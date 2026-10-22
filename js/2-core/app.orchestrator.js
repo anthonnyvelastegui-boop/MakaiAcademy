@@ -1,60 +1,37 @@
-// js/2-core/app.orchestrator.js
-import { auth, db, onAuthStateChanged, doc, getDoc, setDoc } from "./firebase.service.js";
-import { appState, isMasterAdmin } from "./state.store.js";
+import { auth, onAuthStateChanged } from "./firebase.service.js";
 import { initAuthLogin } from "../3-security/auth.login.js";
-import { initDashboardSPA } from "./router.spa.js";
+import { initAuthRegister } from "../3-security/auth.register.js";
+import { checkIsVerifiedUser, showVerificationPendingScreen } from "../3-security/auth.verifier.js";
 
 function initApp() {
     const isIndexPage = !!document.getElementById("auth-form");
-    const isDashboardPage = !!document.getElementById("views-container");
+    const isRegisterPage = !!document.getElementById("full-register-form");
 
     if (isIndexPage) {
         initAuthLogin();
     }
 
+    if (isRegisterPage) {
+        initAuthRegister();
+    }
+
     onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            appState.currentUser = user;
-            const adminStatus = isMasterAdmin(user.email);
+        if (!user) return;
 
-            const defaultProfile = {
-                email: user.email,
-                nombre: user.displayName || user.email.split("@")[0],
-                rol: adminStatus ? "admin" : "estudiante",
-                subscriptionLevel: adminStatus ? "PRO" : "Básico",
-                casesUsedThisMonth: 0,
-                totalExamsCompleted: 0,
-                globalAverage: 0,
-                createdAt: new Date().toISOString()
-            };
+        const verified = await checkIsVerifiedUser(user);
 
-            try {
-                const userRef = doc(db, "usuarios", user.uid);
-                const snap = await getDoc(userRef);
-                if (!snap.exists()) {
-                    await setDoc(userRef, defaultProfile);
-                    appState.currentUserData = defaultProfile;
-                } else {
-                    appState.currentUserData = snap.data();
-                    if (adminStatus) {
-                        appState.currentUserData.rol = "admin";
-                        appState.currentUserData.subscriptionLevel = "PRO";
-                    }
-                }
-            } catch (e) {
-                console.warn("Cargando perfil en memoria mientras responde Firestore:", e);
-                appState.currentUserData = defaultProfile;
+        if (!verified) {
+            if (isRegisterPage) {
+                showVerificationPendingScreen(user);
+            } else if (isIndexPage) {
+                window.location.href = "registro.html?verify=pending";
             }
+            return;
+        }
 
-            if (isIndexPage) {
-                window.location.href = "dashboard.html";
-            } else if (isDashboardPage) {
-                initDashboardSPA(user, appState.currentUserData);
-            }
-        } else {
-            if (isDashboardPage) {
-                window.location.href = "index.html";
-            }
+        // Si ya está autenticado y verificado en index.html o registro.html, redirigir al Dashboard
+        if (isIndexPage || isRegisterPage) {
+            window.location.href = "dashboard.html";
         }
     });
 }
