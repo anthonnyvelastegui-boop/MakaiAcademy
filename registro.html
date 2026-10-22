@@ -1,1 +1,474 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Makai Academy • Registro de Expediente Clínico y Planes CACES</title>
+    <link rel="icon" type="image/png" href="assets/1-branding/logos/logo.png">
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Material Symbols Outlined -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        surface: '#070a0f',
+                        'surface-container': '#0f141d',
+                        'surface-high': '#18202c',
+                        primary: '#00e5ff',
+                        secondary: '#94de2d',
+                        danger: '#ff4d4d',
+                        warning: '#ffbe0b',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #070a0f; color: #f3f4f6; }
+    </style>
+
+    <!-- Definiciones Vectoriales SVG (Logo Respaldo + Ícono Nirvana) -->
+    <svg id="svg-defs" style="display: none;">
+        <symbol id="makai-logo-fallback" viewBox="0 0 120 100">
+            <defs>
+                <linearGradient id="makaiRingReg" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#00e5ff" />
+                    <stop offset="100%" stop-color="#034078" />
+                </linearGradient>
+                <linearGradient id="makaiBookReg" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#b5ec42" />
+                    <stop offset="100%" stop-color="#6db321" />
+                </linearGradient>
+            </defs>
+            <circle cx="65" cy="50" r="42" fill="none" stroke="url(#makaiRingReg)" stroke-width="6" stroke-dasharray="210 60" stroke-linecap="round"/>
+            <circle cx="42" cy="52" r="28" fill="none" stroke="#00bcd4" stroke-width="7" stroke-dasharray="130 50" stroke-dashoffset="35" stroke-linecap="round"/>
+            <path d="M26 62 L29 44 Q37 44 42 47 L42 64 Q36 61 26 62 Z" fill="none" stroke="url(#makaiBookReg)" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M58 62 L55 44 Q47 44 42 47 L42 64 Q48 61 58 62 Z" fill="none" stroke="url(#makaiBookReg)" stroke-width="2.5" stroke-linejoin="round"/>
+            <circle cx="42" cy="36" r="6" fill="none" stroke="url(#makaiBookReg)" stroke-width="2.5"/>
+            <path d="M39 42 L45 42 M42 36 L42 42" stroke="url(#makaiBookReg)" stroke-width="2" stroke-linecap="round"/>
+        </symbol>
+    </svg>
+</head>
+<body class="antialiased min-h-screen flex flex-col justify-between bg-surface">
+
+    <!-- Header Superior de Navegación -->
+    <header class="border-b border-surface-high bg-surface-container/90 backdrop-blur-md sticky top-0 z-30">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-white p-1 flex items-center justify-center shadow-[0_0_15px_rgba(0,229,255,0.25)]">
+                    <img src="assets/1-branding/logos/logo.png" alt="Makai Academy" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <svg class="w-8 h-8 hidden"><use href="#makai-logo-fallback"></use></svg>
+                </div>
+                <div>
+                    <h1 class="text-base font-extrabold text-white tracking-tight leading-none group-hover:text-primary transition-colors">MAKAI ACADEMY</h1>
+                    <p class="text-[10px] font-mono text-primary uppercase tracking-widest mt-1">EXPEDIENTE CLÍNICO • CACES ECUADOR</p>
+                </div>
+            </a>
+
+            <a href="index.html" class="inline-flex items-center gap-2 text-xs font-mono font-bold text-gray-300 hover:text-primary bg-surface border border-surface-high px-4 py-2 rounded-xl transition-colors">
+                <span class="material-symbols-outlined text-base">arrow_back</span>
+                <span>Volver al Inicio de Sesión</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal -->
+    <main class="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8">
+
+        <!-- ==================================================================== -->
+        <!-- TARJETA 1: FORMULARIO COMPLETO DE REGISTRO Y EVIDENCIA DE PAGO       -->
+        <!-- ==================================================================== -->
+        <div id="registration-card" class="bg-surface-container border border-surface-high rounded-2xl p-6 sm:p-8 shadow-2xl">
+            <div class="border-b border-surface-high pb-5 mb-6 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <span class="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-primary bg-primary/10 border border-primary/30 px-3 py-1 rounded-full mb-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                        Registro Oficial de Estudiante
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Apertura de Expediente Académico</h2>
+                    <p class="text-xs sm:text-sm text-gray-400 mt-1">Completa tus datos profesionales, elige tu modalidad de preparación CACES y activa tu acceso.</p>
+                </div>
+            </div>
+
+            <!-- Caja de Errores Dinámica -->
+            <div id="reg-error-box" class="hidden mb-6 p-4 rounded-xl bg-danger/15 border border-danger text-danger text-xs font-mono font-bold"></div>
+
+            <form id="full-register-form" class="space-y-8">
+
+                <!-- SECCIÓN 1: DATOS PERSONALES Y ACADÉMICOS -->
+                <div>
+                    <h3 class="text-xs font-mono font-bold text-primary uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-base">badge</span>
+                        1. Identificación Profesional y Carrera CACES
+                    </h3>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 mb-1">Título Académico</label>
+                            <select id="reg-title" required class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-primary">
+                                <option value="Dr.">Dr. (Médico / Odontólogo)</option>
+                                <option value="Dra.">Dra. (Médica / Odontóloga)</option>
+                                <option value="Lic.">Lic. (Enfermería)</option>
+                                <option value="Obst.">Obst. (Obstetricia)</option>
+                                <option value="Interno/a">Interno/a Rotativo</option>
+                                <option value="Est.">Estudiante Ciencias de la Salud</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 mb-1">Primer Nombre</label>
+                            <input type="text" id="reg-firstname" required placeholder="Ej: Anthonny" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-primary">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 mb-1">Apellido Paterno / Materno</label>
+                            <input type="text" id="reg-lastname" required placeholder="Ej: Velástegui" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-primary">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 mb-1">Alias / Nickname Clínico</label>
+                            <input type="text" id="reg-nickname" required placeholder="Ej: DrVelasteguiEC" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-primary">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 mb-1">Carrera a Evaluar (CACES)</label>
+                            <select id="reg-career" required class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-primary">
+                                <option value="medicina">Medicina Humana (FCS-EC)</option>
+                                <option value="enfermeria">Enfermería & Cuidados Críticos</option>
+                                <option value="odontologia">Odontología Clínica</option>
+                                <option value="obstetricia">Obstetricia & Salud Materna</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 mb-1">País de Residencia</label>
+                            <select id="reg-country" required class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-primary">
+                                <option value="Ecuador" selected>🇪🇨 Ecuador</option>
+                                <option value="Colombia">🇨🇴 Colombia</option>
+                                <option value="Perú">🇵🇪 Perú</option>
+                                <option value="Chile">🇨🇱 Chile</option>
+                                <option value="México">🇲🇽 México</option>
+                                <option value="España">🇪🇸 España</option>
+                                <option value="Otro">🌎 Otro País</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 mb-1">Teléfono Celular / WhatsApp</label>
+                            <div class="flex gap-2">
+                                <select id="reg-phone-ext" class="w-28 bg-surface border border-surface-high rounded-xl px-2.5 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-primary">
+                                    <option value="+593" selected>🇪🇨 +593</option>
+                                    <option value="+57">🇨🇴 +57</option>
+                                    <option value="+51">🇵🇪 +51</option>
+                                    <option value="+56">🇨🇱 +56</option>
+                                    <option value="+52">🇲🇽 +52</option>
+                                    <option value="+34">🇪🇸 +34</option>
+                                    <option value="+1">🇺🇸 +1</option>
+                                </select>
+                                <input type="tel" id="reg-phone-number" required placeholder="0991234567" class="flex-1 bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-primary">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 mb-1">Fecha de Nacimiento (Día / Mes / Año)</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <input type="number" id="reg-bday" min="1" max="31" required placeholder="Día (DD)" class="bg-surface border border-surface-high rounded-xl px-3 py-2.5 text-sm text-white font-mono text-center focus:outline-none focus:border-primary">
+                                <input type="number" id="reg-bmonth" min="1" max="12" required placeholder="Mes (MM)" class="bg-surface border border-surface-high rounded-xl px-3 py-2.5 text-sm text-white font-mono text-center focus:outline-none focus:border-primary">
+                                <input type="number" id="reg-byear" min="1950" max="2010" required placeholder="Año (AAAA)" class="bg-surface border border-surface-high rounded-xl px-3 py-2.5 text-sm text-white font-mono text-center focus:outline-none focus:border-primary">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 2: CREDENCIALES Y CORREO DE RESPALDO -->
+                <div class="pt-6 border-t border-surface-high">
+                    <h3 class="text-xs font-mono font-bold text-primary uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-base">lock</span>
+                        2. Credenciales de Acceso y Seguridad
+                    </h3>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 mb-1">Correo Electrónico Principal (Login)</label>
+                            <input type="email" id="reg-email" required placeholder="medico@universidad.edu.ec" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-primary">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 mb-1">Correo Electrónico de Respaldo (Obligatorio y distinto)</label>
+                            <input type="email" id="reg-backup-email" required placeholder="respaldo.personal@gmail.com" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-primary">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 mb-1">Contraseña (Mínimo 6 caracteres)</label>
+                            <input type="password" id="reg-password" minlength="6" required placeholder="••••••••" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-primary">
+                            <div id="reg-password-strength" class="h-1.5 w-full bg-surface-high mt-2 rounded-full overflow-hidden hidden">
+                                <div class="h-full bg-danger w-1/3 transition-all"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 mb-1">Confirmar Contraseña</label>
+                            <input type="password" id="reg-confirm-password" minlength="6" required placeholder="••••••••" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-primary">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 3: SELECCIÓN DE PLAN ACADÉMICO Y PASARELA DE PAGO -->
+                <div class="pt-6 border-t border-surface-high">
+                    <h3 class="text-xs font-mono font-bold text-primary uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-base">workspace_premium</span>
+                        3. Selecciona tu Plan Académico Makai Academy
+                    </h3>
+
+                    <input type="hidden" id="reg-plan-select" value="basico">
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <!-- Plan Básico -->
+                        <div class="plan-card cursor-pointer rounded-xl p-4 border-2 border-primary bg-surface-high/95 shadow-[0_0_20px_rgba(0,229,255,0.2)] transition-all relative flex flex-col justify-between" data-plan-card="basico">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[10px] font-mono uppercase text-gray-400 font-bold">Freemium</span>
+                                    <span class="material-symbols-outlined text-primary text-base check-icon">check_circle</span>
+                                </div>
+                                <h4 class="text-base font-extrabold text-white">Plan Básico</h4>
+                                <p class="text-xl font-extrabold text-primary font-mono my-1">$0.00 <span class="text-xs text-gray-400 font-normal">/ mes</span></p>
+                                <p class="text-[11px] text-gray-400">15 casos clínicos CACES al mes y diagnóstico inicial.</p>
+                            </div>
+                        </div>
+
+                        <!-- Plan PRO Mensual -->
+                        <div class="plan-card cursor-pointer rounded-xl p-4 border border-surface-high bg-surface hover:border-gray-600 transition-all relative flex flex-col justify-between" data-plan-card="pro_mensual">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[10px] font-mono uppercase text-primary font-bold">Acceso Total</span>
+                                    <span class="material-symbols-outlined text-gray-600 text-base check-icon">radio_button_unchecked</span>
+                                </div>
+                                <h4 class="text-base font-extrabold text-white">Makai PRO Mensual</h4>
+                                <p class="text-xl font-extrabold text-primary font-mono my-1">$17.99 <span class="text-xs text-gray-400 font-normal">/ mes</span></p>
+                                <p class="text-[11px] text-gray-400">Simulacros de 100 reactivos ilimitados + Sináptico v4.4.</p>
+                            </div>
+                        </div>
+
+                        <!-- Plan PRO Anual -->
+                        <div class="plan-card cursor-pointer rounded-xl p-4 border border-surface-high bg-surface hover:border-gray-600 transition-all relative flex flex-col justify-between" data-plan-card="pro_anual">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[10px] font-mono uppercase bg-secondary/20 text-secondary px-2 py-0.5 rounded font-bold">Ahorra 35%</span>
+                                    <span class="material-symbols-outlined text-gray-600 text-base check-icon">radio_button_unchecked</span>
+                                </div>
+                                <h4 class="text-base font-extrabold text-white">Makai PRO Anual</h4>
+                                <p class="text-xl font-extrabold text-secondary font-mono my-1">$139.99 <span class="text-xs text-gray-400 font-normal">/ año</span></p>
+                                <p class="text-[11px] text-gray-400">12 meses de acceso PRO ilimitado + Mentorías grupales.</p>
+                            </div>
+                        </div>
+
+                        <!-- Plan VIP -->
+                        <div class="plan-card cursor-pointer rounded-xl p-4 border border-surface-high bg-surface hover:border-gray-600 transition-all relative flex flex-col justify-between" data-plan-card="vip">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[10px] font-mono uppercase text-warning font-bold">Especialistas 1 a 1</span>
+                                    <span class="material-symbols-outlined text-gray-600 text-base check-icon">radio_button_unchecked</span>
+                                </div>
+                                <h4 class="text-base font-extrabold text-white">Mentoría Élite VIP</h4>
+                                <p class="text-xl font-extrabold text-warning font-mono my-1">$49.99 <span class="text-xs text-gray-400 font-normal">/ módulo</span></p>
+                                <p class="text-[11px] text-gray-400">5 horas de tutoría personalizada 1 a 1 + Acceso PRO.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Selector de Método de Pago -->
+                    <div class="mb-6">
+                        <label class="block text-xs font-semibold text-gray-400 mb-2">Método de Activación / Pago Preferido</label>
+                        <select id="reg-payment-select" class="w-full bg-surface border border-surface-high rounded-xl px-4 py-3 text-sm text-white font-semibold focus:outline-none focus:border-primary">
+                            <option value="ninguno">Sin pago por ahora (Iniciar con Plan Básico $0)</option>
+                        </select>
+                    </div>
+
+                    <!-- SUBSECCIÓN DINÁMICA A: PAGO CON CÓDIGO QR (DEUNA! / BANCO DEL PACÍFICO) -->
+                    <div id="qr-payment-section" class="hidden mb-6 bg-surface border border-primary/40 rounded-2xl p-5">
+                        <div class="flex items-center gap-2 text-primary font-mono text-xs font-bold uppercase mb-3">
+                            <span class="material-symbols-outlined text-base">qr_code_scanner</span>
+                            <span>Escanea cualquiera de nuestros Códigos QR Oficiales</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-surface-container border border-surface-high rounded-xl p-4 text-center">
+                                <p class="text-xs font-extrabold text-white mb-1">QR Deuna! (Banco Pichincha)</p>
+                                <p class="text-[11px] font-mono text-gray-400 mb-3">Titular: Anthonny Velástegui</p>
+                                <div class="w-44 h-44 mx-auto bg-white rounded-xl p-2 flex items-center justify-center overflow-hidden">
+                                    <img src="assets/1-branding/pagos/qr-deuna.png" alt="QR Deuna!" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="hidden flex-col items-center justify-center text-surface text-xs font-mono p-2">
+                                        <span class="material-symbols-outlined text-3xl mb-1">qr_code_2</span>
+                                        <span>QR Deuna! Oficial</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-surface-container border border-surface-high rounded-xl p-4 text-center">
+                                <p class="text-xs font-extrabold text-white mb-1">QR Be / Banco del Pacífico</p>
+                                <p class="text-[11px] font-mono text-gray-400 mb-3">Titular: Anthonny Velástegui</p>
+                                <div class="w-44 h-44 mx-auto bg-white rounded-xl p-2 flex items-center justify-center overflow-hidden">
+                                    <img src="assets/1-branding/pagos/qr-pacifico.png" alt="QR Pacífico" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="hidden flex-col items-center justify-center text-surface text-xs font-mono p-2">
+                                        <span class="material-symbols-outlined text-3xl mb-1">qr_code_2</span>
+                                        <span>QR Pacífico Oficial</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUBSECCIÓN DINÁMICA B: TRANSFERENCIA BANCARIA DIRECTA -->
+                    <div id="bank-transfer-section" class="hidden mb-6 bg-surface border border-secondary/40 rounded-2xl p-5">
+                        <div class="flex items-center gap-2 text-secondary font-mono text-xs font-bold uppercase mb-3">
+                            <span class="material-symbols-outlined text-base">account_balance</span>
+                            <span>Cuentas Autorizadas para Transferencia Directa o Depósito</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+                            <div class="bg-surface-container border border-surface-high rounded-xl p-4 space-y-1">
+                                <p class="text-primary font-bold text-sm">BANCO PICHINCHA</p>
+                                <p class="text-gray-300">Tipo: <strong class="text-white">Cuenta de Ahorros</strong></p>
+                                <p class="text-gray-300">Titular: <strong class="text-white">Anthonny Velástegui</strong></p>
+                                <p class="text-gray-300">Correo: <strong class="text-white">anthonnyvelastegui@gmail.com</strong></p>
+                            </div>
+                            <div class="bg-surface-container border border-surface-high rounded-xl p-4 space-y-1">
+                                <p class="text-secondary font-bold text-sm">BANCO DEL PACÍFICO</p>
+                                <p class="text-gray-300">Tipo: <strong class="text-white">Cuenta de Ahorros</strong></p>
+                                <p class="text-gray-300">Titular: <strong class="text-white">Anthonny Velástegui</strong></p>
+                                <p class="text-gray-300">Correo: <strong class="text-white">aavemakaihc@gmail.com</strong></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUBSECCIÓN DINÁMICA C: PAGO CON TARJETA -->
+                    <div id="card-payment-section" class="hidden mb-6 bg-surface border border-warning/40 rounded-2xl p-5">
+                        <div class="flex items-center gap-2 text-warning font-mono text-xs font-bold uppercase mb-2">
+                            <span class="material-symbols-outlined text-base">credit_card</span>
+                            <span>Pago con Tarjeta Visa / Mastercard / PayPhone</span>
+                        </div>
+                        <p class="text-xs text-gray-300 leading-relaxed">
+                            Al completar tu registro recibirás el enlace directo de cobro seguro con tarjeta o puedes adjuntar tu comprobante eligiendo QR / Transferencia para activación inmediata.
+                        </p>
+                    </div>
+
+                    <!-- SUBSECCIÓN DINÁMICA D: AUDITORÍA Y SUBIDA DE COMPROBANTE BANCARIO -->
+                    <div id="payment-evidence-section" class="hidden bg-surface-container border-2 border-primary/50 rounded-2xl p-5 space-y-4">
+                        <div class="border-b border-surface-high pb-3">
+                            <h4 class="text-sm font-extrabold text-white flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">receipt_long</span>
+                                Registro de Comprobante Bancario para Activación PRO / VIP
+                            </h4>
+                            <p class="text-xs text-gray-400 mt-0.5">Ingresa los datos exactos de tu transferencia o pago QR y sube la captura (JPG, PNG o PDF máx. 750 KB).</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1">N° de Comprobante / Referencia</label>
+                                <input type="text" id="pay-receipt-number" placeholder="Ej: 04829104" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-primary">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1">Nombre del Titular de la Cuenta</label>
+                                <input type="text" id="pay-holder-name" placeholder="Quien realiza el pago" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-primary">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1">Cédula / RUC del Titular</label>
+                                <input type="text" id="pay-holder-id" placeholder="Ej: 0601234567" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-primary">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1">Banco o App de Origen</label>
+                                <input type="text" id="pay-origin-bank" placeholder="Ej: Pichincha / Deuna! / Pacífico" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-primary">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1">Monto Transferido (USD)</label>
+                                <input type="text" id="pay-amount" placeholder="139.99" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-secondary font-mono font-bold focus:outline-none focus:border-primary">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1">Fecha del Comprobante</label>
+                                <input type="date" id="pay-receipt-date" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-primary">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 mb-1">Adjuntar Captura o PDF del Comprobante (JPG, PNG o PDF)</label>
+                            <input type="file" id="pay-receipt-file" accept="image/jpeg,image/png,application/pdf" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-xs text-gray-300 file:mr-4 file:py-1.5 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-extrabold file:bg-primary file:text-surface hover:file:bg-opacity-90">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón de Envío Final -->
+                <button type="submit" id="btn-submit-register" class="w-full bg-primary text-surface font-extrabold py-4 rounded-xl hover:bg-opacity-95 transition-all shadow-[0_0_25px_rgba(0,229,255,0.35)] flex items-center justify-center gap-2 text-base">
+                    <span class="material-symbols-outlined">how_to_reg</span>
+                    <span>Registrar y Enviar Correo de Verificación</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- ==================================================================== -->
+        <!-- TARJETA 2: PANTALLA DE VERIFICACIÓN DE CORREO PENDIENTE              -->
+        <!-- ==================================================================== -->
+        <div id="verification-card" class="hidden bg-surface-container border-2 border-primary/50 rounded-2xl p-6 sm:p-10 text-center max-w-2xl mx-auto shadow-[0_0_35px_rgba(0,229,255,0.2)]">
+            <div class="w-16 h-16 rounded-2xl bg-primary/15 border border-primary/40 flex items-center justify-center text-primary mx-auto mb-5">
+                <span class="material-symbols-outlined text-4xl">mark_email_unread</span>
+            </div>
+
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-2">Verifica tu Correo Electrónico</h2>
+            <p class="text-sm text-gray-300 leading-relaxed mb-4">
+                Hemos enviado un enlace oficial de confirmación a:<br>
+                <strong id="verify-email-display" class="text-primary font-mono text-base">correo@universidad.edu.ec</strong>
+            </p>
+            <p class="text-xs text-gray-400 mb-6">
+                Abre tu bandeja de entrada (o carpeta de Spam / No deseados), haz clic en el enlace de verificación y luego presiona el botón inferior para ingresar al Dashboard.
+            </p>
+
+            <!-- Aviso Adicional de Pago en Revisión -->
+            <div id="payment-instructions-box" class="hidden mb-6 p-4 rounded-xl bg-surface border border-secondary/40 text-left">
+                <p class="text-xs font-mono font-bold text-secondary uppercase flex items-center gap-1.5 mb-1">
+                    <span class="material-symbols-outlined text-sm">verified_user</span>
+                    <span>Solicitud de Plan <span id="pay-plan-name">PRO</span> Registrada</span>
+                </p>
+                <p class="text-xs text-gray-300">
+                    Tu comprobante ha sido enviado a la Bandeja de Auditoría del Administrador. Mientras se valida tu transferencia, ya puedes ingresar tras confirmar tu correo.
+                </p>
+            </div>
+
+            <div class="space-y-3">
+                <button type="button" id="btn-check-verified" class="w-full bg-primary text-surface font-extrabold py-3.5 px-6 rounded-xl hover:bg-opacity-95 transition-all shadow-[0_0_20px_rgba(0,229,255,0.3)] flex items-center justify-center gap-2 text-sm">
+                    <span class="material-symbols-outlined text-base">verified</span>
+                    <span>Ya abrí el enlace • Acceder a los Simuladores</span>
+                </button>
+
+                <button type="button" id="btn-resend-verification" class="w-full bg-surface border border-surface-high hover:border-primary/50 text-gray-300 hover:text-white font-bold py-3 px-6 rounded-xl transition-colors text-xs font-mono">
+                    ↻ Reenviar enlace de verificación al correo
+                </button>
+            </div>
+
+            <div id="verify-status-msg" class="hidden mt-4 p-3 rounded-xl text-xs font-mono"></div>
+        </div>
+
+    </main>
+
+    <!-- Footer Institucional -->
+    <footer class="border-t border-surface-high bg-surface-container py-5 text-center text-xs font-mono text-gray-500">
+        MAKAI ACADEMY (PROYECTO ALICIZATION) • SISTEMA DE PREPARACIÓN CACES ECUADOR
+    </footer>
+
+    <!-- Punto de Entrada Único Modular -->
+    <script type="module" src="js/2-core/app.orchestrator.js"></script>
+</body>
+</html>
