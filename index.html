@@ -1,1 +1,415 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Makai Academy • Portal de Ciencias de la Salud & CACES</title>
+    <link rel="icon" type="image/png" href="assets/1-branding/logos/logo.png">
 
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Material Symbols Outlined -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+    <!-- Tailwind CSS CDN & Configuración Cyber-Medical Dark Mode -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        surface: '#070a0f',
+                        'surface-container': '#0f141d',
+                        'surface-high': '#18202c',
+                        primary: '#00e5ff',
+                        secondary: '#94de2d',
+                        danger: '#ff4d4d',
+                        warning: '#ffbe0b',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #070a0f;
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(0, 229, 255, 0.06) 0%, transparent 35%),
+                radial-gradient(circle at 85% 60%, rgba(0, 229, 255, 0.05) 0%, transparent 40%);
+            color: #f3f4f6;
+        }
+    </style>
+
+    <!-- Definición SVG de Respaldo del Logo Oficial Makai Academy -->
+    <svg style="display: none;">
+        <symbol id="makai-logo-fallback" viewBox="0 0 120 100">
+            <defs>
+                <linearGradient id="makaiRing" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#00e5ff" />
+                    <stop offset="100%" stop-color="#034078" />
+                </linearGradient>
+                <linearGradient id="makaiBook" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#b5ec42" />
+                    <stop offset="100%" stop-color="#6db321" />
+                </linearGradient>
+            </defs>
+            <circle cx="65" cy="50" r="42" fill="none" stroke="url(#makaiRing)" stroke-width="6" stroke-dasharray="210 60" stroke-linecap="round"/>
+            <circle cx="42" cy="52" r="28" fill="none" stroke="#00bcd4" stroke-width="7" stroke-dasharray="130 50" stroke-dashoffset="35" stroke-linecap="round"/>
+            <path d="M26 62 L29 44 Q37 44 42 47 L42 64 Q36 61 26 62 Z" fill="none" stroke="url(#makaiBook)" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M58 62 L55 44 Q47 44 42 47 L42 64 Q48 61 58 62 Z" fill="none" stroke="url(#makaiBook)" stroke-width="2.5" stroke-linejoin="round"/>
+            <circle cx="42" cy="36" r="6" fill="none" stroke="url(#makaiBook)" stroke-width="2.5"/>
+            <path d="M39 42 L45 42 M42 36 L42 42" stroke="url(#makaiBook)" stroke-width="2" stroke-linecap="round"/>
+        </symbol>
+    </svg>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Barra Superior de Estado Clínico -->
+    <header class="w-full border-b border-surface-high/80 bg-surface/90 backdrop-blur-md px-6 lg:px-12 py-3.5 flex flex-wrap items-center justify-between gap-4 z-30">
+        <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-xl bg-white p-1 flex items-center justify-center shadow-[0_0_15px_rgba(0,229,255,0.25)] overflow-hidden">
+                <img src="assets/1-branding/logos/logo.png" alt="Makai Academy Logo" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <svg class="w-9 h-9 hidden"><use href="#makai-logo-fallback"></use></svg>
+            </div>
+            <div>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-lg font-extrabold tracking-tight text-white">MAKAI</span>
+                    <span class="text-lg font-extrabold tracking-tight text-primary">ACADEMY</span>
+                </div>
+                <p class="text-[10px] font-mono tracking-widest text-gray-400 uppercase">Portal de Ciencias de la Salud y Formación Continua</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 text-xs">
+            <div class="flex items-center gap-2 bg-surface-container border border-surface-high px-3.5 py-1.5 rounded-full">
+                <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+                <span class="text-gray-300 font-medium">Sistemas Operativos 100%</span>
+            </div>
+            <div class="hidden sm:flex items-center gap-1.5 text-gray-400 font-mono">
+                <span class="material-symbols-outlined text-primary text-sm">lock</span>
+                <span>Red Segura Sanitaria e Institucional</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal (Grid 12 Columnas) -->
+    <main class="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-8 py-8 lg:py-12 grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+
+        <!-- COLUMNA IZQUIERDA: Tarjeta de Autenticación Unificada (5 cols) -->
+        <div class="lg:col-span-5 bg-surface-container rounded-2xl p-7 sm:p-9 border border-surface-high border-t-2 border-t-primary shadow-[0_-8px_30px_rgba(0,229,255,0.12),0_20px_50px_rgba(0,0,0,0.6)] relative">
+            
+            <!-- Encabezado Interno con Logo Oficial -->
+            <div class="flex items-center justify-between gap-3 mb-7 pb-5 border-b border-surface-high/70">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl bg-white p-1.5 flex items-center justify-center shadow-md flex-shrink-0">
+                        <img src="assets/1-branding/logos/logo.png" alt="Makai Academy" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <svg class="w-10 h-10 hidden"><use href="#makai-logo-fallback"></use></svg>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-extrabold text-white leading-tight">MAKAI ACADEMY</h1>
+                        <p class="text-xs text-gray-400">Ecosistema Clínico CACES</p>
+                    </div>
+                </div>
+                <span class="text-[11px] font-mono text-primary bg-primary/10 border border-primary/30 px-2.5 py-1 rounded-md text-right leading-tight">
+                    Capacitación Continua<br>en Salud
+                </span>
+            </div>
+
+            <!-- Pestañas: Iniciar Sesión / Crear Cuenta -->
+            <div class="flex bg-surface p-1.5 rounded-xl border border-surface-high mb-6">
+                <button id="tab-login" type="button" class="flex-1 py-2.5 rounded-lg bg-surface-high text-white font-semibold text-xs sm:text-sm transition-all shadow flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-base">lock_open</span>
+                    <span>Iniciar Sesión</span>
+                </button>
+                <button id="tab-register" type="button" class="flex-1 py-2.5 rounded-lg text-gray-400 hover:text-white font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-base">person_add</span>
+                    <span>Crear Cuenta de Salud</span>
+                </button>
+            </div>
+
+            <!-- Alerta Dinámica de Mensajes / Errores -->
+            <div id="auth-alert" class="hidden mb-5 p-3.5 rounded-xl border text-xs font-medium flex items-center gap-2.5"></div>
+
+            <!-- Formulario Principal de Autenticación -->
+            <form id="auth-form" class="space-y-5">
+                <div>
+                    <div class="flex justify-between items-baseline mb-1.5">
+                        <label for="email" class="block text-xs font-semibold text-gray-300">Correo Electrónico Institucional</label>
+                        <span class="text-[10px] font-mono text-gray-500">ej. usuario@salud.org / institucion.edu</span>
+                    </div>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-lg">mail</span>
+                        <input type="email" id="email" required autocomplete="email" class="w-full bg-surface border border-surface-high rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="ej. usuario@universidad.edu.ec / hospital.org">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label for="password" class="block text-xs font-semibold text-gray-300">Clave Criptográfica de Acceso</label>
+                        <button type="button" id="btn-toggle-password" class="text-[11px] font-mono text-primary hover:underline flex items-center gap-1">
+                            <span class="material-symbols-outlined text-xs" id="icon-toggle-password">visibility</span>
+                            <span id="text-toggle-password">Mostrar</span>
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-lg">key</span>
+                        <input type="password" id="password" required autocomplete="current-password" class="w-full bg-surface border border-surface-high rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="••••••••••••">
+                    </div>
+                    <!-- Barra Medidora de Entropía en Tiempo Real -->
+                    <div id="password-strength" class="h-1.5 w-full bg-surface-high mt-2 rounded-full overflow-hidden hidden">
+                        <div id="password-strength-bar" class="h-full bg-danger w-1/3 transition-all duration-300"></div>
+                    </div>
+                    <p id="password-strength-text" class="text-[10px] font-mono text-gray-500 mt-1 hidden"></p>
+                </div>
+
+                <!-- Campos Adicionales de Registro Rápido -->
+                <div id="register-fields" class="hidden space-y-4 pt-1 border-t border-surface-high/60">
+                    <div>
+                        <label for="full-name" class="block text-xs font-semibold text-gray-300 mb-1.5">Nombres y Apellidos Completos</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-lg">badge</span>
+                            <input type="text" id="full-name" class="w-full bg-surface border border-surface-high rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="Ej: Dr. Anthonny Velástegui">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="university" class="block text-xs font-semibold text-gray-300 mb-1.5">Universidad / Hospital / Matrícula (Opcional)</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-lg">school</span>
+                            <input type="text" id="university" class="w-full bg-surface border border-surface-high rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="Ej: UCE, PUCE, ESPOCH, UG, IESS...">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between text-xs pt-1">
+                    <label class="flex items-center gap-2 text-gray-400 cursor-pointer">
+                        <input type="checkbox" id="remember-me" checked class="rounded bg-surface border-surface-high text-primary focus:ring-primary">
+                        <span>Recordar terminal segura</span>
+                    </label>
+                    <button type="button" id="btn-forgot-password" class="text-primary hover:underline font-medium">
+                        ¿Olvidaste tu contraseña?
+                    </button>
+                </div>
+
+                <button type="submit" id="submit-btn" class="w-full bg-primary text-surface font-extrabold py-3.5 rounded-xl hover:bg-opacity-95 transition-all shadow-[0_0_25px_rgba(0,229,255,0.4)] flex items-center justify-center gap-2 text-sm">
+                    <span id="submit-btn-text">Acceder al Portal de Salud</span>
+                    <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                </button>
+            </form>
+
+            <!-- Acceso directo al Expediente Completo y Subida de Comprobantes (registro.html) -->
+            <div class="mt-4 text-center">
+                <a href="registro.html" class="inline-flex items-center gap-1.5 text-xs font-mono text-secondary hover:underline">
+                    <span class="material-symbols-outlined text-sm">upload_file</span>
+                    <span>¿Ya realizaste tu pago PRO/VIP? Subir comprobante en Expediente →</span>
+                </a>
+            </div>
+
+            <p class="text-center text-xs text-gray-400 mt-3">
+                ¿Eres especialista? Únete a nuestro cuerpo docente clínico.
+                <a href="mailto:anthonnyvelastegui@gmail.com?subject=Postulaci%C3%B3n%20Docente%20Makai%20Academy" class="text-primary font-semibold hover:underline">Postula aquí.</a>
+            </p>
+
+            <div class="mt-6 flex items-center justify-between">
+                <span class="w-1/5 border-b border-surface-high"></span>
+                <span class="text-[10px] text-gray-500 font-mono tracking-widest uppercase">O MEDIANTE SSO ACADÉMICO</span>
+                <span class="w-1/5 border-b border-surface-high"></span>
+            </div>
+
+            <!-- Botones SSO: Google, Microsoft y Apple -->
+            <div class="mt-5 grid grid-cols-3 gap-3">
+                <button id="btn-google-login" type="button" class="flex items-center justify-center gap-2 bg-surface border border-surface-high hover:border-primary/60 py-2.5 px-3 rounded-xl text-xs font-semibold text-gray-200 transition-all">
+                    <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    <span>Google</span>
+                </button>
+                <button id="btn-microsoft-login" type="button" class="flex items-center justify-center gap-2 bg-surface border border-surface-high hover:border-gray-500 py-2.5 px-3 rounded-xl text-xs font-semibold text-gray-200 transition-all">
+                    <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 23 23">
+                        <path fill="#f25022" d="M1 1h10v10H1z"/>
+                        <path fill="#00a4ef" d="M1 12h10v10H1z"/>
+                        <path fill="#7fba00" d="M12 1h10v10H12z"/>
+                        <path fill="#ffb900" d="M12 12h10v10H12z"/>
+                    </svg>
+                    <span>Microsoft</span>
+                </button>
+                <button id="btn-apple-login" type="button" class="flex items-center justify-center gap-1.5 bg-surface border border-surface-high hover:border-gray-500 py-2.5 px-3 rounded-xl text-xs font-semibold text-gray-200 transition-all">
+                    <span class="material-symbols-outlined text-base">ios</span>
+                    <span>Apple</span>
+                </button>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-surface-high/60 flex items-center justify-center gap-2 text-[11px] font-mono text-gray-500">
+                <span class="material-symbols-outlined text-secondary text-sm">verified_user</span>
+                <span>Cifrado AES-256 bits • Cumplimiento HIPAA & RGPD Sanitario</span>
+            </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: 3 Planes Académicos y Medios de Pago (7 cols) -->
+        <div class="lg:col-span-7 flex flex-col justify-between space-y-6">
+
+            <div>
+                <div class="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 px-3.5 py-1 rounded-full mb-3">
+                    <span class="w-2 h-2 rounded-full bg-primary"></span>
+                    <span class="text-[11px] font-mono font-semibold text-primary uppercase tracking-wider">Formación Continua en Salud Acreditada</span>
+                </div>
+                <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+                    Planes Académicos en Ciencias de la Salud & Preparación CACES
+                </h2>
+                <p class="text-sm text-gray-400 mt-2 leading-relaxed">
+                    Diseñado para estudiantes y profesionales de salud de Latinoamérica con preparación integral de alto rendimiento para el examen CACES, rondas clínicas y acreditación profesional.
+                </p>
+            </div>
+
+            <!-- Selector Interactivo de Periodo de Facturación -->
+            <div class="bg-surface-container border border-surface-high rounded-xl px-5 py-3 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-gray-200">
+                    <span class="material-symbols-outlined text-primary text-lg">calendar_month</span>
+                    <span>Periodo de Facturación:</span>
+                </div>
+                <div class="flex items-center bg-surface p-1 rounded-lg border border-surface-high">
+                    <button type="button" id="bill-monthly" class="px-3.5 py-1.5 rounded-md text-xs font-bold text-gray-400 hover:text-white transition-all">
+                        Mensual
+                    </button>
+                    <button type="button" id="bill-annual" class="px-3.5 py-1.5 rounded-md text-xs font-bold bg-primary text-surface transition-all">
+                        Anual <span class="ml-1 bg-surface/20 px-1.5 py-0.5 rounded text-[10px]">Ahorra 35%</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grid de 3 Tarjetas de Planes Académicos -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
+
+                <!-- PLAN 1: Plan Básico -->
+                <div class="bg-surface-container border border-surface-high rounded-2xl p-6 flex flex-col justify-between hover:border-gray-600 transition-all">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-[10px] font-mono uppercase tracking-wider bg-surface-high text-gray-300 px-2.5 py-1 rounded">Básico</span>
+                            <span class="material-symbols-outlined text-gray-500 text-lg">clinical_notes</span>
+                        </div>
+                        <h3 class="text-lg font-extrabold text-white">Plan Básico</h3>
+                        <p class="text-xs text-gray-400 mt-1 leading-relaxed">Acceso formativo introductorio para estudiantes de medicina y áreas sanitarias.</p>
+
+                        <div class="my-5 pb-5 border-b border-surface-high">
+                            <span class="text-3xl font-extrabold text-white">$0</span>
+                            <span class="text-xs font-mono text-gray-400"> / siempre gratis</span>
+                        </div>
+
+                        <ul class="text-xs text-gray-300 space-y-3">
+                            <li class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary text-sm mt-0.5">check_circle</span> <span>Acceso formativo introductorio</span></li>
+                            <li class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary text-sm mt-0.5">check_circle</span> <span><strong>15 Casos clínicos</strong> multidisciplinarios al mes</span></li>
+                            <li class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary text-sm mt-0.5">check_circle</span> <span>Diagnóstico inicial de rendimiento CACES</span></li>
+                            <li class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary text-sm mt-0.5">check_circle</span> <span>Visor diagnóstico y anatómico 2D estándar</span></li>
+                        </ul>
+                    </div>
+
+                    <button type="button" data-plan="Basico" class="btn-select-plan mt-6 w-full py-2.5 rounded-xl border border-surface-high hover:border-gray-500 text-xs font-bold text-gray-300 hover:text-white transition-colors">
+                        Comenzar Gratis
+                    </button>
+                </div>
+
+                <!-- PLAN 2: Makai PRO CACES (Destacado) -->
+                <div class="bg-surface-container border-2 border-primary rounded-2xl p-6 flex flex-col justify-between relative shadow-[0_0_35px_rgba(0,229,255,0.16)] md:-translate-y-1">
+                    <div>
+                        <div class="flex items-center justify-between gap-1 mb-3">
+                            <span class="bg-primary text-surface text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wide leading-tight">
+                                Más Popular / Recomendado CACES
+                            </span>
+                            <span class="material-symbols-outlined text-primary text-lg">verified</span>
+                        </div>
+
+                        <h3 class="text-lg font-extrabold text-white flex items-center gap-1.5">
+                            Makai PRO CACES
+                        </h3>
+                        <p class="text-xs text-gray-400 mt-1 leading-relaxed">Preparación integral de máxima exigencia para aprobar y destacar en el examen CACES.</p>
+
+                        <div id="pro-savings-badge" class="mt-3 mb-4 bg-primary/10 border border-primary/30 rounded-lg px-3 py-1.5 text-[11px] font-semibold text-primary text-center">
+                            🔥 Ahorra un 35% con facturación anual
+                        </div>
+
+                        <div class="pb-4 mb-4 border-b border-surface-high">
+                            <div class="flex items-baseline gap-1">
+                                <span id="pro-price-main" class="text-3xl font-extrabold text-primary">$17.99</span>
+                                <span id="pro-price-period" class="text-xs font-mono text-gray-300">USD / mes</span>
+                            </div>
+                            <p id="pro-price-sub" class="text-xs font-mono text-secondary mt-1 font-semibold">o $139.99 USD / año</p>
+                        </div>
+
+                        <ul class="text-xs text-gray-200 space-y-2.5">
+                            <li class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary text-sm mt-0.5">check_circle</span> <span>Acceso a <strong>Mentorías Clínicas Grupales Semanales</strong> en vivo</span></li>
+                            <li class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary text-sm mt-0.5">check_circle</span> <span>Casos clínicos interdisciplinarios ilimitados (UCI, Urgencias, Consulta)</span></li>
+                            <li class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary text-sm mt-0.5">check_circle</span> <span>Acceso total a <strong>simuladores clínicos en 2D y 3D</strong></span></li>
+                            <li class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary text-sm mt-0.5">check_circle</span> <span>Módulo de estudio con <strong>algoritmo avanzado de repetición espaciada Sináptico v4.4</strong></span></li>
+                            <li class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary text-sm mt-0.5">check_circle</span> <span>Bancos de preguntas infinitas CACES con <strong>simulacro cronometrado</strong></span></li>
+                        </ul>
+                    </div>
+
+                    <button type="button" data-plan="PRO" class="btn-select-plan mt-6 w-full py-3 rounded-xl bg-primary text-surface font-extrabold text-xs hover:bg-opacity-90 transition-all shadow-[0_0_20px_rgba(0,229,255,0.3)]">
+                        Activar Makai PRO CACES
+                    </button>
+                </div>
+
+                <!-- PLAN 3: Mentoría Élite VIP -->
+                <div class="bg-surface-container border border-warning/40 rounded-2xl p-6 flex flex-col justify-between hover:border-warning transition-all">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-[10px] font-mono uppercase tracking-wider bg-warning/15 border border-warning/40 text-warning px-2.5 py-1 rounded font-semibold">
+                                Exclusivo • Add-On VIP
+                            </span>
+                            <span class="material-symbols-outlined text-warning text-lg">workspace_premium</span>
+                        </div>
+
+                        <h3 class="text-lg font-extrabold text-white">Mentoría Élite VIP</h3>
+                        <p class="text-xs text-gray-400 mt-1 leading-relaxed">Acompañamiento personalizado 1 a 1 de alta especialidad clínica.</p>
+
+                        <div class="my-5 pb-5 border-b border-surface-high">
+                            <span class="text-3xl font-extrabold text-warning">$49.99</span>
+                            <span class="text-xs font-mono text-gray-400 block mt-0.5">USD (Pago único por módulo)</span>
+                        </div>
+
+                        <ul class="text-xs text-gray-300 space-y-3">
+                            <li class="flex items-start gap-2"><span class="material-symbols-outlined text-warning text-sm mt-0.5">stars</span> <span><strong>Paquete Élite:</strong> 5 horas de tutoría clínica privada y personalizada 1 a 1 con docentes especialistas</span></li>
+                            <li class="flex items-start gap-2"><span class="material-symbols-outlined text-warning text-sm mt-0.5">stars</span> <span>Revisión individualizada de historial de simulacros CACES</span></li>
+                            <li class="flex items-start gap-2"><span class="material-symbols-outlined text-warning text-sm mt-0.5">stars</span> <span>Plan de estudio personalizado adaptado a tus rotaciones</span></li>
+                            <li class="flex items-start gap-2"><span class="material-symbols-outlined text-warning text-sm mt-0.5">stars</span> <span>Acceso prioritario directo vía canal VIP con tutores médicos</span></li>
+                        </ul>
+                    </div>
+
+                    <button type="button" data-plan="VIP" class="btn-select-plan mt-6 w-full py-2.5 rounded-xl border border-warning/50 text-warning hover:bg-warning hover:text-surface font-bold text-xs transition-all">
+                        Reservar Mentoría VIP
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Pasarelas y Medios de Pago Homologados en Ecuador -->
+            <div class="bg-surface-container/70 border border-surface-high rounded-xl px-5 py-3.5 flex flex-wrap items-center justify-between gap-3">
+                <span class="text-xs text-gray-400 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-base">payments</span>
+                    Medios de pago seguros homologados en Ecuador:
+                </span>
+                <div class="flex flex-wrap gap-2 items-center">
+                    <span class="text-[11px] font-mono font-bold bg-surface px-3 py-1 rounded-md border border-primary/30 text-primary">PayPhone</span>
+                    <span class="text-[11px] font-mono font-bold bg-surface px-3 py-1 rounded-md border border-secondary/30 text-secondary">Deuna! (QR)</span>
+                    <span class="text-[11px] font-mono font-bold bg-surface px-3 py-1 rounded-md border border-surface-high text-gray-300">Transferencia Bancaria</span>
+                    <span class="text-[11px] font-mono font-bold bg-surface px-3 py-1 rounded-md border border-surface-high text-gray-300">Visa / Mastercard</span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Único Punto de Entrada Modular (Arquitectura Oficial MakaiAcademy) -->
+    <script type="module" src="js/2-core/app.orchestrator.js"></script>
+</body>
+</html>
