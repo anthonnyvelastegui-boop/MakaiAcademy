@@ -356,3 +356,789 @@
 
                     <!-- Botones Fijos Obligatorios al Lado Derecho en todas las subventanas de CARRERA -->
                     <div class="flex items-center gap-3">
+                        <button class="btn-quick-classrooms bg-surface-container border border-primary/40 hover:border-primary text-primary hover:bg-primary/10 px-4 py-2.5 rounded-xl text-xs font-extrabold font-mono flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(0,229,255,0.12)]">
+                            <span class="material-symbols-outlined text-base">smart_display</span>
+                            <span>🎥 Aulas Virtuales</span>
+                        </button>
+                        <button class="btn-quick-metrics bg-surface-container border border-secondary/40 hover:border-secondary text-secondary hover:bg-secondary/10 px-4 py-2.5 rounded-xl text-xs font-extrabold font-mono flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(148,222,45,0.12)]">
+                            <span class="material-symbols-outlined text-base">monitoring</span>
+                            <span>📊 Mis Métricas</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sub-pantalla 1.1: Grid de 11 Carreras de Salud -->
+                <div id="carrera-step-1-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Inyectado dinámicamente por router.spa.js -->
+                </div>
+
+                <!-- Sub-pantalla 1.2: Niveles (Preuniversitario, Nivelación, 1.º a 12.º Semestre) -->
+                <div id="carrera-step-2-levels" class="hidden">
+                    <div class="mb-5">
+                        <button id="btn-back-to-careers" class="inline-flex items-center gap-2 text-xs font-mono font-bold text-primary bg-surface-container border border-surface-high hover:border-primary px-4 py-2 rounded-xl transition-colors">
+                            <span class="material-symbols-outlined text-sm">arrow_back</span> Volver a las 11 Carreras de Salud
+                        </button>
+                    </div>
+                    <div id="carrera-levels-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <!-- Inyectado dinámicamente según la duración de la carrera -->
+                    </div>
+                </div>
+
+                <!-- Sub-pantalla 1.3: Materias Universales del Nivel Seleccionado -->
+                <div id="carrera-step-3-subjects" class="hidden">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+                        <button id="btn-back-to-levels" class="inline-flex items-center gap-2 text-xs font-mono font-bold text-primary bg-surface-container border border-surface-high hover:border-primary px-4 py-2 rounded-xl transition-colors">
+                            <span class="material-symbols-outlined text-sm">arrow_back</span> Volver a Niveles y Semestres
+                        </button>
+                        <span class="text-xs font-mono text-gray-400 bg-surface-container border border-surface-high px-3.5 py-1.5 rounded-lg" id="selected-level-badge">
+                            Malla Curricular Universal • Ecuador
+                        </span>
+                    </div>
+                    <div id="carrera-subjects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Materias universales con botones a Simulador, Sináptico, PDFs y Aula Virtual -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================================================================ -->
+            <!-- VISTA 2: CACES (4 CARRERAS OFICIALES + MATERIAS + 4 NIVELES)     -->
+            <!-- ================================================================ -->
+            <div id="view-caces" class="tab-content hidden max-w-6xl mx-auto">
+                <div class="flex flex-wrap items-center justify-between gap-4 pb-6 mb-6 border-b border-surface-high">
+                    <div>
+                        <div class="inline-flex items-center gap-2 bg-secondary/10 border border-secondary/30 px-3 py-1 rounded-full mb-2">
+                            <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+                            <span class="text-[10px] font-mono text-secondary uppercase tracking-wider">HABILITACIÓN PROFESIONAL CACES • ECUADOR</span>
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white" id="caces-main-title">Examen Oficial CACES</h2>
+                        <p class="text-sm text-gray-400 mt-1" id="caces-main-subtitle">Exclusivo para las 4 carreras convocadas al Examen de Habilitación para el Ejercicio Profesional.</p>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <button class="btn-quick-spaced bg-surface-container border border-primary/40 hover:border-primary text-primary px-4 py-2.5 rounded-xl text-xs font-extrabold font-mono flex items-center gap-2 transition-all">
+                            <span class="material-symbols-outlined text-base">style</span>
+                            <span>🧠 Sináptico v4.4</span>
+                        </button>
+                        <button class="btn-quick-metrics bg-surface-container border border-secondary/40 hover:border-secondary text-secondary px-4 py-2.5 rounded-xl text-xs font-extrabold font-mono flex items-center gap-2 transition-all">
+                            <span class="material-symbols-outlined text-base">monitoring</span>
+                            <span>📊 Mis Métricas</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sub-pantalla 2.1: Selección de las 4 Carreras Oficiales CACES -->
+                <div id="caces-step-1-careers" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Medicina Humana, Enfermería, Obstetricia y Odontología -->
+                </div>
+
+                <!-- Sub-pantalla 2.2: Panel Interior de la Carrera CACES Elegida -->
+                <div id="caces-step-2-dashboard" class="hidden space-y-8">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <button id="btn-back-caces-careers" class="inline-flex items-center gap-2 text-xs font-mono font-bold text-primary bg-surface-container border border-surface-high hover:border-primary px-4 py-2 rounded-xl transition-colors">
+                            <span class="material-symbols-outlined text-sm">arrow_back</span> Cambiar Carrera CACES
+                        </button>
+                        <span id="caces-active-career-badge" class="text-xs font-mono font-bold text-secondary bg-secondary/10 border border-secondary/30 px-4 py-1.5 rounded-full">
+                            Medicina Humana • CACES
+                        </span>
+                    </div>
+
+                    <!-- Bloque A: Todas las Materias Oficiales CACES (Al elegir cualquiera despliega Simulador de Materia o Repetición Sináptica) -->
+                    <div class="bg-surface-container border border-surface-high rounded-2xl p-6">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                            <h3 class="text-sm font-mono font-extrabold text-primary uppercase tracking-wider flex items-center gap-2">
+                                <span class="material-symbols-outlined text-lg">account_tree</span>
+                                1.componentes y Materias Oficiales CACES (Haz clic en una materia)
+                            </h3>
+                            <span class="text-[11px] font-mono text-gray-400">Despliega Simulador por Materia o Sináptico</span>
+                        </div>
+                        <div id="caces-subjects-interactive-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Tarjetas de materias CACES con desplegable de 2 opciones -->
+                        </div>
+                    </div>
+
+                    <!-- Bloque B: Simuladores CACES por 4 Niveles de Dificultad + Repetición Sináptica en General -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <!-- Opción Simuladores con 4 Niveles de Dificultad (7 cols) -->
+                        <div class="lg:col-span-7 bg-surface-container border border-primary/40 rounded-2xl p-6 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-[10px] font-mono uppercase bg-primary/15 text-primary border border-primary/30 px-2.5 py-1 rounded font-bold">Matriz Evaluativa Completa</span>
+                                    <span class="material-symbols-outlined text-primary">speed</span>
+                                </div>
+                                <h3 class="text-xl font-extrabold text-white mb-1">2. Simuladores Globales por Nivel de Dificultad</h3>
+                                <p class="text-xs text-gray-400 mb-5">Elige uno de los 4 niveles de complejidad clínica o configura la modalidad del algoritmo CACES:</p>
+
+                                <!-- 4 Niveles de Dificultad Desplegados -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6" id="caces-difficulty-levels">
+                                    <button class="caces-diff-btn p-3.5 rounded-xl border border-surface-high bg-surface hover:border-secondary text-left transition-all" data-diff="Básico">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs font-extrabold text-secondary font-mono">NIVEL 1 • BÁSICO</span>
+                                            <span class="material-symbols-outlined text-sm text-secondary">play_arrow</span>
+                                        </div>
+                                        <p class="text-[11px] text-gray-400">Conceptos troncales, definiciones y guías MSP esenciales.</p>
+                                    </button>
+
+                                    <button class="caces-diff-btn p-3.5 rounded-xl border-2 border-primary bg-surface-high text-left transition-all" data-diff="Intermedio">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs font-extrabold text-primary font-mono">NIVEL 2 • INTERMEDIO</span>
+                                            <span class="material-symbols-outlined text-sm text-primary">play_arrow</span>
+                                        </div>
+                                        <p class="text-[11px] text-gray-300">Casos clínicos diagnósticos y manejo farmacológico inicial.</p>
+                                    </button>
+
+                                    <button class="caces-diff-btn p-3.5 rounded-xl border border-surface-high bg-surface hover:border-warning text-left transition-all" data-diff="Avanzado">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs font-extrabold text-warning font-mono">NIVEL 3 • AVANZADO</span>
+                                            <span class="material-symbols-outlined text-sm text-warning">play_arrow</span>
+                                        </div>
+                                        <p class="text-[11px] text-gray-400">Diagnóstico diferencial complejo, comorbilidades y urgencias.</p>
+                                    </button>
+
+                                    <button class="caces-diff-btn p-3.5 rounded-xl border border-surface-high bg-surface hover:border-danger text-left transition-all" data-diff="Élite">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs font-extrabold text-danger font-mono">NIVEL 4 • ÉLITE CACES</span>
+                                            <span class="material-symbols-outlined text-sm text-danger">local_fire_department</span>
+                                        </div>
+                                        <p class="text-[11px] text-gray-400">Reactivos trampa de alta exigencia y pacientes críticos UCI.</p>
+                                    </button>
+                                </div>
+
+                                <!-- Selector de 3 Modos (Estándar 100, Tutor 20, Crítico 30) -->
+                                <div class="grid grid-cols-3 gap-2.5 mb-5">
+                                    <button id="mode-standard" class="exam-mode-btn p-2.5 rounded-xl border border-surface-high bg-surface text-center hover:border-primary transition-all" data-mode="standard">
+                                        <span class="block text-xs font-extrabold text-white">Estándar</span>
+                                        <span class="text-[10px] font-mono text-primary">100 preg • 150m</span>
+                                    </button>
+                                    <button id="mode-tutor" class="exam-mode-btn p-2.5 rounded-xl border-2 border-primary bg-surface-high text-center transition-all" data-mode="tutor">
+                                        <span class="block text-xs font-extrabold text-white">Modo Tutor</span>
+                                        <span class="text-[10px] font-mono text-secondary">20 preg • 30m</span>
+                                    </button>
+                                    <button id="mode-critical" class="exam-mode-btn p-2.5 rounded-xl border border-surface-high bg-surface text-center hover:border-danger transition-all" data-mode="critical">
+                                        <span class="block text-xs font-extrabold text-white">Crítico</span>
+                                        <span class="text-[10px] font-mono text-danger">30 preg • 45m</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button id="btn-start-exam" class="w-full bg-primary text-surface font-extrabold py-3.5 px-6 rounded-xl hover:bg-opacity-95 transition-all shadow-[0_0_25px_rgba(0,229,255,0.35)] flex items-center justify-center gap-2 text-sm">
+                                <span class="material-symbols-outlined">play_circle</span>
+                                <span>Iniciar Simulacro CACES Ahora</span>
+                            </button>
+                        </div>
+
+                        <!-- Opción Repetición Sináptica en General (5 cols) -->
+                        <div class="lg:col-span-5 bg-surface-container border border-secondary/40 rounded-2xl p-6 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-[10px] font-mono uppercase bg-secondary/15 text-secondary border border-secondary/30 px-2.5 py-1 rounded font-bold">Algoritmo Sináptico v4.4</span>
+                                    <span class="material-symbols-outlined text-secondary">psychology</span>
+                                </div>
+                                <h3 class="text-xl font-extrabold text-white mb-2">3. Repetición Sináptica en General</h3>
+                                <p class="text-xs text-gray-400 leading-relaxed mb-5">
+                                    Entrena con el mazo global de toda tu carrera combinando todas las especialidades evaluadas por el CACES según tu curva individual de olvido.
+                                </p>
+
+                                <div class="bg-surface border border-surface-high rounded-xl p-4 space-y-2.5 mb-6 font-mono text-xs">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">Retención Proyectada:</span>
+                                        <span class="text-secondary font-bold">94.2%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">Intervalos Activos:</span>
+                                        <span class="text-primary font-bold">&lt;10m • 1d • 4d</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">Sincronización:</span>
+                                        <span class="text-white">Cloud Firestore</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button id="btn-open-general-sinaptico" class="w-full bg-secondary text-surface font-extrabold py-3.5 px-6 rounded-xl hover:bg-opacity-95 transition-all shadow-[0_0_25px_rgba(148,222,45,0.3)] flex items-center justify-center gap-2 text-sm">
+                                <span class="material-symbols-outlined">bolt</span>
+                                <span>Abrir Repetición Sináptica General</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================================================================ -->
+            <!-- VISTA 3: SIMULADOR CACES ACTIVO (CRONÓMETRO Y MATRIZ)            -->
+            <!-- ================================================================ -->
+            <div id="view-simulator" class="tab-content hidden h-full flex flex-col max-w-6xl mx-auto">
+                <div class="flex flex-wrap justify-between items-center bg-surface-container p-4 rounded-2xl border border-surface-high mb-6 gap-4">
+                    <button id="btn-exit-exam" class="text-gray-300 hover:text-white flex items-center gap-2 text-xs font-bold bg-surface px-3.5 py-2 rounded-xl border border-surface-high transition-colors">
+                        <span class="material-symbols-outlined text-base">arrow_back</span> Finalizar / Volver
+                    </button>
+                    <div class="text-center">
+                        <p class="text-xs font-mono text-primary uppercase tracking-widest font-bold" id="exam-context">Medicina Humana • Modo Tutor</p>
+                    </div>
+                    <div class="flex items-center gap-3 bg-surface border border-primary/40 px-4 py-2 rounded-xl shadow-[0_0_15px_rgba(0,229,255,0.15)]">
+                        <span class="material-symbols-outlined text-primary text-lg">timer</span>
+                        <span id="exam-timer" class="text-xl font-mono font-extrabold text-primary tracking-widest">00:30:00</span>
+                    </div>
+                </div>
+
+                <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-hidden">
+                    <!-- Caso Clínico (8 cols) -->
+                    <div class="lg:col-span-8 bg-surface-container border border-surface-high rounded-2xl p-6 sm:p-8 overflow-y-auto flex flex-col">
+                        <div class="flex flex-wrap justify-between items-center gap-2 mb-6 pb-4 border-b border-surface-high">
+                            <span class="bg-primary/15 text-primary border border-primary/30 text-xs font-mono font-bold px-3.5 py-1 rounded-md" id="q-counter">Reactivo 1 / 20</span>
+                            <div class="flex items-center gap-2">
+                                <button id="btn-mark-review" class="text-xs font-mono px-3 py-1 rounded-md bg-surface border border-warning/40 text-warning hover:bg-warning/15 transition-colors">
+                                    ⚑ Marcar Revisión
+                                </button>
+                                <span class="text-xs font-mono px-3 py-1 rounded-md bg-danger/15 border border-danger/30 text-danger font-bold" id="q-difficulty">Nivel: Intermedio</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-2 flex items-center gap-2 text-xs font-mono text-primary uppercase tracking-wider">
+                            <span class="material-symbols-outlined text-sm">clinical_notes</span>
+                            <span id="q-subject-label">Presentación del Caso Clínico</span>
+                        </div>
+
+                        <p class="text-base sm:text-lg text-white leading-relaxed mb-6 font-medium" id="q-text">Cargando caso clínico...</p>
+
+                        <!-- Imagen Clínica Opcional desde assets/4-banco-clinico/ -->
+                        <div id="q-image-wrapper" class="hidden mb-6 rounded-xl overflow-hidden border border-surface-high bg-surface p-2 text-center">
+                            <img id="q-image" src="" alt="Evidencia Clínica" class="max-h-64 mx-auto object-contain rounded-lg">
+                        </div>
+
+                        <div class="space-y-3 mt-auto" id="q-options">
+                            <!-- Opciones A, B, C, D -->
+                        </div>
+
+                        <!-- Racional CACES -->
+                        <div id="q-rational" class="hidden mt-6 p-5 bg-surface border-l-4 border-secondary rounded-r-xl">
+                            <h5 class="text-xs font-mono font-bold text-secondary uppercase tracking-wider flex items-center gap-2 mb-2">
+                                <span class="material-symbols-outlined text-base">verified</span> Justificación Médica • Racional CACES
+                            </h5>
+                            <p class="text-sm text-gray-200 leading-relaxed" id="q-rational-text"></p>
+                            <button id="btn-next-tutor" class="mt-4 bg-secondary text-surface text-xs font-extrabold px-6 py-2.5 rounded-lg hover:bg-opacity-90 transition-all">
+                                Siguiente Reactivo →
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Matriz de Reactivos (4 cols) -->
+                    <div class="lg:col-span-4 bg-surface-container border border-surface-high rounded-2xl p-6 flex flex-col">
+                        <h4 class="text-xs font-mono font-bold text-gray-300 mb-4 uppercase tracking-wider">Matriz de Control de Reactivos</h4>
+                        <div class="grid grid-cols-5 gap-2 mb-6 overflow-y-auto flex-1 content-start" id="matrix-grid"></div>
+
+                        <div class="pt-4 border-t border-surface-high space-y-2 mb-6 text-xs font-mono">
+                            <div class="flex items-center gap-2 text-gray-400"><div class="w-3 h-3 rounded bg-surface border border-gray-600"></div> Pendiente</div>
+                            <div class="flex items-center gap-2 text-gray-400"><div class="w-3 h-3 rounded bg-primary"></div> Respondida</div>
+                            <div class="flex items-center gap-2 text-gray-400"><div class="w-3 h-3 rounded bg-warning"></div> Marcada para revisión</div>
+                        </div>
+
+                        <button id="btn-submit-exam" class="w-full bg-primary text-surface font-extrabold py-3.5 rounded-xl hover:bg-opacity-90 transition-colors text-xs uppercase tracking-wider">
+                            Concluir & Enviar a Calificar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================================================================ -->
+            <!-- VISTA 4: REPETICIÓN ESPACIADA • SINÁPTICO v4.4                   -->
+            <!-- ================================================================ -->
+            <div id="view-spaced" class="tab-content hidden max-w-5xl mx-auto">
+                <div class="bg-surface-container border border-surface-high rounded-2xl p-5 mb-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary">
+                                <span class="material-symbols-outlined">ecg_heart</span>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Mazo Activo • Repetición Espaciada • Sináptico v4.4</p>
+                                <select id="spaced-deck-selector" class="bg-transparent text-white font-extrabold text-base sm:text-lg focus:outline-none cursor-pointer">
+                                    <option value="medicina" class="bg-surface-container">Medicina Humana & Urgencias Clínicas • Foco CACES</option>
+                                    <option value="enfermeria" class="bg-surface-container">Enfermería & Cuidados Críticos • Foco CACES</option>
+                                    <option value="obstetricia" class="bg-surface-container">Obstetricia & Salud Materna • Foco CACES</option>
+                                    <option value="odontologia" class="bg-surface-container">Odontología Clínica • Foco CACES</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button id="btn-back-from-spaced" class="text-xs font-mono text-primary hover:underline flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">arrow_back</span> Volver al Panel
+                        </button>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-surface-high">
+                        <div class="flex-1 min-w-[220px]">
+                            <div class="flex justify-between text-xs font-mono text-gray-400 mb-1.5">
+                                <span>Progreso de la Sesión Sináptica</span>
+                                <span class="text-primary font-bold" id="spaced-counter-badge">Tarjeta 1</span>
+                            </div>
+                            <div class="w-full h-2 bg-surface rounded-full overflow-hidden">
+                                <div class="w-2/3 h-full bg-gradient-to-r from-primary to-secondary"></div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 font-mono text-xs">
+                            <div class="bg-surface border border-secondary/40 px-3 py-1.5 rounded-lg">
+                                <span class="text-[10px] text-gray-400 block">REPASADAS HOY</span>
+                                <span class="text-secondary font-bold" id="fc-reviewed-today">0</span>
+                            </div>
+                            <div class="bg-surface border border-warning/40 px-3 py-1.5 rounded-lg">
+                                <span class="text-[10px] text-gray-400 block">EN COLA</span>
+                                <span class="text-warning font-bold" id="fc-remaining-queue">8</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta Sináptica -->
+                <div id="flashcard-container" class="bg-surface-container border border-surface-high rounded-2xl p-6 sm:p-8 shadow-2xl mb-6">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-6">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-primary/15 border border-primary/40 text-primary text-[11px] font-mono font-bold px-3 py-1 rounded">TARJETA SINÁPTICA V4.4</span>
+                            <span class="bg-surface border border-surface-high text-gray-300 text-xs font-mono px-3 py-1 rounded" id="fc-category">Medicina Interna</span>
+                        </div>
+                        <span class="bg-danger/15 border border-danger/40 text-danger text-xs font-mono font-bold px-3 py-1 rounded flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">warning</span> Alta Prioridad CACES
+                        </span>
+                    </div>
+
+                    <h3 class="text-lg sm:text-xl font-semibold text-white leading-relaxed mb-6" id="fc-front">
+                        Cargando tarjeta clínica...
+                    </h3>
+
+                    <div id="fc-back" class="hidden bg-surface border-l-4 border-secondary rounded-r-xl p-5 mb-6">
+                        <div class="text-xs font-mono text-secondary uppercase tracking-wider font-bold mb-1 flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-base">check_circle</span>
+                            Respuesta Correcta & Racional Clínico
+                        </div>
+                        <p class="text-base sm:text-lg text-white font-semibold leading-relaxed" id="fc-answer"></p>
+                    </div>
+
+                    <div class="text-center">
+                        <button id="btn-show-answer" class="bg-primary text-surface font-extrabold px-8 py-3.5 rounded-xl hover:bg-opacity-95 transition-all shadow-[0_0_25px_rgba(0,229,255,0.35)] inline-flex items-center gap-3 text-sm">
+                            <span class="material-symbols-outlined">flip</span>
+                            <span>Mostrar Respuesta (Barra Espaciadora)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Botones Algorítmicos -->
+                <div id="fc-controls" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <button class="bg-surface-container border border-danger/50 hover:border-danger p-4 rounded-xl text-center transition-all hover:bg-danger/10" data-quality="1">
+                        <div class="flex items-center justify-center gap-2 text-white font-extrabold text-base mb-1">
+                            <span class="w-2.5 h-2.5 rounded-full bg-danger"></span> Difícil (&lt;10m)
+                        </div>
+                        <p class="text-xs text-gray-400">Repetir en esta misma sesión</p>
+                    </button>
+
+                    <button class="bg-surface-container border border-warning/50 hover:border-warning p-4 rounded-xl text-center transition-all hover:bg-warning/10" data-quality="3">
+                        <div class="flex items-center justify-center gap-2 text-white font-extrabold text-base mb-1">
+                            <span class="w-2.5 h-2.5 rounded-full bg-warning"></span> Bueno (1d)
+                        </div>
+                        <p class="text-xs text-gray-400">Programar para mañana</p>
+                    </button>
+
+                    <button class="bg-surface-container border border-secondary/50 hover:border-secondary p-4 rounded-xl text-center transition-all hover:bg-secondary/10" data-quality="5">
+                        <div class="flex items-center justify-center gap-2 text-white font-extrabold text-base mb-1">
+                            <span class="w-2.5 h-2.5 rounded-full bg-secondary"></span> Fácil (4d)
+                        </div>
+                        <p class="text-xs text-gray-400">Consolidación a largo plazo</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================================================================ -->
+            <!-- VISTA 5: RURAL (AÑO DE SALUD RURAL MSP ECUADOR + LECTOR PDF)     -->
+            <!-- ================================================================ -->
+            <div id="view-rural" class="tab-content hidden max-w-6xl mx-auto">
+                <div class="mb-8 pb-6 border-b border-surface-high flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <span class="text-[10px] font-mono uppercase bg-secondary/15 text-secondary border border-secondary/30 px-3 py-1 rounded-full font-bold">Ministerio de Salud Pública • Ecuador</span>
+                        <h2 class="text-3xl font-extrabold text-white mt-2">Módulo de Salud Rural & Guardias</h2>
+                        <p class="text-sm text-gray-400 mt-1">Guías de Práctica Clínica (GPC), llenado de RDACAA, PRAS, vigilancia epidemiológica y protocolos de emergencia rural.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-surface-container border border-surface-high hover:border-primary rounded-2xl p-6 transition-all">
+                        <span class="material-symbols-outlined text-primary text-3xl mb-3">menu_book</span>
+                        <h3 class="text-lg font-extrabold text-white mb-2">Guías GPC-MSP Oficiales</h3>
+                        <p class="text-xs text-gray-400 mb-4">Protocolos materno-infantiles, clave roja, clave azul, clave amarilla y manejo sindrómico en primer nivel.</p>
+                        <button class="btn-open-pdf-reader w-full py-2.5 rounded-xl bg-primary/15 border border-primary/40 text-primary text-xs font-mono font-bold hover:bg-primary hover:text-surface transition-all" data-pdf="Clave Obstétrica MSP">
+                            Abrir Visor 1D de Guías PDF
+                        </button>
+                    </div>
+
+                    <div class="bg-surface-container border border-surface-high hover:border-secondary rounded-2xl p-6 transition-all">
+                        <span class="material-symbols-outlined text-secondary text-3xl mb-3">assignment</span>
+                        <h3 class="text-lg font-extrabold text-white mb-2">Plataformas PRAS / VIEPI / SIVE</h3>
+                        <p class="text-xs text-gray-400 mb-4">Plantillas paso a paso para notificación obligatoria, fichas epidemiológicas y cierres mensuales de centro de salud.</p>
+                        <button class="btn-open-pdf-reader w-full py-2.5 rounded-xl bg-secondary/15 border border-secondary/40 text-secondary text-xs font-mono font-bold hover:bg-secondary hover:text-surface transition-all" data-pdf="Manual PRAS y SIVE-Alerta">
+                            Ver Manual Operativo Rural
+                        </button>
+                    </div>
+
+                    <div class="bg-surface-container border border-surface-high hover:border-warning rounded-2xl p-6 transition-all">
+                        <span class="material-symbols-outlined text-warning text-3xl mb-3">medication</span>
+                        <h3 class="text-lg font-extrabold text-white mb-2">Vademécum Rural Cuadro Básico</h3>
+                        <p class="text-xs text-gray-400 mb-4">Dosis pediátricas por kilo, diluciones de emergencia y medicamentos disponibles en el Cuadro Nacional Básico (CNMB).</p>
+                        <button class="btn-open-pdf-reader w-full py-2.5 rounded-xl bg-warning/15 border border-warning/40 text-warning text-xs font-mono font-bold hover:bg-warning hover:text-surface transition-all" data-pdf="Vademécum CNMB Rural">
+                            Consultar Dosis Pediátricas
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================================================================ -->
+            <!-- VISTA 6: SIMULADORES 1D, 2D Y 3D (MONITOR UCI-104 EN VIVO)       -->
+            <!-- ================================================================ -->
+            <div id="view-simulators-engine" class="tab-content hidden max-w-6xl mx-auto">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6 pb-4 border-b border-surface-high">
+                    <div>
+                        <span id="sim-engine-badge" class="text-[10px] font-mono uppercase bg-primary/15 text-primary border border-primary/40 px-3 py-1 rounded-full font-bold">
+                            MOTOR CLÍNICO INTERACTIVO • 2D
+                        </span>
+                        <h2 id="sim-engine-title" class="text-2xl sm:text-3xl font-extrabold text-white mt-2">Monitor Multiparámetro UCI-104 & Lienzo Clínico</h2>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button class="sim-engine-btn px-3.5 py-2 rounded-xl bg-surface-container border border-surface-high text-xs font-mono font-bold text-secondary hover:border-secondary" data-engine="1D">Motor 1D</button>
+                        <button class="sim-engine-btn px-3.5 py-2 rounded-xl bg-surface-container border border-primary text-xs font-mono font-bold text-primary" data-engine="2D">Motor 2D</button>
+                        <button class="sim-engine-btn px-3.5 py-2 rounded-xl bg-surface-container border border-surface-high text-xs font-mono font-bold text-warning hover:border-warning flex items-center gap-1.5" data-engine="3D">
+                            <span>Motor 3D</span>
+                            <svg class="w-4 h-4"><use href="#nirvana-icon"></use></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Monitor Hemodinámico UCI-104 con Ondas ECG en Tiempo Real -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-8 bg-surface-container border border-primary/40 rounded-2xl p-6 shadow-[0_0_30px_rgba(0,229,255,0.08)]">
+                        <div class="flex items-center justify-between mb-4 pb-3 border-b border-surface-high font-mono text-xs">
+                            <span class="text-primary font-bold flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-secondary animate-ping"></span>
+                                MONITOR UCI-104 • TELEMETRÍA EN VIVO
+                            </span>
+                            <span class="text-gray-400" id="sim-patient-status">PACIENTE: ADULTO 58 AÑOS • DOLOR TORÁCICO</span>
+                        </div>
+
+                        <!-- Trazado ECG Vectorial Animado -->
+                        <div class="bg-surface border border-surface-high rounded-xl p-4 mb-5">
+                            <div class="flex justify-between text-[11px] font-mono text-secondary mb-1">
+                                <span>DERIVACIÓN DII • 25 mm/s</span>
+                                <span id="sim-ecg-rhythm">RITMO SINUSAL TAQUICÁRDICO</span>
+                            </div>
+                            <svg class="w-full h-24 overflow-visible" viewBox="0 0 600 80">
+                                <path class="ecg-line" fill="none" stroke="#94de2d" stroke-width="2.5"
+                                      d="M0,45 L40,45 L50,35 L60,45 L75,45 L82,55 L90,10 L98,70 L106,45 L125,45 L140,30 L155,45 L200,45 L210,35 L220,45 L235,45 L242,55 L250,10 L258,70 L266,45 L285,45 L300,30 L315,45 L360,45 L370,35 L380,45 L395,45 L402,55 L410,10 L418,70 L426,45 L445,45 L460,30 L475,45 L520,45 L530,35 L540,45 L555,45 L562,55 L570,10 L578,70 L586,45 L600,45"/>
+                            </svg>
+                        </div>
+
+                        <!-- Lienzo de Intervención (1D / 2D / 3D) -->
+                        <div id="sim-interactive-stage" class="bg-surface border border-surface-high rounded-xl p-5 min-h-[210px] flex flex-col justify-between">
+                            <p class="text-sm text-gray-200 leading-relaxed" id="sim-case-narrative">
+                                Selecciona una maniobra clínica en el panel derecho para evaluar la respuesta hemodinámica del paciente en tiempo real.
+                            </p>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+                                <button class="sim-action-btn p-3 rounded-xl bg-surface-container border border-surface-high hover:border-primary text-xs font-mono font-bold text-primary transition-all" data-action="auscultar">
+                                    🩺 Auscultar Focos
+                                </button>
+                                <button class="sim-action-btn p-3 rounded-xl bg-surface-container border border-surface-high hover:border-secondary text-xs font-mono font-bold text-secondary transition-all" data-action="oxigeno">
+                                    💨 Administrar O2 / Vía
+                                </button>
+                                <button class="sim-action-btn p-3 rounded-xl bg-surface-container border border-surface-high hover:border-danger text-xs font-mono font-bold text-danger transition-all" data-action="ecg12">
+                                    ⚡ Solicitar ECG 12D
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Signos Vitales Numéricos (4 cols) -->
+                    <div class="lg:col-span-4 space-y-4 font-mono">
+                        <div class="bg-surface-container border border-secondary/40 rounded-2xl p-4 flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] text-gray-400 block">FRECUENCIA CARDÍACA (FC)</span>
+                                <span class="text-3xl font-extrabold text-secondary" id="vital-hr">112</span>
+                                <span class="text-xs text-secondary">lpm</span>
+                            </div>
+                            <span class="material-symbols-outlined text-secondary text-3xl">favorite</span>
+                        </div>
+
+                        <div class="bg-surface-container border border-primary/40 rounded-2xl p-4 flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] text-gray-400 block">SATURACIÓN O2 (SpO2)</span>
+                                <span class="text-3xl font-extrabold text-primary" id="vital-spo2">91%</span>
+                                <span class="text-xs text-primary">FiO2 21%</span>
+                            </div>
+                            <span class="material-symbols-outlined text-primary text-3xl">pulmonology</span>
+                        </div>
+
+                        <div class="bg-surface-container border border-warning/40 rounded-2xl p-4 flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] text-gray-400 block">PRESIÓN ARTERIAL (PA)</span>
+                                <span class="text-3xl font-extrabold text-warning" id="vital-bp">148/92</span>
+                                <span class="text-xs text-warning">mmHg</span>
+                            </div>
+                            <span class="material-symbols-outlined text-warning text-3xl">speed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================================================================ -->
+            <!-- VISTA 7: MIS MÉTRICAS Y DESEMPEÑO                                -->
+            <!-- ================================================================ -->
+            <div id="view-metrics" class="tab-content hidden max-w-5xl mx-auto">
+                <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-3xl font-extrabold text-white mb-1">Mis Métricas y Desempeño</h2>
+                        <p class="text-sm text-gray-400">Telemetría académica sincronizada en tiempo real con tu expediente en Cloud Firestore.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div class="bg-surface-container border border-surface-high rounded-2xl p-6">
+                        <div class="flex items-center gap-4">
+                            <div class="p-3.5 bg-primary/10 border border-primary/30 rounded-xl"><span class="material-symbols-outlined text-primary">percent</span></div>
+                            <div>
+                                <p class="text-xs font-mono text-gray-400 uppercase">Promedio Global Real</p>
+                                <h4 class="text-3xl font-extrabold text-white mt-1" id="metric-avg">0.0%</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-surface-container border border-surface-high rounded-2xl p-6">
+                        <div class="flex items-center gap-4">
+                            <div class="p-3.5 bg-secondary/10 border border-secondary/30 rounded-xl"><span class="material-symbols-outlined text-secondary">task_alt</span></div>
+                            <div>
+                                <p class="text-xs font-mono text-gray-400 uppercase">Simulacros Completados</p>
+                                <h4 class="text-3xl font-extrabold text-white mt-1" id="metric-exams">0</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-surface-container border border-surface-high rounded-2xl p-6">
+                        <div class="flex items-center gap-4">
+                            <div class="p-3.5 bg-warning/10 border border-warning/30 rounded-xl"><span class="material-symbols-outlined text-warning">local_library</span></div>
+                            <div>
+                                <p class="text-xs font-mono text-gray-400 uppercase">Casos Plan Básico Usados</p>
+                                <h4 class="text-3xl font-extrabold text-white mt-1" id="metric-cases">0 / 15</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================================================================ -->
+            <!-- VISTA 8: AULAS VIRTUALES & MENTORÍA VIP                          -->
+            <!-- ================================================================ -->
+            <div id="view-classrooms" class="tab-content hidden max-w-6xl mx-auto">
+                <div class="mb-8 pb-6 border-b border-surface-high flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <span class="text-[10px] font-mono uppercase bg-warning/15 text-warning border border-warning/40 px-3 py-1 rounded-full font-bold">Aulas Virtuales • Streaming & VOD</span>
+                        <h2 class="text-3xl font-extrabold text-white mt-2">Aulas Virtuales & Mentoría Élite VIP</h2>
+                        <p class="text-sm text-gray-400 mt-1">Clases magistrales grabadas con protección DRM y sesiones en vivo con especialistas.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-surface-container border border-surface-high rounded-2xl p-6">
+                        <span class="text-[10px] font-mono text-primary bg-primary/10 px-2.5 py-1 rounded">VOD • RESOLUCIÓN DE CASOS</span>
+                        <h3 class="text-lg font-extrabold text-white mt-3 mb-2">Clínica y Electrocardiografía CACES</h3>
+                        <p class="text-xs text-gray-400 mb-4">Interpretación algorítmica de arritmias, síndromes coronarios agudos y gasometría arterial.</p>
+                        <button class="upcoming-feature w-full py-2.5 rounded-xl bg-surface border border-primary/40 text-primary text-xs font-mono font-bold hover:bg-primary hover:text-surface transition-all">
+                            Reproducir Clase Magistral
+                        </button>
+                    </div>
+
+                    <div class="bg-surface-container border border-surface-high rounded-2xl p-6">
+                        <span class="text-[10px] font-mono text-secondary bg-secondary/10 px-2.5 py-1 rounded">EN VIVO • ZOOM / MEET SDK</span>
+                        <h3 class="text-lg font-extrabold text-white mt-3 mb-2">Guardia Semanal de Preguntas Trampa</h3>
+                        <p class="text-xs text-gray-400 mb-4">Desglose en vivo de reactivos de alta complejidad junto al cuerpo docente de Makai Academy.</p>
+                        <button class="upcoming-feature w-full py-2.5 rounded-xl bg-surface border border-secondary/40 text-secondary text-xs font-mono font-bold hover:bg-secondary hover:text-surface transition-all">
+                            Ingresar a Sala en Vivo
+                        </button>
+                    </div>
+
+                    <div class="bg-surface-container border border-warning/40 rounded-2xl p-6">
+                        <span class="text-[10px] font-mono text-warning bg-warning/10 px-2.5 py-1 rounded">MENTORÍA 1 A 1 • VIP</span>
+                        <h3 class="text-lg font-extrabold text-white mt-3 mb-2">Tutoría Clínica Personalizada</h3>
+                        <p class="text-xs text-gray-400 mb-4">5 horas de acompañamiento directo por módulo con especialistas para reforzar tus áreas débiles.</p>
+                        <button class="upcoming-feature w-full py-2.5 rounded-xl bg-warning text-surface text-xs font-mono font-extrabold hover:bg-opacity-90 transition-all">
+                            Agendar Sesión VIP
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================================================================ -->
+            <!-- VISTA 9: CONFIGURACIONES DE PERFIL (#view-profile)               -->
+            <!-- ================================================================ -->
+            <div id="view-profile" class="tab-content hidden max-w-4xl mx-auto">
+                <div class="mb-8 pb-6 border-b border-surface-high">
+                    <span class="text-[10px] font-mono uppercase bg-primary/15 text-primary border border-primary/30 px-3 py-1 rounded-full font-bold">Expediente Académico Personal</span>
+                    <h2 class="text-3xl font-extrabold text-white mt-2">Configuraciones de Perfil</h2>
+                    <p class="text-sm text-gray-400 mt-1">Gestiona tus datos personales, carrera predeterminada y estado de suscripción en Makai Academy.</p>
+                </div>
+
+                <div class="bg-surface-container border border-surface-high rounded-2xl p-6 sm:p-8 space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-mono text-gray-400 mb-1.5">NOMBRE DEL ESTUDIANTE / PROFESIONAL</label>
+                            <input id="profile-name-input" type="text" class="w-full bg-surface border border-surface-high rounded-xl px-4 py-2.5 text-sm text-white focus:border-primary focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-gray-400 mb-1.5">CORREO ELECTRÓNICO REGISTRADO</label>
+                            <input id="profile-email-input" type="email" disabled class="w-full bg-surface/50 border border-surface-high rounded-xl px-4 py-2.5 text-sm text-gray-400 cursor-not-allowed">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-mono text-gray-400 mb-1.5">PLAN ACADÉMICO ACTIVO</label>
+                            <div class="bg-surface border border-secondary/40 rounded-xl px-4 py-2.5 text-sm font-mono font-bold text-secondary" id="profile-plan-badge">
+                                Plan ---
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-gray-400 mb-1.5">ACTUALIZAR SUSCRIPCIÓN</label>
+                            <button id="btn-upgrade-from-profile" class="w-full bg-primary text-surface font-extrabold py-2.5 rounded-xl text-xs font-mono uppercase hover:bg-opacity-90 transition-all">
+                                Subir Comprobante / Mejorar a Makai PRO
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-surface-high flex justify-end">
+                        <button id="btn-save-profile" class="bg-secondary text-surface font-extrabold px-6 py-2.5 rounded-xl text-xs font-mono uppercase hover:bg-opacity-90 transition-all">
+                            Guardar Cambios de Perfil
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================================================================ -->
+            <!-- VISTA 10: BÓVEDA DE ADMINISTRADOR (js/1-admin/)                  -->
+            <!-- ================================================================ -->
+            <div id="view-admin" class="tab-content hidden max-w-6xl mx-auto">
+                <div class="mb-6 border-b border-warning/30 pb-4 flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-warning flex items-center gap-2">
+                            <span class="material-symbols-outlined text-3xl">admin_panel_settings</span> Bóveda Maestra de Administrador
+                        </h2>
+                        <p class="text-xs sm:text-sm text-gray-400">Control de reactivos CACES, tarjetas Sinápticas, PDFs, pagos bancarios y respaldos JSON/Excel.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button id="btn-backup-json" class="px-3.5 py-2 rounded-xl bg-surface-container border border-primary/40 text-primary text-xs font-mono font-bold hover:bg-primary hover:text-surface transition-all">
+                            ⬇ Backup .JSON
+                        </button>
+                        <button id="btn-backup-csv" class="px-3.5 py-2 rounded-xl bg-surface-container border border-secondary/40 text-secondary text-xs font-mono font-bold hover:bg-secondary hover:text-surface transition-all">
+                            📊 Alumnos .CSV (Excel)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Creación Individual de Reactivos CACES / Tarjetas Sinápticas -->
+                    <div class="bg-surface-container border border-surface-high rounded-2xl p-6">
+                        <h3 class="text-base font-extrabold text-white mb-4">Ingresar Reactivo CACES / Tarjeta Sináptica</h3>
+                        <form id="admin-form" class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-400 mb-1">Carrera</label>
+                                    <select id="admin-carrera" class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2 text-white text-sm" required>
+                                        <option value="medicina">Medicina Humana</option>
+                                        <option value="enfermeria">Enfermería</option>
+                                        <option value="obstetricia">Obstetricia</option>
+                                        <option value="odontologia">Odontología</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-400 mb-1">Materia</label>
+                                    <select id="admin-materia" class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2 text-white text-sm" required></select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1">Enunciado / Caso Clínico</label>
+                                <textarea id="admin-enunciado" rows="3" class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2 text-white text-sm" required></textarea>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div><label class="block text-xs text-gray-400 mb-1">Opción A</label><input type="text" id="admin-opA" class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2 text-white text-sm" required></div>
+                                <div><label class="block text-xs text-gray-400 mb-1">Opción B</label><input type="text" id="admin-opB" class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2 text-white text-sm" required></div>
+                                <div><label class="block text-xs text-gray-400 mb-1">Opción C</label><input type="text" id="admin-opC" class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2 text-white text-sm" required></div>
+                                <div><label class="block text-xs text-gray-400 mb-1">Opción D</label><input type="text" id="admin-opD" class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2 text-white text-sm" required></div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-400 mb-1">Respuesta Correcta</label>
+                                    <select id="admin-correcta" class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2 text-white text-sm" required>
+                                        <option value="A">A</option>
+                                        <option value="B">B</option>
+                                        <option value="C">C</option>
+                                        <option value="D">D</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-400 mb-1">Nivel Dificultad CACES</label>
+                                    <select id="admin-dificultad" class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2 text-white text-sm" required>
+                                        <option value="Básico">Nivel 1: Básico</option>
+                                        <option value="Intermedio" selected>Nivel 2: Intermedio</option>
+                                        <option value="Avanzado">Nivel 3: Avanzado</option>
+                                        <option value="Élite">Nivel 4: Élite CACES</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1">Racional CACES (Justificación Clínica)</label>
+                                <textarea id="admin-racional" rows="2" class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2 text-white text-sm" required></textarea>
+                            </div>
+
+                            <button type="submit" class="w-full bg-warning text-surface font-extrabold py-3 rounded-xl hover:bg-opacity-90 transition-colors text-sm">
+                                Guardar Reactivo en Firestore
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Importación Masiva JSON + Bandeja de Pagos Bancarios -->
+                    <div class="space-y-6">
+                        <div class="bg-surface-container border border-surface-high rounded-2xl p-6 flex flex-col">
+                            <h3 class="text-base font-extrabold text-white mb-2">Importación Masiva por Lotes (JSON)</h3>
+                            <p class="text-xs text-gray-400 mb-3">Pega un arreglo JSON válido para cargar decenas de preguntas clínicas a `preguntas_caces`.</p>
+                            <textarea id="admin-json-import" rows="6" class="w-full bg-surface border border-surface-high rounded-xl px-4 py-3 text-secondary font-mono text-xs focus:outline-none focus:border-warning mb-3" placeholder='[{"carrera":"medicina","materia":"Medicina Interna","dificultad":"Élite","enunciado":"Paciente...","opciones":{"A":"...","B":"...","C":"...","D":"..."},"respuestaCorrecta":"A","racional":"..."}]'></textarea>
+                            <button id="btn-import-json" class="w-full bg-surface border border-warning text-warning hover:bg-warning hover:text-surface font-extrabold py-2.5 rounded-xl transition-colors text-xs uppercase font-mono">
+                                Importar Lote JSON a Firestore
+                            </button>
+                        </div>
+
+                        <div class="bg-surface-container border border-surface-high rounded-2xl p-6">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-base font-extrabold text-white">Bandeja de Verificación de Pagos</h3>
+                                <button id="btn-refresh-payments" class="text-xs font-mono text-primary hover:underline">↻ Actualizar</button>
+                            </div>
+                            <div id="admin-payments-list" class="space-y-2.5 max-h-56 overflow-y-auto text-xs font-mono text-gray-400">
+                                <p class="text-gray-500">Haz clic en Actualizar para consultar `solicitudes_pago` en Firestore.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Toast Flotante Nirvana -->
+        <div id="toast" class="fixed bottom-8 right-8 bg-surface-container border border-primary/50 shadow-[0_0_25px_rgba(0,229,255,0.25)] p-4 rounded-2xl flex items-center gap-4 transform translate-y-24 opacity-0 transition-all duration-300 z-50 pointer-events-none">
+            <svg class="w-8 h-8 flex-shrink-0"><use href="#nirvana-icon"></use></svg>
+            <div>
+                <p class="text-sm font-extrabold text-white" id="toast-title">Módulo en calibración final</p>
+                <p class="text-xs text-primary font-mono" id="toast-subtitle">Disponible próximamente en Makai Academy</p>
+            </div>
+        </div>
+
+        <!-- Modal Candado Freemium / Upgrade a PRO -->
+        <div id="freemium-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4"></div>
+
+    </main>
+
+    <!-- Punto de Entrada Único de la Arquitectura Modular (ES Modules) -->
+    <script type="module" src="js/2-core/app.orchestrator.js"></script>
+</body>
+</html>
