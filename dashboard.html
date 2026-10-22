@@ -1,1 +1,358 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Makai Academy • LMS & Simulador Clínico CACES v4.4.2</title>
+    <link rel="icon" type="image/png" href="assets/1-branding/logos/logo.png">
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Material Symbols Outlined -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        surface: '#06090e',
+                        'surface-container': '#0c1118',
+                        'surface-high': '#161f2c',
+                        primary: '#00e5ff',
+                        secondary: '#94de2d',
+                        danger: '#ff4d4d',
+                        warning: '#ffbe0b',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #06090e;
+            color: #f3f4f6;
+            background-image: radial-gradient(circle at 85% 10%, rgba(0, 229, 255, 0.05), transparent 35%),
+                              radial-gradient(circle at 15% 90%, rgba(148, 222, 45, 0.04), transparent 35%);
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeInView 0.22s ease-out; }
+        @keyframes fadeInView {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes eqBar {
+            0%, 100% { height: 4px; }
+            50% { height: 16px; }
+        }
+        .eq-bar {
+            width: 3px;
+            background-color: #00e5ff;
+            border-radius: 9999px;
+            transition: height 0.2s ease;
+        }
+        .eq-playing .eq-bar:nth-child(1) { animation: eqBar 0.7s infinite ease-in-out 0.1s; }
+        .eq-playing .eq-bar:nth-child(2) { animation: eqBar 0.5s infinite ease-in-out 0.3s; background-color: #94de2d; }
+        .eq-playing .eq-bar:nth-child(3) { animation: eqBar 0.8s infinite ease-in-out 0.2s; }
+        .eq-playing .eq-bar:nth-child(4) { animation: eqBar 0.6s infinite ease-in-out 0.4s; background-color: #94de2d; }
+
+        @keyframes ecgSweep {
+            0% { stroke-dashoffset: 600; }
+            100% { stroke-dashoffset: 0; }
+        }
+        .ecg-line {
+            stroke-dasharray: 600;
+            animation: ecgSweep 3.5s linear infinite;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #06090e; }
+        ::-webkit-scrollbar-thumb { background: #161f2c; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00e5ff; }
+    </style>
+
+    <!-- Definiciones Vectoriales: Ícono Nirvana y Respaldo del Logo Oficial -->
+    <svg id="svg-defs" style="display: none;">
+        <symbol id="nirvana-icon" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" fill="#ffbe0b" stroke="#00e5ff" stroke-width="4"/>
+            <path d="M 25 35 L 40 50 M 40 35 L 25 50" stroke="#06090e" stroke-width="6" stroke-linecap="round"/>
+            <path d="M 60 35 L 75 50 M 75 35 L 60 50" stroke="#06090e" stroke-width="6" stroke-linecap="round"/>
+            <path d="M 26 65 Q 50 86 74 65" fill="none" stroke="#06090e" stroke-width="5.5" stroke-linecap="round"/>
+            <path d="M 45 73 Q 50 93 57 73" fill="#ff4d4d" stroke="#06090e" stroke-width="2.5"/>
+        </symbol>
+
+        <symbol id="makai-logo-fallback" viewBox="0 0 120 100">
+            <defs>
+                <linearGradient id="makaiRingDash" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#00e5ff" />
+                    <stop offset="100%" stop-color="#034078" />
+                </linearGradient>
+                <linearGradient id="makaiBookDash" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#b5ec42" />
+                    <stop offset="100%" stop-color="#6db321" />
+                </linearGradient>
+            </defs>
+            <circle cx="65" cy="50" r="42" fill="none" stroke="url(#makaiRingDash)" stroke-width="6" stroke-dasharray="210 60" stroke-linecap="round"/>
+            <circle cx="42" cy="52" r="28" fill="none" stroke="#00bcd4" stroke-width="7" stroke-dasharray="130 50" stroke-dashoffset="35" stroke-linecap="round"/>
+            <path d="M26 62 L29 44 Q37 44 42 47 L42 64 Q36 61 26 62 Z" fill="none" stroke="url(#makaiBookDash)" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M58 62 L55 44 Q47 44 42 47 L42 64 Q48 61 58 62 Z" fill="none" stroke="url(#makaiBookDash)" stroke-width="2.5" stroke-linejoin="round"/>
+            <circle cx="42" cy="36" r="6" fill="none" stroke="url(#makaiBookDash)" stroke-width="2.5"/>
+            <path d="M39 42 L45 42 M42 36 L42 42" stroke="url(#makaiBookDash)" stroke-width="2" stroke-linecap="round"/>
+        </symbol>
+    </svg>
+</head>
+<body class="antialiased h-screen flex overflow-hidden select-none sm:select-auto">
+
+    <!-- ==================================================================== -->
+    <!-- SIDEBAR IZQUIERDO FIJO (CYBER-MEDICAL HUD v4.4.2)                    -->
+    <!-- ==================================================================== -->
+    <aside class="w-72 bg-surface-container border-r border-surface-high flex flex-col h-full flex-shrink-0 z-30">
+        <!-- Encabezado con Logo Oficial + MAKAI arriba y ACADEMY abajo -->
+        <div class="p-5 border-b border-surface-high">
+            <div class="flex items-center gap-3.5 mb-4">
+                <div class="w-12 h-12 rounded-xl bg-white p-1 flex items-center justify-center shadow-[0_0_18px_rgba(0,229,255,0.3)] flex-shrink-0">
+                    <img src="assets/1-branding/logos/logo.png" alt="Makai Academy" class="w-full h-full object-contain"
+                         onerror="if(!this.dataset.retry){this.dataset.retry='1';this.src='logo.png';}else{this.style.display='none';this.nextElementSibling.style.display='block';}">
+                    <svg class="w-10 h-10 hidden"><use href="#makai-logo-fallback"></use></svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold text-white tracking-wider leading-none">MAKAI</h1>
+                    <p class="text-xs font-mono font-bold text-primary tracking-[0.28em] uppercase mt-1">ACADEMY</p>
+                </div>
+            </div>
+
+            <!-- Barra de Estado: Versión 4.4.2 -->
+            <div class="bg-surface border border-surface-high rounded-xl px-3.5 py-2.5">
+                <div class="flex items-center justify-between text-[11px] font-mono mb-1.5">
+                    <span class="flex items-center gap-1.5 text-secondary font-bold">
+                        <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+                        Versión 4.4.2
+                    </span>
+                    <span class="text-primary font-semibold">ALICIZATION</span>
+                </div>
+                <div class="w-full h-1.5 bg-surface-high rounded-full overflow-hidden">
+                    <div class="w-11/12 h-full bg-gradient-to-r from-secondary via-primary to-primary"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú Lateral Principal: CARRERA, CACES, RURAL, SIMULADORES, MENTORÍA VIP -->
+        <nav class="flex-1 overflow-y-auto p-4 space-y-2" id="sidebar-nav">
+            <!-- 1. CARRERA -->
+            <button class="nav-btn w-full flex items-center justify-between px-4 py-3.5 text-sm font-extrabold rounded-xl bg-primary text-surface transition-all shadow-[0_0_20px_rgba(0,229,255,0.25)]" data-target="view-carrera">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-lg">school</span>
+                    <span class="tracking-wide">CARRERA</span>
+                </div>
+                <span class="text-[10px] font-mono bg-surface/20 px-2 py-0.5 rounded font-bold">11 ÁREAS</span>
+            </button>
+
+            <!-- 2. CACES -->
+            <button class="nav-btn w-full flex items-center justify-between px-4 py-3.5 text-sm font-extrabold text-gray-300 hover:text-white hover:bg-surface-high rounded-xl transition-all" data-target="view-caces">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-lg text-primary">verified</span>
+                    <span class="tracking-wide">CACES</span>
+                </div>
+                <span class="text-[10px] font-mono bg-primary/15 text-primary border border-primary/30 px-2 py-0.5 rounded font-bold">OFICIAL</span>
+            </button>
+
+            <!-- 3. RURAL -->
+            <button class="nav-btn w-full flex items-center justify-between px-4 py-3.5 text-sm font-extrabold text-gray-300 hover:text-white hover:bg-surface-high rounded-xl transition-all" data-target="view-rural">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-lg text-secondary">health_and_safety</span>
+                    <span class="tracking-wide">RURAL</span>
+                </div>
+                <span class="text-[10px] font-mono bg-secondary/15 text-secondary border border-secondary/30 px-2 py-0.5 rounded font-bold">MSP-EC</span>
+            </button>
+
+            <!-- 4. SIMULADORES (Desplegable 1D, 2D y 3D) -->
+            <div class="space-y-1">
+                <button id="btn-toggle-simulators" class="w-full flex items-center justify-between px-4 py-3.5 text-sm font-extrabold text-gray-300 hover:text-white hover:bg-surface-high rounded-xl transition-all">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-lg text-warning">vital_signs</span>
+                        <span class="tracking-wide">SIMULADORES</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[9px] font-mono bg-warning/15 text-warning border border-warning/30 px-1.5 py-0.5 rounded">1D•2D•3D</span>
+                        <span id="simulators-chevron" class="material-symbols-outlined text-base transition-transform duration-200">expand_more</span>
+                    </div>
+                </button>
+
+                <!-- Subopciones desplegables 1D, 2D y 3D -->
+                <div id="simulators-submenu" class="hidden pl-4 pr-1 py-1 space-y-1.5 border-l-2 border-primary/30 ml-4">
+                    <button class="sim-engine-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-mono font-bold text-gray-300 hover:text-white hover:bg-surface-high transition-colors" data-engine="1D">
+                        <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-secondary"></span> Simulador 1D</span>
+                        <span class="text-[10px] text-secondary">Secuencial</span>
+                    </button>
+                    <button class="sim-engine-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-mono font-bold text-gray-300 hover:text-white hover:bg-surface-high transition-colors" data-engine="2D">
+                        <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary"></span> Simulador 2D</span>
+                        <span class="text-[10px] text-primary">Lienzo UCI</span>
+                    </button>
+                    <button class="sim-engine-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-mono font-bold text-gray-300 hover:text-white hover:bg-surface-high transition-colors" data-engine="3D">
+                        <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-warning"></span> Simulador 3D</span>
+                        <svg class="w-4 h-4"><use href="#nirvana-icon"></use></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 5. MENTORÍA VIP -->
+            <button class="nav-btn w-full flex items-center justify-between px-4 py-3.5 text-sm font-extrabold text-gray-300 hover:text-white hover:bg-surface-high border border-dashed border-surface-high rounded-xl transition-all" data-target="view-classrooms">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-lg text-warning">stars</span>
+                    <div class="text-left">
+                        <span class="block tracking-wide">MENTORÍA VIP</span>
+                        <span class="text-[10px] font-mono text-warning font-normal">Aulas & Especialistas</span>
+                    </div>
+                </div>
+                <svg class="w-5 h-5 flex-shrink-0"><use href="#nirvana-icon"></use></svg>
+            </button>
+
+            <!-- 6. BÓVEDA DE ADMINISTRADOR (Oculto para estudiantes, visible para cuentas maestras) -->
+            <button id="admin-nav-btn" class="hidden nav-btn w-full flex items-center justify-between px-4 py-3.5 text-sm font-extrabold text-warning hover:bg-warning/15 rounded-xl transition-all mt-4 border border-warning/40 shadow-[0_0_15px_rgba(255,190,11,0.15)]" data-target="view-admin">
+                <div class="flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-lg">admin_panel_settings</span>
+                    <span>⚡ BÓVEDA ADMIN</span>
+                </div>
+                <span class="text-[9px] font-mono bg-warning text-surface px-1.5 py-0.5 rounded font-extrabold">ROOT</span>
+            </button>
+        </nav>
+
+        <!-- Pie del Sidebar: Telemetría PACS + Perfil de Usuario Clickeable + Cerrar Sesión -->
+        <div class="p-4 border-t border-surface-high space-y-3 bg-surface/60">
+            <div class="bg-surface-container border border-surface-high rounded-lg px-3 py-2 text-[10px] font-mono flex items-center justify-between">
+                <span class="text-secondary flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-secondary animate-ping"></span>
+                    LATENCIA RED: 14 ms
+                </span>
+                <span class="text-primary font-bold">SINCRO OK</span>
+            </div>
+
+            <!-- Tarjeta del Usuario -> Lleva a Configuraciones de Perfil (#view-profile) -->
+            <button id="user-profile-btn" class="w-full flex items-center justify-between gap-3 p-2.5 rounded-xl bg-surface-container hover:bg-surface-high border border-surface-high hover:border-primary/50 transition-all text-left group" title="Abrir Configuraciones de Perfil">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <div class="w-10 h-10 rounded-full bg-surface-high border border-primary/50 flex items-center justify-center text-primary font-extrabold flex-shrink-0 group-hover:scale-105 transition-transform" id="user-avatar">
+                        A
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-sm font-bold text-white truncate group-hover:text-primary transition-colors" id="user-name">Cargando...</p>
+                        <p class="text-[11px] text-secondary font-mono truncate" id="user-plan">Plan ---</p>
+                    </div>
+                </div>
+                <span class="material-symbols-outlined text-gray-400 group-hover:text-primary text-base">settings</span>
+            </button>
+
+            <button id="btn-logout" class="w-full py-2 text-xs font-bold text-danger border border-danger/30 hover:bg-danger/10 rounded-xl transition-colors flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-sm">logout</span> Cerrar Sesión Clínica
+            </button>
+        </div>
+    </aside>
+
+    <!-- ==================================================================== -->
+    <!-- CONTENEDOR PRINCIPAL DERECHO (HEADER + VISTAS SPA)                   -->
+    <!-- ==================================================================== -->
+    <main class="flex-1 flex flex-col h-full bg-surface relative overflow-hidden">
+
+        <!-- HEADER SUPERIOR CON BUSCADOR CLÍNICO Y REPRODUCTOR DE MÚSICA CC0 -->
+        <header class="min-h-[5rem] py-2 border-b border-surface-high bg-surface-container/90 backdrop-blur-md flex flex-wrap items-center justify-between px-6 gap-4 flex-shrink-0 z-20">
+            <!-- Buscador Clínico Global -->
+            <div class="flex-1 min-w-[220px] max-w-md">
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-lg">search</span>
+                    <input id="global-clinical-search" type="text" class="w-full bg-surface border border-surface-high rounded-xl pl-11 pr-4 py-2 text-xs sm:text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors" placeholder="Buscar materia, diagnóstico CIE-11 o guía MSP...">
+                </div>
+            </div>
+
+            <!-- Reproductor de Música Libre de Derechos de Autor (CC0) -->
+            <div class="flex items-center gap-3 bg-surface border border-surface-high hover:border-primary/40 rounded-2xl px-3.5 py-2 shadow-[0_0_20px_rgba(0,229,255,0.06)]">
+                <!-- Ecualizador Animado -->
+                <div id="music-eq" class="flex items-end gap-1 h-4 px-1">
+                    <div class="eq-bar h-1.5"></div>
+                    <div class="eq-bar h-2.5"></div>
+                    <div class="eq-bar h-1"></div>
+                    <div class="eq-bar h-3"></div>
+                </div>
+
+                <!-- Selector de Pista CC0 -->
+                <div class="min-w-[145px] max-w-[190px]">
+                    <div class="flex items-center justify-between text-[10px] font-mono text-gray-400">
+                        <span class="text-primary font-bold">AUDIO ESTUDIO CC0</span>
+                        <span id="music-status-label" class="text-secondary">LISTO</span>
+                    </div>
+                    <select id="cc0-track-select" class="w-full bg-transparent text-xs font-bold text-white focus:outline-none cursor-pointer truncate">
+                        <option value="alpha" class="bg-surface-container">1. Ondas Alpha • Concentración</option>
+                        <option value="lofi" class="bg-surface-container">2. Lo-Fi Clínico • Guardia Nocturna</option>
+                        <option value="ambient" class="bg-surface-container">3. Ambient Sináptico • Lectura</option>
+                    </select>
+                </div>
+
+                <!-- Controles de Reproducción -->
+                <div class="flex items-center gap-1">
+                    <button id="btn-music-prev" class="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-surface-high transition-colors" title="Pista Anterior">
+                        <span class="material-symbols-outlined text-base">skip_previous</span>
+                    </button>
+                    <button id="btn-music-Toggle" class="w-8 h-8 rounded-xl bg-primary/15 border border-primary/40 text-primary hover:bg-primary hover:text-surface flex items-center justify-center transition-all" title="Reproducir / Pausar">
+                        <span class="material-symbols-outlined text-lg" id="music-play-icon">play_arrow</span>
+                    </button>
+                    <button id="btn-music-next" class="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-surface-high transition-colors" title="Siguiente Pista">
+                        <span class="material-symbols-outlined text-base">skip_next</span>
+                    </button>
+                </div>
+
+                <!-- Volumen + Carga de MP3 Local -->
+                <div class="hidden xl:flex items-center gap-2 pl-2 border-l border-surface-high">
+                    <span class="material-symbols-outlined text-gray-400 text-sm">volume_up</span>
+                    <input id="music-volume" type="range" min="0" max="1" step="0.05" value="0.5" class="w-16 accent-primary cursor-pointer">
+                    <label for="local-mp3-input" class="cursor-pointer bg-surface-high hover:bg-primary/20 text-[10px] font-mono text-primary border border-primary/30 px-2 py-1 rounded-lg transition-colors" title="Cargar archivo MP3 desde tu dispositivo">
+                        📁 MP3
+                    </label>
+                    <input id="local-mp3-input" type="file" accept="audio/*" class="hidden">
+                </div>
+                <audio id="cc0-audio-element" preload="none"></audio>
+            </div>
+
+            <!-- Acciones Rápidas Derecha: Perfil y Admin -->
+            <div class="flex items-center gap-3">
+                <button id="header-profile-pill" class="hidden md:flex items-center gap-2 bg-surface border border-surface-high hover:border-primary/40 px-3 py-1.5 rounded-xl transition-colors">
+                    <span class="w-2 h-2 rounded-full bg-secondary"></span>
+                    <span class="text-xs font-bold text-white" id="header-user-name">Médico</span>
+                    <span class="material-symbols-outlined text-sm text-primary">manage_accounts</span>
+                </button>
+
+                <button id="header-admin-btn" class="hidden px-3.5 py-2 bg-warning/15 text-warning border border-warning/40 rounded-xl text-xs font-extrabold hover:bg-warning/25 transition-colors">
+                    ⚡ Admin
+                </button>
+            </div>
+        </header>
+
+        <!-- ==================================================================== -->
+        <!-- CONTENEDOR DINÁMICO DE VISTAS SPA (#views-container)                 -->
+        <!-- ==================================================================== -->
+        <div class="flex-1 overflow-y-auto p-6 lg:p-8 relative" id="views-container">
+
+            <!-- ================================================================ -->
+            <!-- VISTA 1: CARRERA (3 PANTALLAS ENCADENADAS + BOTONES FIJOS)       -->
+            <!-- ================================================================ -->
+            <div id="view-carrera" class="tab-content active max-w-6xl mx-auto">
+                <!-- Barra Superior Fija de CARRERA con "Aulas Virtuales" y "Mis Métricas" siempre a la derecha -->
+                <div class="flex flex-wrap items-center justify-between gap-4 pb-6 mb-6 border-b border-surface-high">
+                    <div>
+                        <div class="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 px-3 py-1 rounded-full mb-2">
+                            <span class="w-2 h-2 rounded-full bg-primary"></span>
+                            <span class="text-[10px] font-mono text-primary uppercase tracking-wider" id="carrera-breadcrumb">MÓDULO UNIVERSITARIO • PASO 1 DE 3</span>
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white" id="carrera-main-title">Carreras de Ciencias de la Salud</h2>
+                        <p class="text-sm text-gray-400 mt-1" id="carrera-main-subtitle">Selecciona tu carrera para acceder a Preuniversitario, Nivelación y todos los semestres académicos.</p>
+                    </div>
+
+                    <!-- Botones Fijos Obligatorios al Lado Derecho en todas las subventanas de CARRERA -->
+                    <div class="flex items-center gap-3">
