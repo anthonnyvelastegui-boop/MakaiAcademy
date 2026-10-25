@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Makai Academy | Portal de Ciencias de la Salud & Preparación CACES</title>
+    <link rel="icon" type="image/png" href="assets/1-branding/logos/logo.png" />
 
     <!-- Tailwind CSS & Google Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -62,8 +63,15 @@
         <section class="lg:col-span-5 bg-surface-container border border-surface-high rounded-2xl p-6 sm:p-7 shadow-2xl">
             <div class="flex items-center justify-between gap-3 pb-5 border-b border-surface-high">
                 <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-xl bg-surface border border-primary/40 flex items-center justify-center text-primary font-mono font-extrabold text-base shadow-[0_0_15px_rgba(0,229,255,0.15)]">
-                        <img src="assets/1-branding/logos/logo.png" alt="MK" class="w-8 h-8 object-contain hidden" onload="this.classList.remove('hidden'); this.nextElementSibling.classList.add('hidden');" onerror="this.classList.add('hidden');" />
+                    <!-- CONTENEDOR DEL LOGO OFICIAL CON DETECCIÓN MULTIRUTA -->
+                    <div class="w-12 h-12 rounded-xl bg-surface border border-primary/40 flex items-center justify-center text-primary font-mono font-extrabold text-base shadow-[0_0_15px_rgba(0,229,255,0.18)] overflow-hidden p-1">
+                        <img
+                            src="assets/1-branding/logos/logo.png"
+                            alt="Makai Academy"
+                            class="w-full h-full object-contain hidden"
+                            onload="this.classList.remove('hidden'); this.nextElementSibling.classList.add('hidden');"
+                            onerror="if(!this.dataset.try1){this.dataset.try1='1';this.src='assets/1-branding/logos/logo.jpg';}else if(!this.dataset.try2){this.dataset.try2='1';this.src='logo.png';}else{this.classList.add('hidden');}"
+                        />
                         <span>MK</span>
                     </div>
                     <div>
@@ -176,13 +184,20 @@
                 </a>
             </div>
 
-            <div class="mt-3 text-center">
-                <a href="registro.html?plan=basico" class="text-[11px] text-gray-400 hover:text-primary transition-colors">
-                    ¿Eres especialista? Únete a nuestro cuerpo docente clínico. <span class="text-primary font-semibold underline">Postula aquí.</span>
-                </a>
+            <!-- BOTÓN DE POSTULACIÓN DOCENTE EN SALUD (ABRE MENÚ ESPECIAL) -->
+            <div class="mt-4 pt-3 border-t border-surface-high text-center">
+                <button
+                    type="button"
+                    id="btn-open-teacher-modal"
+                    class="w-full py-2.5 px-3 rounded-xl bg-surface hover:bg-surface-high border border-primary/30 hover:border-primary text-xs text-gray-300 hover:text-white transition-all flex items-center justify-center gap-1.5 group"
+                >
+                    <span class="material-symbols-outlined text-primary text-base">school</span>
+                    <span>¿Eres bueno enseñando? Únete a nuestro cuerpo docente en salud.</span>
+                    <span class="text-primary font-extrabold underline group-hover:text-secondary">Postula Aquí</span>
+                </button>
             </div>
 
-            <p class="mt-5 text-center text-[10px] font-mono text-gray-500">
+            <p class="mt-4 text-center text-[10px] font-mono text-gray-500">
                 🔒 Validación de correo activa • Cifrado AES-256 bits
             </p>
         </section>
@@ -421,7 +436,296 @@
         </section>
     </main>
 
-    <!-- MOTOR DIRECTO DE AUTENTICACIÓN (CORREO + GMAIL) Y PLANES -->
+    <!-- ========================================================================
+         MENÚ ESPECIAL / MODAL DE POSTULACIÓN AL CUERPO DOCENTE EN SALUD
+         Guarda en colección separada: "postulaciones_docentes" en Cloud Firestore
+         ======================================================================== -->
+    <div id="teacher-application-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-surface-container border-2 border-primary/60 rounded-2xl max-w-4xl w-full p-6 sm:p-8 shadow-[0_0_40px_rgba(0,229,255,0.2)] my-8 max-h-[92vh] overflow-y-auto space-y-6">
+
+            <!-- CABECERA DEL MODAL DOCENTE -->
+            <div class="flex items-start justify-between gap-4 pb-4 border-b border-surface-high">
+                <div>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/15 border border-primary/40 text-primary text-[10px] font-mono font-extrabold uppercase tracking-wider">
+                        <span class="material-symbols-outlined text-sm">school</span>
+                        RECLUTAMIENTO Y EVALUACIÓN ACADÉMICA • EXPEDIENTE SEPARADO
+                    </span>
+                    <h3 class="text-xl sm:text-2xl font-extrabold text-white mt-2">
+                        Postulación al Cuerpo Docente en Ciencias de la Salud
+                    </h3>
+                    <p class="text-xs sm:text-sm text-gray-400 mt-1">
+                        Completa tu perfil pedagógico y selecciona las materias que dominas. Tu expediente será evaluado por Dirección Académica para determinar tu elegibilidad y habilitar tu perfil de Docente en Makai Academy.
+                    </p>
+                </div>
+                <button type="button" id="btn-close-teacher-modal" class="px-3 py-1.5 rounded-xl bg-surface border border-surface-high hover:border-danger text-gray-400 hover:text-danger text-xs font-mono font-bold transition-all shrink-0">
+                    ✕ Cerrar
+                </button>
+            </div>
+
+            <!-- CAJA DE ALERTA / CONFIRMACIÓN DE POSTULACIÓN -->
+            <div id="teacher-alert-box" class="hidden p-4 rounded-xl border text-xs font-mono leading-relaxed"></div>
+
+            <!-- FORMULARIO DE POSTULACIÓN DOCENTE -->
+            <form id="teacher-application-form" class="space-y-6">
+
+                <!-- 1. DATOS PERSONALES Y DE CONTACTO -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-mono font-extrabold text-primary uppercase tracking-widest flex items-center gap-2">
+                        <span class="material-symbols-outlined text-base">badge</span>
+                        <span>1. DATOS DEL POSTULANTE Y CONTACTO DIRECTO</span>
+                    </h4>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Nombres y Apellidos Completos *</label>
+                            <input type="text" id="t-fullname" required placeholder="Ej: Dr. / Est. Nombre Completo" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-primary focus:outline-none" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Cédula / DNI / Pasaporte *</label>
+                            <input type="text" id="t-cedula" required placeholder="Ej: 0601234567" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:border-primary focus:outline-none" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Edad *</label>
+                            <input type="number" id="t-age" min="18" max="80" required placeholder="Ej: 25" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:border-primary focus:outline-none" />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Correo Electrónico Personal / Institucional *</label>
+                            <input type="email" id="t-email" required placeholder="docente@gmail.com" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-primary focus:outline-none" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">WhatsApp / Teléfono de Contacto *</label>
+                            <input type="tel" id="t-phone" required placeholder="Ej: +593 0991234567" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:border-primary focus:outline-none" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Universidad / Hospital de Origen *</label>
+                            <input type="text" id="t-institution" required placeholder="Ej: ESPOCH / UCE / PUCE / IESS..." class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-primary focus:outline-none" />
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-surface-high" />
+
+                <!-- 2. SITUACIÓN ACADÉMICA Y PROFESIONAL (ESTUDIANTE VS GRADUADO) -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-mono font-extrabold text-primary uppercase tracking-widest flex items-center gap-2">
+                        <span class="material-symbols-outlined text-base">workspace_premium</span>
+                        <span>2. PERFIL ACADÉMICO Y NIVEL DE FORMACIÓN</span>
+                    </h4>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Situación Académica Actual *</label>
+                            <select id="t-academic-status" class="w-full bg-surface border border-primary/50 rounded-xl px-3.5 py-2.5 text-sm font-bold text-white focus:border-primary focus:outline-none">
+                                <option value="graduado">Profesional Graduado / Rural / Especialista</option>
+                                <option value="estudiante">Estudiante Universitario (Pregrado / Internado)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Carrera Principal de Ciencias de la Salud *</label>
+                            <select id="t-career" class="w-full bg-surface border border-primary/50 rounded-xl px-3.5 py-2.5 text-sm font-bold text-white focus:border-primary focus:outline-none">
+                                <option value="medicina">Medicina Humana</option>
+                                <option value="enfermeria">Enfermería</option>
+                                <option value="odontologia">Odontología</option>
+                                <option value="obstetricia">Obstetricia</option>
+                                <option value="nutricion">Nutrición y Dietética</option>
+                                <option value="fisioterapia">Fisioterapia y Rehabilitación</option>
+                                <option value="laboratorio_clinico">Laboratorio Clínico</option>
+                                <option value="imagenologia">Imagenología y Radiología</option>
+                                <option value="psicologia_clinica">Psicología Clínica</option>
+                                <option value="bioquimica_farmacia">Bioquímica y Farmacia</option>
+                                <option value="atencion_prehospitalaria">Atención Prehospitalaria y Emergencias</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- SUB-BLOQUE DINÁMICO A: SI ES PROFESIONAL GRADUADO -->
+                    <div id="t-graduated-fields" class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-xl bg-surface border border-surface-high">
+                        <div>
+                            <label class="block text-xs font-medium text-secondary mb-1">Título Obtenido / Especialidad *</label>
+                            <input type="text" id="t-degree-title" placeholder="Ej: Médico General / Esp. Medicina Interna" class="w-full bg-surface-container border border-surface-high rounded-xl px-3 py-2 text-xs text-white focus:border-primary focus:outline-none" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">N° Registro SENESCYT (Opcional)</label>
+                            <input type="text" id="t-senescyt" placeholder="Ej: 1029-2024-XXXXXXX" class="w-full bg-surface-container border border-surface-high rounded-xl px-3 py-2 text-xs text-white font-mono focus:border-primary focus:outline-none" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Estado frente al CACES</label>
+                            <select id="t-caces-status" class="w-full bg-surface-container border border-surface-high rounded-xl px-3 py-2 text-xs text-white focus:border-primary focus:outline-none">
+                                <option value="Aprobado con alto puntaje">CACES Aprobado (Alto Rendimiento)</option>
+                                <option value="Aprobado">CACES Aprobado</option>
+                                <option value="En preparación / Próxima convocatoria">En preparación / Próxima convocatoria</option>
+                                <option value="No aplica a mi carrera">No aplica a mi carrera</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- SUB-BLOQUE DINÁMICO B: SI ES ESTUDIANTE UNIVERSITARIO -->
+                    <div id="t-student-fields" class="hidden grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-xl bg-surface border border-primary/40">
+                        <div>
+                            <label class="block text-xs font-medium text-primary mb-1"> ¿En qué semestre te encuentras? *</label>
+                            <select id="t-student-semester" class="w-full bg-surface-container border border-surface-high rounded-xl px-3 py-2 text-xs text-white focus:border-primary focus:outline-none">
+                                <option value="3er Semestre">3er Semestre</option>
+                                <option value="4to Semestre">4to Semestre</option>
+                                <option value="5to Semestre">5to Semestre</option>
+                                <option value="6to Semestre">6to Semestre</option>
+                                <option value="7mo Semestre">7mo Semestre</option>
+                                <option value="8vo Semestre">8vo Semestre</option>
+                                <option value="9no Semestre">9no Semestre</option>
+                                <option value="10mo Semestre">10mo Semestre</option>
+                                <option value="Internado Rotativo">Internado Rotativo</option>
+                                <option value="Egresado / Preparación CACES">Egresado / Preparación CACES</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Promedio Académico Referencial</label>
+                            <input type="text" id="t-student-gpa" placeholder="Ej: 9.1 / 10 o 88%" class="w-full bg-surface-container border border-surface-high rounded-xl px-3 py-2 text-xs text-white font-mono focus:border-primary focus:outline-none" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Distinción o Ayudantía</label>
+                            <input type="text" id="t-student-merit" placeholder="Ej: Ayudante de Anatomía / Tutor Par" class="w-full bg-surface-container border border-surface-high rounded-xl px-3 py-2 text-xs text-white focus:border-primary focus:outline-none" />
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-surface-high" />
+
+                <!-- 3. MATERIAS QUE DOMINA Y DESEA IMPARTIR (DINÁMICAS SEGÚN LA CARRERA, SELECCIÓN MÚLTIPLE) -->
+                <div class="space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h4 class="text-xs font-mono font-extrabold text-primary uppercase tracking-widest flex items-center gap-2">
+                            <span class="material-symbols-outlined text-base">menu_book</span>
+                            <span>3. MATERIAS QUE DOMINAS Y QUIERES DAR CLASES (SELECCIÓN MÚLTIPLE) *</span>
+                        </h4>
+                        <span id="t-subjects-counter" class="px-2.5 py-0.5 rounded-full bg-primary/15 border border-primary/40 text-primary text-[11px] font-mono font-bold">
+                            0 materias seleccionadas
+                        </span>
+                    </div>
+                    <p class="text-xs text-gray-400">
+                        Haz clic sobre todas las asignaturas de tu carrera y de ciencias básicas en las que tengas dominio sobresaliente para enseñar:
+                    </p>
+
+                    <!-- CONTENEDOR DINÁMICO DE PÍLDORAS DE MATERIAS -->
+                    <div id="t-subjects-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 p-4 rounded-xl bg-surface border border-surface-high max-h-64 overflow-y-auto">
+                        <!-- Generado dinámicamente según la carrera seleccionada -->
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">
+                            ¿Dominas alguna otra materia o subespecialidad adicional? (Opcional, sepáralas por comas)
+                        </label>
+                        <input type="text" id="t-extra-subjects" placeholder="Ej: Electrocardiografía avanzada, Taller de Suturas, Gasometría arterial, Ventilación Mecánica..." class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-primary focus:outline-none" />
+                    </div>
+                </div>
+
+                <hr class="border-surface-high" />
+
+                <!-- 4. CUALIDADES PEDAGÓGICAS, MODALIDADES Y EXPERIENCIA -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-mono font-extrabold text-primary uppercase tracking-widest flex items-center gap-2">
+                        <span class="material-symbols-outlined text-base">psychology</span>
+                        <span>4. CUALIDADES DOCENTES, MODALIDAD Y DISPONIBILIDAD</span>
+                    </h4>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Modalidades en las que desea participar -->
+                        <div class="p-4 rounded-xl bg-surface border border-surface-high space-y-2.5">
+                            <span class="text-xs font-bold text-white block">¿En qué áreas de Makai Academy deseas participar?</span>
+                            <label class="flex items-center gap-2 text-xs text-gray-300 cursor-pointer">
+                                <input type="checkbox" name="t-modality" value="Clases en Vivo (Aulas Virtuales)" checked class="rounded bg-surface-container border-surface-high text-primary focus:ring-0" />
+                                <span>🎥 Impartir Clases en Vivo (Aulas Virtuales por Semestre/CACES)</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-xs text-gray-300 cursor-pointer">
+                                <input type="checkbox" name="t-modality" value="Tutorías 1 a 1 (Mentoría VIP)" class="rounded bg-surface-container border-surface-high text-primary focus:ring-0" />
+                                <span>⭐ Tutorías Personalizadas 1 a 1 (Mentoría Élite VIP)</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-xs text-gray-300 cursor-pointer">
+                                <input type="checkbox" name="t-modality" value="Redacción de Casos Clínicos CACES" class="rounded bg-surface-container border-surface-high text-primary focus:ring-0" />
+                                <span>📝 Redacción de Casos Clínicos y Reactivos tipo CACES</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-xs text-gray-300 cursor-pointer">
+                                <input type="checkbox" name="t-modality" value="Grabación de Videoclases Asíncronas" class="rounded bg-surface-container border-surface-high text-primary focus:ring-0" />
+                                <span>🎬 Grabación de Videoclases y Resúmenes Clínicos</span>
+                            </label>
+                        </div>
+
+                        <!-- Cualidades y fortalezas del postulante -->
+                        <div class="p-4 rounded-xl bg-surface border border-surface-high space-y-2.5">
+                            <span class="text-xs font-bold text-white block">Marca tus cualidades y experiencia docente:</span>
+                            <label class="flex items-center gap-2 text-xs text-gray-300 cursor-pointer">
+                                <input type="checkbox" name="t-qualities" value="Experiencia previa dando clases o tutorías" class="rounded bg-surface-container border-surface-high text-secondary focus:ring-0" />
+                                <span>✓ He dado clases particulares, grupales o ayudantías universitarias</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-xs text-gray-300 cursor-pointer">
+                                <input type="checkbox" name="t-qualities" value="Capacidad de resumir temas complejos con mnemotecnias" class="rounded bg-surface-container border-surface-high text-secondary focus:ring-0" />
+                                <span>✓ Explico temas complejos de forma práctica y con mnemotecnias</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-xs text-gray-300 cursor-pointer">
+                                <input type="checkbox" name="t-qualities" value="Dominio de Guías de Práctica Clínica (GPC-MSP)" class="rounded bg-surface-container border-surface-high text-secondary focus:ring-0" />
+                                <span>✓ Dominio de Guías de Práctica Clínica del MSP y protocolos CACES</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-xs text-gray-300 cursor-pointer">
+                                <input type="checkbox" name="t-qualities" value="Herramientas digitales (Pizarra virtual / Slides)" class="rounded bg-surface-container border-surface-high text-secondary focus:ring-0" />
+                                <span>✓ Cuento con buen micrófono/cámara y manejo pizarra o diapositivas</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Experiencia Docente Previa *</label>
+                            <select id="t-exp-years" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-primary focus:outline-none">
+                                <option value="Menos de 1 año (Talento emergente)">Menos de 1 año (Talento emergente)</option>
+                                <option value="1 a 2 años enseñando">1 a 2 años dando tutorías/clases</option>
+                                <option value="3 a 5 años de experiencia">3 a 5 años de experiencia docente</option>
+                                <option value="Más de 5 años / Docente Universitario">Más de 5 años / Docente Universitario</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Disponibilidad Semanal *</label>
+                            <select id="t-availability" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-primary focus:outline-none">
+                                <option value="2 a 4 horas/semana (Noches o Fines de semana)">2 a 4 horas/semana (Noches / Fines de semana)</option>
+                                <option value="5 a 8 horas/semana">5 a 8 horas por semana</option>
+                                <option value="10 a 15 horas/semana">10 a 15 horas por semana</option>
+                                <option value="Tiempo flexible / A convenir">Tiempo flexible / A convenir por módulos</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Link a CV, Drive o Video Demo (Opcional)</label>
+                            <input type="url" id="t-cv-link" placeholder="https://drive.google.com/..." class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-xs text-white font-mono focus:border-primary focus:outline-none" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">
+                            Cuéntanos brevemente por qué eres bueno enseñando y cómo estructurarías una clase en Makai Academy *
+                        </label>
+                        <textarea id="t-pitch" rows="3" required placeholder="Ej: Me apasiona enseñar fisiopatología y clínica mediante casos reales, esquemas visuales y resolución paso a paso de reactivos..." class="w-full bg-surface border border-surface-high rounded-xl p-3.5 text-xs text-white focus:border-primary focus:outline-none"></textarea>
+                    </div>
+                </div>
+
+                <!-- BOTÓN DE ENVÍO DE EXPEDIENTE DOCENTE -->
+                <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <p class="text-[11px] font-mono text-gray-400">
+                        📌 Tu postulación se registrará en el expediente exclusivo de <strong>Evaluación Docente</strong> para revisión del Administrador.
+                    </p>
+                    <button
+                        type="submit"
+                        id="btn-submit-teacher"
+                        class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-primary text-surface font-extrabold text-xs sm:text-sm hover:bg-opacity-90 transition-all shadow-[0_0_25px_rgba(0,229,255,0.3)] flex items-center justify-center gap-2 shrink-0"
+                    >
+                        <span class="material-symbols-outlined text-lg">send</span>
+                        <span>Enviar Postulación Docente</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MOTOR DIRECTO DE AUTENTICACIÓN (CORREO + GMAIL), PLANES Y RECLUTAMIENTO DOCENTE -->
     <script type="module">
         import {
             auth,
@@ -433,11 +737,15 @@
             sendEmailVerification,
             doc,
             getDoc,
-            setDoc
+            setDoc,
+            collection,
+            addDoc
         } from "./js/2-core/firebase.service.js";
         import { isMasterAdmin } from "./js/2-core/state.store.js";
 
-        // 1. Controlador de Facturación Mensual / Anual
+        // ====================================================================
+        // 1. CONTROLADOR DE FACTURACIÓN MENSUAL / ANUAL
+        // ====================================================================
         let currentBilling = "monthly";
         const btnMonthly = document.getElementById("btn-billing-monthly");
         const btnAnnual = document.getElementById("btn-billing-annual");
@@ -476,7 +784,9 @@
         btnAnnual?.addEventListener("click", () => setBillingMode("annual"));
         setBillingMode("monthly");
 
-        // 2. Redirección de Planes y Métodos de Pago
+        // ====================================================================
+        // 2. REDIRECCIÓN DE PLANES Y MÉTODOS DE PAGO
+        // ====================================================================
         document.querySelectorAll("[data-select-plan]").forEach((btn) => {
             btn.addEventListener("click", () => {
                 const chosenPlan = btn.dataset.selectPlan || (currentBilling === "monthly" ? "pro_mensual" : "pro_anual");
@@ -493,7 +803,9 @@
             });
         });
 
-        // 3. Mostrar/Ocultar Contraseña
+        // ====================================================================
+        // 3. MOSTRAR / OCULTAR CONTRASEÑA Y ALERTAS
+        // ====================================================================
         const passInput = document.getElementById("password");
         const togglePassBtn = document.getElementById("btn-toggle-pass");
         togglePassBtn?.addEventListener("click", () => {
@@ -503,7 +815,6 @@
             togglePassBtn.innerHTML = isPass ? "<span>🙈 Ocultar</span>" : "<span>👁 Mostrar</span>";
         });
 
-        // 4. Función de Alertas en Pantalla
         const alertBox = document.getElementById("auth-alert-box");
         function showAlert(msg, type = "error") {
             if (!alertBox) return;
@@ -518,7 +829,9 @@
             alertBox.textContent = msg;
         }
 
-        // 5. Inicio de Sesión con Correo y Contraseña (+ Validación de Correo)
+        // ====================================================================
+        // 4. INICIO DE SESIÓN CON CORREO ELECTRÓNICO Y GMAIL
+        // ====================================================================
         const authForm = document.getElementById("auth-form");
         const submitBtn = document.getElementById("submit-btn");
 
@@ -534,7 +847,6 @@
                 const cred = await signInWithEmailAndPassword(auth, email, password);
                 const user = cred.user;
 
-                // Verificar si el correo electrónico ya fue validado (excepto Administradores Maestros)
                 if (!user.emailVerified && !isMasterAdmin(user.email)) {
                     try {
                         await sendEmailVerification(user);
@@ -557,7 +869,6 @@
             }
         });
 
-        // 6. Inicio de Sesión con Google (Gmail)
         const btnGoogle = document.getElementById("btn-google");
         let googlePopupInProgress = false;
 
@@ -604,7 +915,7 @@
             } catch (err) {
                 console.error("Error Google Login:", err);
                 if (err.code !== "auth/popup-closed-by-user") {
-                    showAlert("⚠️ No se pudo iniciar con Gmail (" + err.code + "). Verifica en Firebase Console -> Authentication -> Sign-in method que 'Google' esté Habilitado y tu dominio autorizado.", "error");
+                    showAlert("⚠️ No se pudo iniciar con Gmail (" + err.code + ").", "error");
                 }
                 btnGoogle.disabled = false;
                 btnGoogle.innerHTML = originalHTML;
@@ -613,7 +924,6 @@
             }
         });
 
-        // 7. Recuperación de Contraseña por Correo
         document.getElementById("btn-forgot-pass")?.addEventListener("click", async () => {
             const emailInput = document.getElementById("email")?.value.trim();
             const targetEmail = emailInput || prompt("Ingresa tu correo electrónico para enviarte el enlace de restablecimiento de contraseña:");
@@ -624,6 +934,305 @@
                 showAlert(`✅ Se envió un enlace de recuperación a ${targetEmail}. Revisa tu bandeja de entrada o Spam.`, "success");
             } catch (err) {
                 showAlert("⚠️ Error al enviar correo de recuperación: " + err.message, "error");
+            }
+        });
+
+        // ====================================================================
+        // 5. SISTEMA DE POSTULACIÓN DOCENTE CON CATÁLOGO DINÁMICO POR CARRERA
+        // ====================================================================
+        const TEACHER_SUBJECTS_BY_CAREER = {
+            medicina: [
+                "Anatomía Humana y Neuroanatomía",
+                "Fisiología Médica",
+                "Histología y Embriología",
+                "Bioquímica y Biología Molecular",
+                "Farmacología Básica y Clínica",
+                "Fisiopatología y Semiología Clínica",
+                "Microbiología, Parasitología e Inmunología",
+                "Medicina Interna (Cardiología, Neumología, Nefrología, Gastro)",
+                "Pediatría y Neonatología",
+                "Ginecología y Obstetricia (Score MAMÁ / Claves Obstétricas)",
+                "Cirugía General y Trauma",
+                "Urgencias, Emergencias y Cuidados Críticos (UCI)",
+                "Salud Pública, Epidemiología y Bioética",
+                "Salud Mental y Psiquiatría",
+                "Preparación Intensiva Examen CACES Medicina"
+            ],
+            enfermeria: [
+                "Fundamentos y Proceso de Atención de Enfermería (PAE / NANDA-NIC-NOC)",
+                "Morfofunción y Farmacología en Enfermería",
+                "Enfermería Clínico-Quirúrgica del Adulto",
+                "Enfermería Materno-Infantil y Neonatal",
+                "Enfermería Pediátrica y del Adolescente",
+                "Enfermería Familiar, Comunitaria y Salud Pública (MAIS-FCI)",
+                "Enfermería en Urgencias, Emergencias y Cuidados Intensivos",
+                "Centro Quirúrgico y Bioseguridad",
+                "Administración, Liderazgo y Gestión en Enfermería",
+                "Salud Mental y Psiquiatría en Enfermería",
+                "Preparación Intensiva Examen CACES Enfermería"
+            ],
+            odontologia: [
+                "Anatomía Dental y Cabeza/Cuello",
+                "Patología Bucal y Semiología Odontológica",
+                "Operatoria Dental y Biomateriales",
+                "Endodoncia Clínica",
+                "Periodoncia e Implantología",
+                "Cirugía Bucal y Maxilofacial",
+                "Rehabilitación Oral y Prótesis (Fija / Removible)",
+                "Odontopediatría y Ortodoncia Preventiva",
+                "Farmacología y Anestesiología Odontológica",
+                "Radiología Bucal y Bioseguridad",
+                "Salud Pública Odontológica",
+                "Preparación Intensiva Examen CACES Odontología"
+            ],
+            obstetricia: [
+                "Obstetricia Fisiológica y Atención del Parto",
+                "Alto Riesgo Obstétrico y Claves Obstétricas (Azul, Roja, Amarilla)",
+                "Ginecología Clínica y Salud Sexual/Reproductiva",
+                "Neonatología, Perinatología y Lactancia Materna",
+                "Monitoreo Fetal y Ecografía Obstétrica Básica",
+                "Farmacología Obstétrica y Ginecológica",
+                "Salud Pública Materna y Epidemiología",
+                "Psicoprofilaxis Obstétrica",
+                "Preparación Intensiva Examen CACES Obstetricia"
+            ],
+            nutricion: [
+                "Evaluación del Estado Nutricional (ABCD)",
+                "Dietoterapia del Adulto y Enfermedades Crónicas",
+                "Nutrición Materno-Infantil y Pediátrica",
+                "Nutrición Clínica y Soporte Enteral / Parenteral",
+                "Bioquímica de la Nutrición y Fisiología Digestiva",
+                "Bromatología, Tecnología e Higiene de Alimentos",
+                "Nutrición Comunitaria y Salud Pública",
+                "Nutrición Deportiva",
+                "Administración de Servicios de Alimentación"
+            ],
+            fisioterapia: [
+                "Anatomía Funcional y Biomecánica Clínica",
+                "Cinesiterapia y Evaluación Fisioterapéutica",
+                "Rehabilitación Musculoesquelética y Traumatológica",
+                "Fisioterapia Neurológica (Adulto y Pediátrica)",
+                "Fisioterapia Cardiorrespiratoria y UCI",
+                "Agentes Físicos y Electroterapia",
+                "Fisioterapia Deportiva y Readaptación",
+                "Rehabilitación Geriátrica y Comunitaria"
+            ],
+            laboratorio_clinico: [
+                "Hematología Clínica y Coagulación / Hemostasia",
+                "Bioquímica Clínica y Enzimología",
+                "Bacteriología y Virología Clínica",
+                "Parasitología y Micología Médica",
+                "Inmunología, Serología y Biología Molecular (PCR)",
+                "Uroanálisis y Líquidos Biológicos",
+                "Banco de Sangre y Medicina Transfusional",
+                "Control de Calidad, Toma de Muestras y Bioseguridad"
+            ],
+            imagenologia: [
+                "Anatomía Radiológica Multiplanar",
+                "Radiología Convencional y Estudios Contrastados",
+                "Tomografía Computarizada (TC) Clínica",
+                "Resonancia Magnética Nuclear (RMN)",
+                "Ecografía Diagnóstica y Doppler",
+                "Física de las Radiaciones y Radioprotección / Dosimetría",
+                "Mamografía y Densitometría Ósea"
+            ],
+            psicologia_clinica: [
+                "Psicopatología Clínica (DSM-5-TR / CIE-11)",
+                "Evaluación Psicológica y Psicodiagnóstico",
+                "Psicoterapia Cognitivo-Conductual y de Tercera Generación",
+                "Neuropsicología Clínica y Rehabilitación Cognitiva",
+                "Intervención en Crisis y Primeros Auxilios Psicológicos",
+                "Psicología Infantil y del Adolescente",
+                "Psicología de la Salud, Hospitalaria y Cuidados Paliativos"
+            ],
+            bioquimica_farmacia: [
+                "Farmacología Clínica y Farmacoterapia",
+                "Farmacia Hospitalaria y Atención Farmacéutica",
+                "Química Farmacéutica y Farmacognosia",
+                "Toxicología Analítica, Forense y Clínica",
+                "Tecnología Farmacéutica y Biofarmacia / Farmacocinética",
+                "Análisis Clínico y Bromatológico",
+                "Asuntos Regulatorios y Legislación Farmacéutica"
+            ],
+            atencion_prehospitalaria: [
+                "Soporte Vital Básico y Avanzado (BLS / ACLS)",
+                "Manejo Prehospitalario del Trauma (PHTLS / ITLS)",
+                "Soporte Vital Avanzado Pediátrico (PALS)",
+                "Emergencias Clínicas, Cardiovasculares y Respiratorias",
+                "Emergencias Obstétricas y Neonatales en Ambulancia",
+                "Farmacología de Urgencias y Manejo de Vía Aérea",
+                "Triaje (START / Manchester), Desastres y Materiales Peligrosos"
+            ]
+        };
+
+        const teacherModal = document.getElementById("teacher-application-modal");
+        const btnOpenTeacher = document.getElementById("btn-open-teacher-modal");
+        const btnCloseTeacher = document.getElementById("btn-close-teacher-modal");
+        const academicStatusSelect = document.getElementById("t-academic-status");
+        const graduatedFields = document.getElementById("t-graduated-fields");
+        const studentFields = document.getElementById("t-student-fields");
+        const careerSelect = document.getElementById("t-career");
+        const subjectsGrid = document.getElementById("t-subjects-grid");
+        const subjectsCounter = document.getElementById("t-subjects-counter");
+        const teacherForm = document.getElementById("teacher-application-form");
+        const teacherAlertBox = document.getElementById("teacher-alert-box");
+
+        function updateSubjectsCounter() {
+            const checkedCount = document.querySelectorAll('input[name="t-subject-item"]:checked').length;
+            if (subjectsCounter) {
+                subjectsCounter.textContent = `${checkedCount} ${checkedCount === 1 ? "materia seleccionada" : "materias seleccionadas"}`;
+            }
+        }
+
+        function renderTeacherSubjectsForCareer(careerKey) {
+            if (!subjectsGrid) return;
+            const list = TEACHER_SUBJECTS_BY_CAREER[careerKey] || TEACHER_SUBJECTS_BY_CAREER.medicina;
+            subjectsGrid.innerHTML = "";
+
+            list.forEach((subj) => {
+                const label = document.createElement("label");
+                label.className = "flex items-start gap-2.5 p-2.5 rounded-xl bg-surface-container border border-surface-high hover:border-primary/60 cursor-pointer transition-all text-xs text-gray-200 select-none";
+                label.innerHTML = `
+                    <input type="checkbox" name="t-subject-item" value="${subj}" class="mt-0.5 rounded bg-surface border-surface-high text-primary focus:ring-0" />
+                    <span class="leading-snug">${subj}</span>
+                `;
+                const checkbox = label.querySelector("input");
+                checkbox?.addEventListener("change", () => {
+                    if (checkbox.checked) {
+                        label.classList.add("border-primary", "bg-primary/10", "text-white", "font-semibold");
+                        label.classList.remove("border-surface-high");
+                    } else {
+                        label.classList.remove("border-primary", "bg-primary/10", "text-white", "font-semibold");
+                        label.classList.add("border-surface-high");
+                    }
+                    updateSubjectsCounter();
+                });
+                subjectsGrid.appendChild(label);
+            });
+            updateSubjectsCounter();
+        }
+
+        // Alternar campos si es Estudiante o Graduado
+        academicStatusSelect?.addEventListener("change", () => {
+            if (academicStatusSelect.value === "estudiante") {
+                graduatedFields?.classList.add("hidden");
+                studentFields?.classList.remove("hidden");
+                studentFields?.classList.add("grid");
+            } else {
+                studentFields?.classList.add("hidden");
+                studentFields?.classList.remove("grid");
+                graduatedFields?.classList.remove("hidden");
+            }
+        });
+
+        careerSelect?.addEventListener("change", () => {
+            renderTeacherSubjectsForCareer(careerSelect.value);
+        });
+
+        // Abrir y cerrar modal docente
+        btnOpenTeacher?.addEventListener("click", () => {
+            teacherAlertBox?.classList.add("hidden");
+            renderTeacherSubjectsForCareer(careerSelect?.value || "medicina");
+            teacherModal?.classList.remove("hidden");
+            teacherModal?.classList.add("flex");
+        });
+
+        btnCloseTeacher?.addEventListener("click", () => {
+            teacherModal?.classList.add("hidden");
+            teacherModal?.classList.remove("flex");
+        });
+
+        teacherModal?.addEventListener("click", (e) => {
+            if (e.target === teacherModal) {
+                teacherModal.classList.add("hidden");
+                teacherModal.classList.remove("flex");
+            }
+        });
+
+        // Guardar postulación docente en colección separada "postulaciones_docentes"
+        teacherForm?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            teacherAlertBox?.classList.add("hidden");
+
+            const selectedSubjects = Array.from(document.querySelectorAll('input[name="t-subject-item"]:checked')).map((el) => el.value);
+            const extraSubjects = document.getElementById("t-extra-subjects")?.value.trim() || "";
+            if (extraSubjects) {
+                extraSubjects.split(",").map((s) => s.trim()).filter(Boolean).forEach((s) => selectedSubjects.push(s));
+            }
+
+            if (selectedSubjects.length === 0) {
+                teacherAlertBox.className = "p-4 rounded-xl border border-danger bg-danger/15 text-danger text-xs font-mono leading-relaxed";
+                teacherAlertBox.textContent = "⚠️ Por favor selecciona al menos una (1) materia que domines y quieras enseñar.";
+                teacherAlertBox.classList.remove("hidden");
+                return;
+            }
+
+            const modalities = Array.from(document.querySelectorAll('input[name="t-modality"]:checked')).map((el) => el.value);
+            const qualities = Array.from(document.querySelectorAll('input[name="t-qualities"]:checked')).map((el) => el.value);
+            const status = academicStatusSelect?.value || "graduado";
+
+            const submitTeacherBtn = document.getElementById("btn-submit-teacher");
+            const originalBtnHtml = submitTeacherBtn.innerHTML;
+
+            const payload = {
+                tipoExpediente: "postulacion_docente_salud",
+                estadoEvaluacion: "pendiente_evaluacion", // "pendiente_evaluacion" | "apto_aprobado" | "no_elegible"
+                rolSolicitado: "docente",
+                nombreCompleto: document.getElementById("t-fullname")?.value.trim() || "",
+                cedula: document.getElementById("t-cedula")?.value.trim() || "",
+                edad: Number(document.getElementById("t-age")?.value || 0),
+                email: document.getElementById("t-email")?.value.trim() || "",
+                telefonoWhatsapp: document.getElementById("t-phone")?.value.trim() || "",
+                institucionOrigen: document.getElementById("t-institution")?.value.trim() || "",
+                condicionAcademica: status, // "graduado" | "estudiante"
+                carreraPrincipal: careerSelect?.value || "medicina",
+                carreraNombre: careerSelect?.options[careerSelect.selectedIndex]?.text || "Medicina Humana",
+                detalleGraduado: status === "graduado" ? {
+                    tituloEspecialidad: document.getElementById("t-degree-title")?.value.trim() || "Profesional de Salud",
+                    registroSenescyt: document.getElementById("t-senescyt")?.value.trim() || "No especificado",
+                    estadoCaces: document.getElementById("t-caces-status")?.value || "Aprobado"
+                } : null,
+                detalleEstudiante: status === "estudiante" ? {
+                    semestreActual: document.getElementById("t-student-semester")?.value || "",
+                    promedioAcademico: document.getElementById("t-student-gpa")?.value.trim() || "",
+                    meritoAyudantia: document.getElementById("t-student-merit")?.value.trim() || ""
+                } : null,
+                materiasQueDomina: selectedSubjects,
+                totalMateriasSeleccionadas: selectedSubjects.length,
+                modalidadesInteres: modalities,
+                cualidadesPedagogicas: qualities,
+                experienciaDocente: document.getElementById("t-exp-years")?.value || "",
+                disponibilidadSemanal: document.getElementById("t-availability")?.value || "",
+                enlaceCvVideo: document.getElementById("t-cv-link")?.value.trim() || "",
+                presentacionMetodologia: document.getElementById("t-pitch")?.value.trim() || "",
+                fechaPostulacionLegible: new Date().toLocaleString("es-EC", { timeZone: "America/Guayaquil" }),
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                submitTeacherBtn.disabled = true;
+                submitTeacherBtn.innerHTML = "<span>Guardando expediente docente en Firestore...</span>";
+
+                await addDoc(collection(db, "postulaciones_docentes"), payload);
+
+                teacherForm.reset();
+                renderTeacherSubjectsForCareer(careerSelect?.value || "medicina");
+
+                teacherAlertBox.className = "p-4 rounded-xl border-2 border-secondary bg-secondary/15 text-secondary text-xs font-mono leading-relaxed";
+                teacherAlertBox.innerHTML = `
+                    <strong class="block text-sm mb-1">✅ ¡Expediente de Postulación Docente recibido con éxito!</strong>
+                    Hemos registrado tus datos y tus <strong>${payload.totalMateriasSeleccionadas} materias seleccionadas</strong> en nuestra base de evaluación docente (separada del registro estudiantil). Dirección Académica revisará tu perfil y, de resultar <strong>APTO / ELEGIBLE</strong>, nos contactaremos a tu WhatsApp (<strong>${payload.telefonoWhatsapp}</strong>) y correo (<strong>${payload.email}</strong>) para habilitar tu cuenta oficial de Docente en Makai Academy.
+                `;
+                teacherAlertBox.classList.remove("hidden");
+                teacherAlertBox.scrollIntoView({ behavior: "smooth", block: "center" });
+            } catch (err) {
+                console.error("Error guardando postulación docente:", err);
+                teacherAlertBox.className = "p-4 rounded-xl border border-danger bg-danger/15 text-danger text-xs font-mono leading-relaxed";
+                teacherAlertBox.textContent = "⚠️ Error al enviar tu postulación: " + err.message;
+                teacherAlertBox.classList.remove("hidden");
+            } finally {
+                submitTeacherBtn.disabled = false;
+                submitTeacherBtn.innerHTML = originalBtnHtml;
             }
         });
     </script>
