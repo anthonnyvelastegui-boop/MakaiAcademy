@@ -89,20 +89,20 @@
             </div>
 
             <!-- CAJA DE ALERTAS -->
-            <div id="auth-alert-box" class="hidden mb-4 p-3 rounded-xl border text-xs font-mono"></div>
+            <div id="auth-alert-box" class="hidden mb-4 p-3.5 rounded-xl border text-xs font-mono leading-relaxed"></div>
 
-            <!-- FORMULARIO DE INICIO DE SESIÓN -->
+            <!-- FORMULARIO DE INICIO DE SESIÓN CON CORREO ELECTRÓNICO -->
             <form id="auth-form" class="space-y-4">
                 <div>
                     <div class="flex justify-between items-center mb-1.5">
-                        <label for="email" class="text-xs font-semibold text-gray-300">Correo Electrónico Institucional</label>
-                        <span class="text-[10px] font-mono text-gray-500">ej. user@uce.edu.ec / hospital.org</span>
+                        <label for="email" class="text-xs font-semibold text-gray-300">Correo Electrónico</label>
+                        <span class="text-[10px] font-mono text-gray-500">Gmail / Institucional</span>
                     </div>
                     <input
                         type="email"
                         id="email"
                         required
-                        placeholder="ej. usuario@universidad.edu.ec / hospital.org"
+                        placeholder="ej. usuario@gmail.com / universidad.edu.ec"
                         class="w-full bg-surface border border-surface-high rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary transition-colors"
                     />
                 </div>
@@ -143,8 +143,31 @@
                 </button>
             </form>
 
+            <!-- ACCESO EXCLUSIVO CON GOOGLE (GMAIL) -->
+            <div class="mt-5">
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-surface-high"></div>
+                    <span class="flex-shrink mx-3 text-[10px] font-mono text-gray-400 uppercase tracking-widest">O INGRESA DIRECTAMENTE CON TU GMAIL</span>
+                    <div class="flex-grow border-t border-surface-high"></div>
+                </div>
+
+                <button
+                    type="button"
+                    id="btn-google"
+                    class="mt-2 w-full py-3.5 px-4 bg-surface hover:bg-surface-high border-2 border-primary/40 hover:border-primary rounded-xl text-xs sm:text-sm font-extrabold text-white flex items-center justify-center gap-3 transition-all shadow-[0_0_15px_rgba(0,229,255,0.12)]"
+                >
+                    <svg class="w-5 h-5" viewBox="0 0 24 24">
+                        <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
+                        <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
+                        <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"/>
+                        <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 20.9 7.4 24 12 24z"/>
+                    </svg>
+                    <span>Continuar con Google (Gmail)</span>
+                </button>
+            </div>
+
             <!-- ACCESO DIRECTO A REGISTRO DE EXPEDIENTE Y COMPROBANTES -->
-            <div class="mt-4">
+            <div class="mt-5">
                 <a
                     href="registro.html?plan=pro_anual&pago=qr"
                     class="block w-full text-center py-2.5 px-4 rounded-xl bg-secondary/10 border border-secondary/40 text-secondary hover:bg-secondary/20 text-xs font-bold transition-all"
@@ -159,42 +182,8 @@
                 </a>
             </div>
 
-            <!-- SSO ACADÉMICO -->
-            <div class="mt-6">
-                <div class="relative flex py-2 items-center">
-                    <div class="flex-grow border-t border-surface-high"></div>
-                    <span class="flex-shrink mx-3 text-[10px] font-mono text-gray-500 uppercase tracking-widest">O MEDIANTE SSO ACADÉMICO</span>
-                    <div class="flex-grow border-t border-surface-high"></div>
-                </div>
-
-                <div class="grid grid-cols-3 gap-3 mt-3">
-                    <button type="button" id="btn-google" class="py-2.5 px-3 bg-surface hover:bg-surface-high border border-surface-high rounded-xl text-xs font-semibold text-white flex items-center justify-center gap-2 transition-all">
-                        <svg class="w-4 h-4" viewBox="0 0 24 24">
-                            <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
-                            <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
-                            <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"/>
-                            <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 20.9 7.4 24 12 24z"/>
-                        </svg>
-                        <span>Google</span>
-                    </button>
-                    <button type="button" id="btn-microsoft" class="py-2.5 px-3 bg-surface hover:bg-surface-high border border-surface-high rounded-xl text-xs font-semibold text-white flex items-center justify-center gap-2 transition-all">
-                        <span class="w-3.5 h-3.5 grid grid-cols-2 gap-0.5">
-                            <span class="bg-[#f25022] block"></span>
-                            <span class="bg-[#7fba00] block"></span>
-                            <span class="bg-[#00a4ef] block"></span>
-                            <span class="bg-[#ffb900] block"></span>
-                        </span>
-                        <span>Microsoft</span>
-                    </button>
-                    <button type="button" id="btn-apple" class="py-2.5 px-3 bg-surface hover:bg-surface-high border border-surface-high rounded-xl text-xs font-semibold text-white flex items-center justify-center gap-2 transition-all">
-                        <span></span>
-                        <span>Apple</span>
-                    </button>
-                </div>
-            </div>
-
             <p class="mt-5 text-center text-[10px] font-mono text-gray-500">
-                🔒 Cifrado AES-256 bits • Cumplimiento HIPAA & LOPDP Sanitaria
+                🔒 Validación de correo activa • Cifrado AES-256 bits
             </p>
         </section>
 
@@ -298,18 +287,17 @@
 
                         <div id="pro-savings-pill" class="mt-3 p-2 rounded-lg bg-primary/10 border border-primary/30 text-center">
                             <span id="pro-savings-text" class="text-[11px] font-bold text-primary">
-                                🔥 Ahorra un 35% con facturación anual
+                                ⚡ Suscripción mensual flexible • Sin permanencia
                             </span>
                         </div>
 
-                        <!-- PRECIO DINÁMICO SEGÚN INTERRUPTOR MENSUAL / ANUAL -->
                         <div class="mt-3 pb-4 border-b border-surface-high">
                             <div class="flex items-baseline gap-1">
-                                <span id="pro-main-price" class="text-3xl font-extrabold text-primary">$139.99</span>
-                                <span id="pro-main-period" class="text-xs text-gray-300 font-mono">USD / año</span>
+                                <span id="pro-main-price" class="text-3xl font-extrabold text-primary">$17.99</span>
+                                <span id="pro-main-period" class="text-xs text-gray-300 font-mono">USD / mes</span>
                             </div>
                             <div id="pro-secondary-price" class="text-xs text-secondary font-mono font-bold mt-1">
-                                • Equivalente a $11.66 USD / mes (o $17.99 mes a mes)
+                                • O cámbialo a $139.99 USD / año (Ahorras 35%)
                             </div>
                         </div>
 
@@ -340,10 +328,10 @@
                     <button
                         type="button"
                         id="btn-select-pro"
-                        data-select-plan="pro_anual"
+                        data-select-plan="pro_mensual"
                         class="mt-6 w-full py-3 px-4 rounded-xl bg-primary text-surface font-extrabold text-xs hover:bg-opacity-90 transition-all shadow-[0_0_15px_rgba(0,229,255,0.3)]"
                     >
-                        Activar Makai PRO Anual ($139.99)
+                        Activar Makai PRO Mensual ($17.99)
                     </button>
                 </div>
 
@@ -393,7 +381,7 @@
                 </div>
             </div>
 
-            <!-- MEDIOS DE PAGO SEGUROS HOMOLOGADOS EN ECUADOR (INTERACTIVOS) -->
+            <!-- MEDIOS DE PAGO SEGUROS HOMOLOGADOS EN ECUADOR -->
             <div class="bg-surface-container border border-surface-high rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center gap-2 text-xs text-gray-400">
                     <span class="material-symbols-outlined text-primary text-base">verified_user</span>
@@ -405,21 +393,21 @@
                         data-select-payment="tarjeta"
                         class="px-3 py-1.5 rounded-lg bg-surface border border-primary/40 text-primary hover:bg-primary hover:text-surface text-xs font-mono font-bold transition-all"
                     >
-                        PayPhone
+                        PayPhone (Pichincha)
                     </button>
                     <button
                         type="button"
                         data-select-payment="qr"
                         class="px-3 py-1.5 rounded-lg bg-surface border border-secondary/40 text-secondary hover:bg-secondary hover:text-surface text-xs font-mono font-bold transition-all"
                     >
-                        Deuna! (QR)
+                        Deuna! / QR Pacífico
                     </button>
                     <button
                         type="button"
                         data-select-payment="transferencia"
                         class="px-3 py-1.5 rounded-lg bg-surface border border-surface-high hover:border-primary text-gray-200 hover:text-primary text-xs font-mono font-bold transition-all"
                     >
-                        Transferencia Bancaria
+                        Transferencia (Pichincha / Pacífico / Diners)
                     </button>
                     <button
                         type="button"
@@ -433,85 +421,211 @@
         </section>
     </main>
 
-    <!-- CONTROLADOR INTERACTIVO DE PLANES Y FACTURACIÓN EN TIEMPO REAL -->
-    <script>
-        (function () {
-            let currentBilling = "annual"; // "monthly" | "annual"
+    <!-- MOTOR DIRECTO DE AUTENTICACIÓN (CORREO + GMAIL) Y PLANES -->
+    <script type="module">
+        import {
+            auth,
+            db,
+            googleProvider,
+            signInWithEmailAndPassword,
+            signInWithPopup,
+            sendPasswordResetEmail,
+            sendEmailVerification,
+            doc,
+            getDoc,
+            setDoc
+        } from "./js/2-core/firebase.service.js";
+        import { isMasterAdmin } from "./js/2-core/state.store.js";
 
-            const btnMonthly = document.getElementById("btn-billing-monthly");
-            const btnAnnual = document.getElementById("btn-billing-annual");
-            const proMainPrice = document.getElementById("pro-main-price");
-            const proMainPeriod = document.getElementById("pro-main-period");
-            const proSecondaryPrice = document.getElementById("pro-secondary-price");
-            const proSavingsText = document.getElementById("pro-savings-text");
-            const btnSelectPro = document.getElementById("btn-select-pro");
+        // 1. Controlador de Facturación Mensual / Anual
+        let currentBilling = "monthly";
+        const btnMonthly = document.getElementById("btn-billing-monthly");
+        const btnAnnual = document.getElementById("btn-billing-annual");
+        const proMainPrice = document.getElementById("pro-main-price");
+        const proMainPeriod = document.getElementById("pro-main-period");
+        const proSecondaryPrice = document.getElementById("pro-secondary-price");
+        const proSavingsText = document.getElementById("pro-savings-text");
+        const btnSelectPro = document.getElementById("btn-select-pro");
 
-            function setBillingMode(mode) {
-                currentBilling = mode === "monthly" ? "monthly" : "annual";
-                sessionStorage.setItem("makai_selected_billing", currentBilling);
+        function setBillingMode(mode) {
+            currentBilling = mode === "monthly" ? "monthly" : "annual";
+            sessionStorage.setItem("makai_selected_billing", currentBilling);
 
-                if (currentBilling === "monthly") {
-                    btnMonthly.className = "px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all bg-primary text-surface shadow-[0_0_12px_rgba(0,229,255,0.3)]";
-                    btnAnnual.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-400 hover:text-white flex items-center gap-1.5";
-
-                    proMainPrice.textContent = "$17.99";
-                    proMainPeriod.textContent = "USD / mes";
-                    proSecondaryPrice.textContent = "• O cámbialo a $139.99 USD / año (Ahorras 35%)";
-                    proSavingsText.textContent = "⚡ Suscripción mensual flexible • Sin permanencia";
-                    btnSelectPro.dataset.selectPlan = "pro_mensual";
-                    btnSelectPro.textContent = "Activar Makai PRO Mensual ($17.99)";
-                } else {
-                    btnAnnual.className = "px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all bg-primary text-surface shadow-[0_0_12px_rgba(0,229,255,0.3)] flex items-center gap-1.5";
-                    btnMonthly.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-400 hover:text-white";
-
-                    proMainPrice.textContent = "$139.99";
-                    proMainPeriod.textContent = "USD / año";
-                    proSecondaryPrice.textContent = "• Equivalente a $11.66 USD / mes (Antes $215.88/año)";
-                    proSavingsText.textContent = "🔥 Ahorra un 35% con facturación anual ($75.89 de descuento)";
-                    btnSelectPro.dataset.selectPlan = "pro_anual";
-                    btnSelectPro.textContent = "Activar Makai PRO Anual ($139.99)";
-                }
+            if (currentBilling === "monthly") {
+                btnMonthly.className = "px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all bg-primary text-surface shadow-[0_0_12px_rgba(0,229,255,0.3)]";
+                btnAnnual.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-400 hover:text-white flex items-center gap-1.5";
+                proMainPrice.textContent = "$17.99";
+                proMainPeriod.textContent = "USD / mes";
+                proSecondaryPrice.textContent = "• O cámbialo a $139.99 USD / año (Ahorras 35%)";
+                proSavingsText.textContent = "⚡ Suscripción mensual flexible • Sin permanencia";
+                btnSelectPro.dataset.selectPlan = "pro_mensual";
+                btnSelectPro.textContent = "Activar Makai PRO Mensual ($17.99)";
+            } else {
+                btnAnnual.className = "px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all bg-primary text-surface shadow-[0_0_12px_rgba(0,229,255,0.3)] flex items-center gap-1.5";
+                btnMonthly.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-400 hover:text-white";
+                proMainPrice.textContent = "$139.99";
+                proMainPeriod.textContent = "USD / año";
+                proSecondaryPrice.textContent = "• Equivalente a $11.66 USD / mes (Antes $215.88/año)";
+                proSavingsText.textContent = "🔥 Ahorra un 35% con facturación anual ($75.89 de descuento)";
+                btnSelectPro.dataset.selectPlan = "pro_anual";
+                btnSelectPro.textContent = "Activar Makai PRO Anual ($139.99)";
             }
+        }
 
-            btnMonthly?.addEventListener("click", () => setBillingMode("monthly"));
-            btnAnnual?.addEventListener("click", () => setBillingMode("annual"));
+        btnMonthly?.addEventListener("click", () => setBillingMode("monthly"));
+        btnAnnual?.addEventListener("click", () => setBillingMode("annual"));
+        setBillingMode("monthly");
 
-            // Inicializar en modo Mensual o Anual según preferencia previa
-            setBillingMode("monthly");
-
-            // Redirección al seleccionar cualquiera de los 3 planes
-            document.querySelectorAll("[data-select-plan]").forEach((btn) => {
-                btn.addEventListener("click", () => {
-                    const chosenPlan = btn.dataset.selectPlan || (currentBilling === "monthly" ? "pro_mensual" : "pro_anual");
-                    sessionStorage.setItem("makai_selected_plan", chosenPlan);
-                    const defaultPay = chosenPlan === "basico" ? "ninguno" : "qr";
-                    window.location.href = `registro.html?plan=${encodeURIComponent(chosenPlan)}&pago=${encodeURIComponent(defaultPay)}`;
-                });
+        // 2. Redirección de Planes y Métodos de Pago
+        document.querySelectorAll("[data-select-plan]").forEach((btn) => {
+            btn.addEventListener("click", () => {
+                const chosenPlan = btn.dataset.selectPlan || (currentBilling === "monthly" ? "pro_mensual" : "pro_anual");
+                const defaultPay = chosenPlan === "basico" ? "ninguno" : "qr";
+                window.location.href = `registro.html?plan=${encodeURIComponent(chosenPlan)}&pago=${encodeURIComponent(defaultPay)}`;
             });
+        });
 
-            // Redirección al seleccionar cualquiera de los 4 botones de medios de pago
-            document.querySelectorAll("[data-select-payment]").forEach((btn) => {
-                btn.addEventListener("click", () => {
-                    const paymentMethod = btn.dataset.selectPayment || "qr";
-                    const activeProPlan = currentBilling === "monthly" ? "pro_mensual" : "pro_anual";
-                    sessionStorage.setItem("makai_selected_plan", activeProPlan);
-                    window.location.href = `registro.html?plan=${encodeURIComponent(activeProPlan)}&pago=${encodeURIComponent(paymentMethod)}`;
-                });
+        document.querySelectorAll("[data-select-payment]").forEach((btn) => {
+            btn.addEventListener("click", () => {
+                const paymentMethod = btn.dataset.selectPayment || "qr";
+                const activeProPlan = currentBilling === "monthly" ? "pro_mensual" : "pro_anual";
+                window.location.href = `registro.html?plan=${encodeURIComponent(activeProPlan)}&pago=${encodeURIComponent(paymentMethod)}`;
             });
+        });
 
-            // Mostrar/Ocultar contraseña
-            const passInput = document.getElementById("password");
-            const togglePassBtn = document.getElementById("btn-toggle-pass");
-            togglePassBtn?.addEventListener("click", () => {
-                if (!passInput) return;
-                const isPass = passInput.type === "password";
-                passInput.type = isPass ? "text" : "password";
-                togglePassBtn.innerHTML = isPass ? "<span>🙈 Ocultar</span>" : "<span>👁 Mostrar</span>";
-            });
-        })();
+        // 3. Mostrar/Ocultar Contraseña
+        const passInput = document.getElementById("password");
+        const togglePassBtn = document.getElementById("btn-toggle-pass");
+        togglePassBtn?.addEventListener("click", () => {
+            if (!passInput) return;
+            const isPass = passInput.type === "password";
+            passInput.type = isPass ? "text" : "password";
+            togglePassBtn.innerHTML = isPass ? "<span>🙈 Ocultar</span>" : "<span>👁 Mostrar</span>";
+        });
+
+        // 4. Función de Alertas en Pantalla
+        const alertBox = document.getElementById("auth-alert-box");
+        function showAlert(msg, type = "error") {
+            if (!alertBox) return;
+            alertBox.classList.remove("hidden", "bg-danger/15", "border-danger", "text-danger", "bg-secondary/15", "border-secondary", "text-secondary", "bg-primary/15", "border-primary", "text-primary");
+            if (type === "success") {
+                alertBox.classList.add("bg-secondary/15", "border-secondary", "text-secondary");
+            } else if (type === "info") {
+                alertBox.classList.add("bg-primary/15", "border-primary", "text-primary");
+            } else {
+                alertBox.classList.add("bg-danger/15", "border-danger", "text-danger");
+            }
+            alertBox.textContent = msg;
+        }
+
+        // 5. Inicio de Sesión con Correo y Contraseña (+ Validación de Correo)
+        const authForm = document.getElementById("auth-form");
+        const submitBtn = document.getElementById("submit-btn");
+
+        authForm?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email = document.getElementById("email")?.value.trim() || "";
+            const password = document.getElementById("password")?.value || "";
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = "<span>Verificando credenciales...</span>";
+
+                const cred = await signInWithEmailAndPassword(auth, email, password);
+                const user = cred.user;
+
+                // Verificar si el correo electrónico ya fue validado (excepto Administradores Maestros)
+                if (!user.emailVerified && !isMasterAdmin(user.email)) {
+                    try {
+                        await sendEmailVerification(user);
+                    } catch (verifyErr) {
+                        console.warn("Aviso reenviando verificación:", verifyErr);
+                    }
+                    window.location.href = "registro.html?verify=pending";
+                    return;
+                }
+
+                window.location.href = "dashboard.html";
+            } catch (err) {
+                let friendlyMsg = "⚠️ Error al iniciar sesión: " + err.message;
+                if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password" || err.code === "auth/user-not-found") {
+                    friendlyMsg = "⚠️ Correo o contraseña incorrectos. Si aún no tienes cuenta, pulsa en 'Crear Cuenta de Salud' o ingresa con Google (Gmail).";
+                }
+                showAlert(friendlyMsg, "error");
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Ingresar al Portal</span><span class="material-symbols-outlined text-base">arrow_forward</span>';
+            }
+        });
+
+        // 6. Inicio de Sesión con Google (Gmail)
+        const btnGoogle = document.getElementById("btn-google");
+        let googlePopupInProgress = false;
+
+        btnGoogle?.addEventListener("click", async () => {
+            if (googlePopupInProgress) return;
+            googlePopupInProgress = true;
+
+            const originalHTML = btnGoogle.innerHTML;
+            btnGoogle.disabled = true;
+            btnGoogle.innerHTML = "<span>Conectando con Google (Gmail)...</span>";
+
+            try {
+                googleProvider.setCustomParameters({ prompt: "select_account" });
+                const result = await signInWithPopup(auth, googleProvider);
+                const user = result.user;
+                const admin = isMasterAdmin(user.email);
+
+                try {
+                    const userRef = doc(db, "usuarios", user.uid);
+                    const snap = await getDoc(userRef);
+
+                    if (!snap.exists()) {
+                        await setDoc(userRef, {
+                            uid: user.uid,
+                            nombre: user.displayName || user.email.split("@")[0],
+                            email: user.email,
+                            rol: admin ? "admin" : "estudiante",
+                            subscriptionLevel: admin ? "PRO" : "Básico",
+                            planSolicitado: admin ? "pro_anual" : "basico",
+                            estadoPago: admin ? "activo_verificado" : "activo_gratis",
+                            correoConfirmadoMakai: true,
+                            casesUsedThisMonth: 0,
+                            totalExamsCompleted: 0,
+                            globalAverage: 0,
+                            createdAt: new Date().toISOString()
+                        });
+                    }
+                } catch (fireErr) {
+                    console.warn("Aviso sincronizando perfil Google en Firestore:", fireErr);
+                }
+
+                localStorage.setItem(`makai_gmail_verified_${user.uid}`, "1");
+                window.location.href = "dashboard.html";
+            } catch (err) {
+                console.error("Error Google Login:", err);
+                if (err.code !== "auth/popup-closed-by-user") {
+                    showAlert("⚠️ No se pudo iniciar con Gmail (" + err.code + "). Verifica en Firebase Console -> Authentication -> Sign-in method que 'Google' esté Habilitado y tu dominio autorizado.", "error");
+                }
+                btnGoogle.disabled = false;
+                btnGoogle.innerHTML = originalHTML;
+            } finally {
+                googlePopupInProgress = false;
+            }
+        });
+
+        // 7. Recuperación de Contraseña por Correo
+        document.getElementById("btn-forgot-pass")?.addEventListener("click", async () => {
+            const emailInput = document.getElementById("email")?.value.trim();
+            const targetEmail = emailInput || prompt("Ingresa tu correo electrónico para enviarte el enlace de restablecimiento de contraseña:");
+            if (!targetEmail) return;
+
+            try {
+                await sendPasswordResetEmail(auth, targetEmail.trim());
+                showAlert(`✅ Se envió un enlace de recuperación a ${targetEmail}. Revisa tu bandeja de entrada o Spam.`, "success");
+            } catch (err) {
+                showAlert("⚠️ Error al enviar correo de recuperación: " + err.message, "error");
+            }
+        });
     </script>
-
-    <!-- DIRECTOR DE ORQUESTA MODULAR -->
-    <script type="module" src="js/2-core/app.orchestrator.js"></script>
 </body>
 </html>
