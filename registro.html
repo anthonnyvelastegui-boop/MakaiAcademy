@@ -54,10 +54,12 @@
             </a>
         </div>
 
-        <!-- CONTENEDOR PRINCIPAL DEL EXPEDIENTE -->
-        <div id="register-main-card" class="bg-surface-container border border-surface-high rounded-2xl p-6 sm:p-8 shadow-2xl">
+        <!-- =========================================================
+             TARJETA 1: FORMULARIO DE REGISTRO DEL EXPEDIENTE
+             ========================================================= -->
+        <div id="registration-card" class="bg-surface-container border border-surface-high rounded-2xl p-6 sm:p-8 shadow-2xl">
 
-            <!-- CABECERA (TAL CUAL image_dfef2e.png) -->
+            <!-- CABECERA -->
             <div class="pb-6 border-b border-surface-high">
                 <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-[11px] font-mono font-bold uppercase tracking-wider">
                     <span class="w-2 h-2 rounded-full bg-primary"></span>
@@ -77,16 +79,13 @@
             <!-- FORMULARIO PRINCIPAL -->
             <form id="full-register-form" class="mt-6 space-y-8">
 
-                <!-- =========================================================
-                     1. IDENTIFICACIÓN PROFESIONAL Y CARRERA CACES (image_dfef2e.png + Cédula)
-                     ========================================================= -->
+                <!-- 1. IDENTIFICACIÓN PROFESIONAL Y CARRERA CACES -->
                 <section class="space-y-4">
                     <h2 class="text-xs font-mono font-extrabold text-primary uppercase tracking-widest flex items-center gap-2">
                         <span class="material-symbols-outlined text-base">badge</span>
                         <span>1. IDENTIFICACIÓN PROFESIONAL Y CARRERA CACES</span>
                     </h2>
 
-                    <!-- Fila 1: Título, Primer Nombre, Apellido -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                             <label for="reg-title" class="block text-xs font-medium text-gray-400 mb-1.5">Título Académico</label>
@@ -108,7 +107,6 @@
                         </div>
                     </div>
 
-                    <!-- Fila 2: Cédula / Matrícula, Alias Clínico, Carrera a Evaluar, País -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
                             <label for="reg-cedula" class="block text-xs font-medium text-primary mb-1.5">Cédula / DNI / Matrícula</label>
@@ -148,7 +146,6 @@
                         </div>
                     </div>
 
-                    <!-- Fila 3: Teléfono Celular / WhatsApp y Fecha de Nacimiento -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label for="reg-phone-number" class="block text-xs font-medium text-gray-400 mb-1.5">Teléfono Celular / WhatsApp</label>
@@ -178,18 +175,16 @@
 
                 <hr class="border-surface-high" />
 
-                <!-- =========================================================
-                     2. CREDENCIALES DE ACCESO Y SEGURIDAD (image_dfef2e.png)
-                     ========================================================= -->
+                <!-- 2. CREDENCIALES DE ACCESO Y SEGURIDAD -->
                 <section class="space-y-4">
                     <h2 class="text-xs font-mono font-extrabold text-primary uppercase tracking-widest flex items-center gap-2">
                         <span class="material-symbols-outlined text-base">lock</span>
-                        <span>2. CREDENCIALES DE ACCESO Y SEGURIDAD</span>
+                        <span>2. CREDENCIALES DE ACCESO Y SEGURIDAD (VALIDACIÓN DE CORREO OBLIGATORIA)</span>
                     </h2>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label for="reg-email" class="block text-xs font-medium text-gray-400 mb-1.5">Correo Electrónico Principal (Login)</label>
+                            <label for="reg-email" class="block text-xs font-medium text-gray-400 mb-1.5">Correo Electrónico Principal (Recibirás un enlace de activación)</label>
                             <input type="email" id="reg-email" required placeholder="medico@universidad.edu.ec" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary" />
                         </div>
                         <div>
@@ -215,18 +210,16 @@
 
                 <hr class="border-surface-high" />
 
-                <!-- =========================================================
-                     3. SELECCIONA TU PLAN ACADÉMICO MAKAI ACADEMY (image_dfef68.png)
-                     ========================================================= -->
+                <!-- 3. SELECCIONA TU PLAN ACADÉMICO MAKAI ACADEMY -->
                 <section class="space-y-5">
                     <h2 class="text-xs font-mono font-extrabold text-primary uppercase tracking-widest flex items-center gap-2">
                         <span class="material-symbols-outlined text-base">workspace_premium</span>
                         <span>3. SELECCIONA TU PLAN ACADÉMICO MAKAI ACADEMY</span>
                     </h2>
 
-                    <input type="hidden" id="reg-plan-select" value="basico" />
+                    <input type="hidden" id="reg-plan-select" value="pro_mensual" />
 
-                    <!-- 4 TARJETAS DE PLANES (TAL CUAL image_dfef68.png) -->
+                    <!-- 4 TARJETAS DE PLANES -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
                         <!-- Plan Básico -->
@@ -248,11 +241,11 @@
                         </div>
 
                         <!-- Makai PRO Mensual -->
-                        <div data-plan-card="pro_mensual" class="plan-card cursor-pointer rounded-xl p-4 border border-surface-high bg-surface hover:border-gray-600 transition-all relative flex flex-col justify-between">
+                        <div data-plan-card="pro_mensual" class="plan-card cursor-pointer rounded-xl p-4 border-2 border-primary bg-surface-high/95 shadow-[0_0_20px_rgba(0,229,255,0.2)] transition-all relative flex flex-col justify-between">
                             <div>
                                 <div class="flex items-center justify-between mb-2">
                                     <span class="text-[10px] font-mono text-primary uppercase font-extrabold">ACCESO TOTAL</span>
-                                    <span class="material-symbols-outlined text-gray-600 text-base check-icon">radio_button_unchecked</span>
+                                    <span class="material-symbols-outlined text-primary text-base check-icon">check_circle</span>
                                 </div>
                                 <h3 class="text-base font-extrabold text-white leading-snug">Makai PRO<br />Mensual</h3>
                                 <div class="mt-2">
@@ -284,11 +277,11 @@
                         </div>
 
                         <!-- Mentoría Élite VIP -->
-                        <div data-plan-card="vip" class="plan-card cursor-pointer rounded-xl p-4 border-2 border-primary bg-surface-high/95 shadow-[0_0_20px_rgba(0,229,255,0.2)] transition-all relative flex flex-col justify-between">
+                        <div data-plan-card="vip" class="plan-card cursor-pointer rounded-xl p-4 border border-surface-high bg-surface hover:border-gray-600 transition-all relative flex flex-col justify-between">
                             <div>
                                 <div class="flex items-center justify-between mb-2">
                                     <span class="text-[10px] font-mono text-warning uppercase font-extrabold">ESPECIALISTAS 1 A 1</span>
-                                    <span class="material-symbols-outlined text-primary text-base check-icon">check_circle</span>
+                                    <span class="material-symbols-outlined text-gray-600 text-base check-icon">radio_button_unchecked</span>
                                 </div>
                                 <h3 class="text-base font-extrabold text-white">Mentoría Élite VIP</h3>
                                 <div class="mt-2">
@@ -308,111 +301,181 @@
                             Método de Activación / Pago Preferido
                         </label>
                         <select id="reg-payment-select" class="w-full bg-surface border border-surface-high rounded-xl px-4 py-3.5 text-sm font-bold text-white focus:outline-none focus:border-primary">
-                            <option value="qr">Código QR Deuna! o Bancario (Pichincha / Pacífico)</option>
-                            <option value="tarjeta">Tarjeta de Crédito / Débito (Visa / Mastercard)</option>
-                            <option value="transferencia">Transferencia Bancaria Directa</option>
+                            <option value="qr">Código QR Deuna! (Pichincha) o QR Banco del Pacífico</option>
+                            <option value="transferencia">Transferencia Bancaria Directa (Pichincha / Pacífico / Diners Club)</option>
+                            <option value="tarjeta">Tarjeta de Crédito / Débito (Visa / Mastercard → Destino Banco Pichincha)</option>
                             <option value="ninguno">Sin pago por ahora (Iniciar con Plan Básico $0)</option>
                         </select>
                     </div>
 
                     <!-- =========================================================
-                         OPCIÓN A: PAGO CON TARJETA (TAL CUAL image_dfef68.png)
+                         ADVERTENCIA OBLIGATORIA DE PLAZO DE 72 HORAS LABORABLES
                          ========================================================= -->
-                    <div id="card-payment-section" class="hidden rounded-xl border border-warning/40 bg-warning/5 p-5">
-                        <div class="flex items-center gap-2 text-xs font-mono font-extrabold text-warning uppercase tracking-wider mb-2">
-                            <span class="material-symbols-outlined text-base">credit_card</span>
-                            <span>PAGO CON TARJETA VISA / MASTERCARD / PAYPHONE</span>
+                    <div id="payment-sla-warning" class="rounded-xl border-2 border-warning/60 bg-warning/10 p-4 flex items-start gap-3 shadow-lg">
+                        <span class="material-symbols-outlined text-warning text-2xl shrink-0 mt-0.5">schedule</span>
+                        <div class="text-xs sm:text-sm text-gray-200 leading-relaxed">
+                            <strong class="text-warning font-mono uppercase tracking-wide block mb-0.5">
+                                ⚠️ AVISO IMPORTANTE SOBRE LA HABILITACIÓN DE SERVICIOS:
+                            </strong>
+                            Una vez seleccionado el método de pago y registrado tu comprobante, nuestro departamento financiero verificará la transacción y <strong>se habilitarán los servicios del plan elegido en un plazo máximo de 72 horas laborables</strong>. Mientras se valida tu pago, podrás verificar tu correo e ingresar con acceso inicial.
                         </div>
-                        <p class="text-xs sm:text-sm text-gray-300 leading-relaxed">
-                            Al completar tu registro recibirás el enlace directo de cobro seguro con tarjeta o puedes adjuntar tu comprobante eligiendo QR / Transferencia para activación inmediata.
-                        </p>
                     </div>
 
                     <!-- =========================================================
-                         OPCIÓN B: CÓDIGOS QR OFICIALES DEUNA! Y PACÍFICO (TAL CUAL image_dff214.png)
+                         OPCIÓN 1: CÓDIGOS QR OFICIALES (PICHINCHA Y PACÍFICO)
+                         Ruta oficial: assets/2-pagos-bancarios/codigos-qr/
                          ========================================================= -->
                     <div id="qr-payment-section" class="hidden rounded-2xl border border-primary/40 bg-surface p-5 space-y-4">
                         <div class="flex items-center gap-2 text-xs font-mono font-extrabold text-primary uppercase tracking-wider">
                             <span class="material-symbols-outlined text-base">qr_code_scanner</span>
-                            <span>ESCANEA CUALQUIERA DE NUESTROS CÓDIGOS QR OFICIALES</span>
+                            <span>ESCANEA CUALQUIERA DE NUESTROS 2 CÓDIGOS QR OFICIALES</span>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- QR 1: Deuna! (Banco Pichincha) -->
-                            <div class="rounded-xl border border-surface-high bg-surface-container p-5 text-center flex flex-col items-center">
-                                <h4 class="text-sm font-extrabold text-white">QR Deuna! (Banco Pichincha)</h4>
-                                <p class="text-xs font-mono text-gray-400 mt-0.5">Titular: Anthonny Velástegui</p>
+                            <!-- QR 1: Banco Pichincha (Deuna!) -->
+                            <div class="rounded-xl border border-surface-high bg-surface-container p-5 text-center flex flex-col items-center justify-between">
+                                <div>
+                                    <h4 class="text-sm font-extrabold text-white">QR Deuna! (Banco Pichincha)</h4>
+                                    <p class="text-xs font-mono text-gray-400 mt-0.5">Titular: Anthonny Velástegui</p>
+                                    <p class="text-xs font-mono text-primary font-bold mt-1">Cuenta de Ahorros: 2205616642</p>
+                                </div>
 
-                                <div class="mt-4 w-52 h-52 bg-white rounded-2xl p-3 flex flex-col items-center justify-center shadow-lg">
+                                <div class="my-4 w-52 h-52 bg-white rounded-2xl p-3 flex flex-col items-center justify-center shadow-lg">
                                     <img
                                         src="assets/2-pagos-bancarios/codigos-qr/qr-deuna.png"
                                         alt="QR Deuna! Oficial"
                                         class="w-full h-full object-contain hidden"
                                         onload="this.classList.remove('hidden'); this.nextElementSibling.classList.add('hidden');"
-                                        onerror="if(!this.dataset.fallbackTried){this.dataset.fallbackTried='1';this.src='assets/1-branding/pagos/qr-deuna.png';}else{this.classList.add('hidden');}"
+                                        onerror="if(!this.dataset.try1){this.dataset.try1='1';this.src='assets/2-pagos-bancarios/codigos-qr/qr-deuna.jpg';}else if(!this.dataset.try2){this.dataset.try2='1';this.src='assets/1-branding/pagos/qr-deuna.png';}else{this.classList.add('hidden');}"
                                     />
                                     <div class="flex flex-col items-center justify-center text-surface">
                                         <span class="material-symbols-outlined text-4xl text-surface">qr_code_2</span>
                                         <span class="text-xs font-mono font-bold mt-2 text-surface">QR Deuna! Oficial</span>
+                                        <span class="text-[10px] font-mono text-gray-600 mt-1">Cta: 2205616642</span>
                                     </div>
                                 </div>
+
+                                <button type="button" onclick="navigator.clipboard.writeText('2205616642'); this.textContent='✓ Cuenta 2205616642 Copiada';" class="px-3 py-1.5 rounded-lg bg-surface border border-primary/40 text-primary text-[11px] font-mono font-bold hover:bg-primary hover:text-surface transition-all">
+                                    📋 Copiar N° Cuenta Pichincha (2205616642)
+                                </button>
                             </div>
 
-                            <!-- QR 2: QR Be / Banco del Pacífico -->
-                            <div class="rounded-xl border border-surface-high bg-surface-container p-5 text-center flex flex-col items-center">
-                                <h4 class="text-sm font-extrabold text-white">QR Be / Banco del Pacífico</h4>
-                                <p class="text-xs font-mono text-gray-400 mt-0.5">Titular: Anthonny Velástegui</p>
+                            <!-- QR 2: Banco del Pacífico -->
+                            <div class="rounded-xl border border-surface-high bg-surface-container p-5 text-center flex flex-col items-center justify-between">
+                                <div>
+                                    <h4 class="text-sm font-extrabold text-white">QR Be / Banco del Pacífico</h4>
+                                    <p class="text-xs font-mono text-gray-400 mt-0.5">Titular: Anthonny Velástegui</p>
+                                    <p class="text-xs font-mono text-primary font-bold mt-1">Cuenta de Ahorros: 1068767358</p>
+                                </div>
 
-                                <div class="mt-4 w-52 h-52 bg-white rounded-2xl p-3 flex flex-col items-center justify-center shadow-lg">
+                                <div class="my-4 w-52 h-52 bg-white rounded-2xl p-3 flex flex-col items-center justify-center shadow-lg">
                                     <img
                                         src="assets/2-pagos-bancarios/codigos-qr/qr-pacifico.png"
                                         alt="QR Pacífico Oficial"
                                         class="w-full h-full object-contain hidden"
                                         onload="this.classList.remove('hidden'); this.nextElementSibling.classList.add('hidden');"
-                                        onerror="if(!this.dataset.fallbackTried){this.dataset.fallbackTried='1';this.src='assets/1-branding/pagos/qr-pacifico.png';}else{this.classList.add('hidden');}"
+                                        onerror="if(!this.dataset.try1){this.dataset.try1='1';this.src='assets/2-pagos-bancarios/codigos-qr/qr-pacifico.jpg';}else if(!this.dataset.try2){this.dataset.try2='1';this.src='assets/1-branding/pagos/qr-pacifico.png';}else{this.classList.add('hidden');}"
                                     />
                                     <div class="flex flex-col items-center justify-center text-surface">
                                         <span class="material-symbols-outlined text-4xl text-surface">qr_code_2</span>
                                         <span class="text-xs font-mono font-bold mt-2 text-surface">QR Pacífico Oficial</span>
+                                        <span class="text-[10px] font-mono text-gray-600 mt-1">Cta: 1068767358</span>
                                     </div>
                                 </div>
+
+                                <button type="button" onclick="navigator.clipboard.writeText('1068767358'); this.textContent='✓ Cuenta 1068767358 Copiada';" class="px-3 py-1.5 rounded-lg bg-surface border border-primary/40 text-primary text-[11px] font-mono font-bold hover:bg-primary hover:text-surface transition-all">
+                                    📋 Copiar N° Cuenta Pacífico (1068767358)
+                                </button>
                             </div>
                         </div>
                     </div>
 
                     <!-- =========================================================
-                         OPCIÓN C: DATOS DE TRANSFERENCIA BANCARIA DIRECTA
+                         OPCIÓN 2: TUS 3 CUENTAS BANCARIAS PARA TRANSFERENCIA DIRECTA
                          ========================================================= -->
-                    <div id="bank-transfer-section" class="hidden rounded-2xl border border-primary/40 bg-surface p-5 space-y-3">
+                    <div id="bank-transfer-section" class="hidden rounded-2xl border border-primary/40 bg-surface p-5 space-y-4">
                         <div class="flex items-center gap-2 text-xs font-mono font-extrabold text-primary uppercase tracking-wider">
                             <span class="material-symbols-outlined text-base">account_balance</span>
-                            <span>CUENTAS BANCARIAS OFICIALES PARA TRANSFERENCIA DIRECTA</span>
+                            <span>CUENTAS OFICIALES PARA TRANSFERENCIA O DEPÓSITO BANCARIO</span>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono text-gray-300">
-                            <div class="p-4 rounded-xl bg-surface-container border border-surface-high space-y-1">
-                                <div class="text-primary font-bold">BANCO PICHINCHA / DEUNA!</div>
-                                <div>Titular: <strong class="text-white">Anthonny Velástegui</strong></div>
-                                <div>Correo de confirmación: <span class="text-gray-400">anthonnyvelastegui@gmail.com</span></div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
+                            <!-- 1) Banco Pichincha -->
+                            <div class="p-4 rounded-xl bg-surface-container border border-primary/40 flex flex-col justify-between space-y-2">
+                                <div class="space-y-1">
+                                    <span class="px-2 py-0.5 rounded bg-warning/20 text-warning font-extrabold text-[10px]">BANCO PICHINCHA</span>
+                                    <div class="text-white font-extrabold text-sm pt-1">Cuenta de Ahorros</div>
+                                    <div class="text-primary font-extrabold text-base tracking-wider">2205616642</div>
+                                    <div class="text-gray-300 text-[11px]">Titular: <strong>Anthonny Velástegui</strong></div>
+                                    <div class="text-gray-400 text-[10px] break-all">Correo: anthonnyvelastegui@gmail.com</div>
+                                </div>
+                                <button type="button" onclick="navigator.clipboard.writeText('2205616642'); this.textContent='✓ Copiado: 2205616642';" class="w-full py-1.5 rounded-lg bg-surface border border-surface-high hover:border-primary text-primary font-bold text-[11px] transition-all">
+                                    Copiar Cuenta Pichincha
+                                </button>
                             </div>
-                            <div class="p-4 rounded-xl bg-surface-container border border-surface-high space-y-1">
-                                <div class="text-primary font-bold">BANCO DEL PACÍFICO</div>
-                                <div>Titular: <strong class="text-white">Anthonny Velástegui</strong></div>
-                                <div>Correo de confirmación: <span class="text-gray-400">aavemakaihc@gmail.com</span></div>
+
+                            <!-- 2) Banco del Pacífico -->
+                            <div class="p-4 rounded-xl bg-surface-container border border-primary/40 flex flex-col justify-between space-y-2">
+                                <div class="space-y-1">
+                                    <span class="px-2 py-0.5 rounded bg-primary/20 text-primary font-extrabold text-[10px]">BANCO DEL PACÍFICO</span>
+                                    <div class="text-white font-extrabold text-sm pt-1">Cuenta de Ahorros</div>
+                                    <div class="text-primary font-extrabold text-base tracking-wider">1068767358</div>
+                                    <div class="text-gray-300 text-[11px]">Titular: <strong>Anthonny Velástegui</strong></div>
+                                    <div class="text-gray-400 text-[10px] break-all">Correo: aavemakaihc@gmail.com</div>
+                                </div>
+                                <button type="button" onclick="navigator.clipboard.writeText('1068767358'); this.textContent='✓ Copiado: 1068767358';" class="w-full py-1.5 rounded-lg bg-surface border border-surface-high hover:border-primary text-primary font-bold text-[11px] transition-all">
+                                    Copiar Cuenta Pacífico
+                                </button>
+                            </div>
+
+                            <!-- 3) Banco Diners Club -->
+                            <div class="p-4 rounded-xl bg-surface-container border border-primary/40 flex flex-col justify-between space-y-2">
+                                <div class="space-y-1">
+                                    <span class="px-2 py-0.5 rounded bg-secondary/20 text-secondary font-extrabold text-[10px]">BANCO DINERS CLUB</span>
+                                    <div class="text-white font-extrabold text-sm pt-1">Cuenta de Ahorros</div>
+                                    <div class="text-secondary font-extrabold text-base tracking-wider">1000856707</div>
+                                    <div class="text-gray-300 text-[11px]">Titular: <strong>Anthonny Velástegui</strong></div>
+                                    <div class="text-gray-400 text-[10px] break-all">Correo: anthonnyvelastegui@gmail.com</div>
+                                </div>
+                                <button type="button" onclick="navigator.clipboard.writeText('1000856707'); this.textContent='✓ Copiado: 1000856707';" class="w-full py-1.5 rounded-lg bg-surface border border-surface-high hover:border-secondary text-secondary font-bold text-[11px] transition-all">
+                                    Copiar Cuenta Diners Club
+                                </button>
                             </div>
                         </div>
                     </div>
 
                     <!-- =========================================================
-                         REGISTRO DE COMPROBANTE BANCARIO PARA ACTIVACIÓN PRO / VIP (image_dff214.png)
+                         OPCIÓN 3: PAGO CON TARJETA (DESTINO BANCO PICHINCHA 2205616642)
+                         ========================================================= -->
+                    <div id="card-payment-section" class="hidden rounded-xl border border-warning/50 bg-warning/5 p-5 space-y-3">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <div class="flex items-center gap-2 text-xs font-mono font-extrabold text-warning uppercase tracking-wider">
+                                <span class="material-symbols-outlined text-base">credit_card</span>
+                                <span>PAGO CON TARJETA VISA / MASTERCARD / PAYPHONE</span>
+                            </div>
+                            <span class="px-2.5 py-0.5 rounded bg-warning/20 text-warning font-mono text-[10px] font-bold">
+                                Recaudación directa: Banco Pichincha Ahorros N° 2205616642
+                            </span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-gray-300 leading-relaxed">
+                            Todos los cobros con tarjeta de crédito o débito (Visa / Mastercard vía PayPhone) se acreditan directamente a la cuenta recaudadora oficial de <strong>Makai Academy en Banco Pichincha (Cuenta de Ahorros N° 2205616642 - Titular: Anthonny Velástegui)</strong>.
+                        </p>
+                        <p class="text-xs text-primary font-mono">
+                            👉 Si ya realizaste el pago por enlace con tarjeta o PayPhone, ingresa abajo el número de referencia del váucher y adjunta tu captura para priorizar tu activación (plazo máximo 72 horas laborables).
+                        </p>
+                    </div>
+
+                    <!-- =========================================================
+                         REGISTRO DE COMPROBANTE BANCARIO PARA ACTIVACIÓN PRO / VIP
                          ========================================================= -->
                     <div id="payment-evidence-section" class="hidden rounded-2xl border border-primary/40 bg-surface p-6 space-y-5">
                         <div class="pb-3 border-b border-surface-high">
                             <h3 class="text-base font-extrabold text-white flex items-center gap-2">
                                 <span class="material-symbols-outlined text-primary">receipt_long</span>
-                                <span>Registro de Comprobante Bancario para Activación PRO / VIP</span>
+                                <span>Registro de Comprobante Bancario / Váucher para Activación PRO / VIP</span>
                             </h3>
                             <p class="text-xs text-gray-400 mt-1">
-                                Ingresa los datos exactos de tu transferencia o pago QR y sube la captura (JPG, PNG o PDF máx. 750 KB).
+                                Ingresa los datos exactos de tu transferencia, pago QR o váucher de tarjeta y sube la captura (JPG, PNG o PDF máx. 750 KB).
                             </p>
                         </div>
 
@@ -422,7 +485,7 @@
                                 <input type="text" id="pay-receipt-number" placeholder="Ej: 04829104" class="w-full bg-surface-container border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white placeholder-gray-500 font-mono focus:outline-none focus:border-primary" />
                             </div>
                             <div>
-                                <label for="pay-holder-name" class="block text-xs font-medium text-gray-400 mb-1.5">Nombre del Titular de la Cuenta</label>
+                                <label for="pay-holder-name" class="block text-xs font-medium text-gray-400 mb-1.5">Nombre del Titular de la Cuenta / Tarjeta</label>
                                 <input type="text" id="pay-holder-name" placeholder="Quien realiza el pago" class="w-full bg-surface-container border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary" />
                             </div>
                             <div>
@@ -433,8 +496,13 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
-                                <label for="pay-origin-bank" class="block text-xs font-medium text-gray-400 mb-1.5">Banco o App de Origen</label>
-                                <input type="text" id="pay-origin-bank" placeholder="Ej: Pichincha / Deuna! / Pacífico" class="w-full bg-surface-container border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary" />
+                                <label for="pay-origin-bank" class="block text-xs font-medium text-gray-400 mb-1.5">Banco Destino / App Utilizada</label>
+                                <select id="pay-origin-bank" class="w-full bg-surface-container border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-primary">
+                                    <option value="Banco Pichincha (Cta. 2205616642 / Deuna!)">Banco Pichincha (Cta. 2205616642 / Deuna!)</option>
+                                    <option value="Banco del Pacífico (Cta. 1068767358 / QR Be)">Banco del Pacífico (Cta. 1068767358 / QR Be)</option>
+                                    <option value="Banco Diners Club (Cta. 1000856707)">Banco Diners Club (Cta. 1000856707)</option>
+                                    <option value="Tarjeta Visa/Mastercard -> Banco Pichincha (2205616642)">Tarjeta Visa/Mastercard → Pichincha (2205616642)</option>
+                                </select>
                             </div>
                             <div>
                                 <label for="pay-amount" class="block text-xs font-medium text-gray-400 mb-1.5">Monto Transferido (USD)</label>
@@ -469,174 +537,491 @@
                     class="w-full bg-primary text-surface font-extrabold py-4 rounded-xl hover:bg-opacity-90 transition-all shadow-[0_0_25px_rgba(0,229,255,0.3)] flex items-center justify-center gap-2 text-sm sm:text-base"
                 >
                     <span class="material-symbols-outlined text-xl">how_to_reg</span>
-                    <span>Registrar y Enviar Correo de Verificación</span>
+                    <span>Registrar Expediente y Enviar Correo de Verificación</span>
                 </button>
             </form>
         </div>
+
+        <!-- =========================================================
+             TARJETA 2: PANTALLA DE VALIDACIÓN DE CORREO Y AVISO 72 HORAS
+             ========================================================= -->
+        <div id="verification-card" class="hidden bg-surface-container border-2 border-primary rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-primary/15 border border-primary text-primary flex items-center justify-center mx-auto">
+                <span class="material-symbols-outlined text-4xl">mark_email_unread</span>
+            </div>
+
+            <div class="space-y-2">
+                <span class="px-3 py-1 rounded-full bg-primary/15 text-primary text-xs font-mono font-extrabold uppercase">
+                    PASO FINAL OBLIGATORIO • VALIDACIÓN DE SEGURIDAD
+                </span>
+                <h2 class="text-2xl font-extrabold text-white">Verifica tu Correo Electrónico</h2>
+                <p class="text-sm text-gray-300 max-w-xl mx-auto">
+                    Hemos enviado un enlace oficial de confirmación a:
+                    <strong id="verify-email-display" class="text-primary font-mono block mt-1 text-base">tu correo electrónico</strong>
+                </p>
+                <p class="text-xs text-gray-400 max-w-lg mx-auto">
+                    Abre tu bandeja de entrada (o la carpeta de <strong>Spam / No deseados</strong>), haz clic en el enlace de verificación y luego presiona el botón de abajo para ingresar al portal.
+                </p>
+            </div>
+
+            <!-- AVISO DE 72 HORAS LABORABLES EN LA PANTALLA DE VERIFICACIÓN -->
+            <div id="payment-instructions-box" class="rounded-xl border-2 border-warning/60 bg-warning/10 p-4 text-left max-w-2xl mx-auto">
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-warning text-2xl shrink-0">verified</span>
+                    <div class="text-xs sm:text-sm text-gray-200 leading-relaxed">
+                        <strong class="text-warning font-mono uppercase block mb-1">
+                            ⏳ TIEMPO DE HABILITACIÓN DEL PLAN ELEGIDO (MÁXIMO 72 HORAS LABORABLES):
+                        </strong>
+                        Una vez seleccionado tu método de pago y enviado tu comprobante a nuestras cuentas oficiales (<strong>Banco Pichincha 2205616642</strong>, <strong>Banco del Pacífico 1068767358</strong> o <strong>Diners Club 1000856707</strong>), los servicios completos del plan elegido se habilitarán en un <strong>plazo máximo de 72 horas laborables</strong> tras la auditoría financiera.
+                    </div>
+                </div>
+            </div>
+
+            <div id="verify-status-msg" class="hidden p-3 rounded-xl border text-xs font-mono max-w-xl mx-auto"></div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                <button
+                    type="button"
+                    id="btn-check-verified"
+                    class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-primary text-surface font-extrabold text-sm hover:bg-opacity-90 transition-all shadow-[0_0_20px_rgba(0,229,255,0.3)] flex items-center justify-center gap-2"
+                >
+                    <span class="material-symbols-outlined text-lg">verified_user</span>
+                    <span>Ya verifiqué mi correo (Ingresar al Portal)</span>
+                </button>
+
+                <button
+                    type="button"
+                    id="btn-resend-email"
+                    class="w-full sm:w-auto px-5 py-3.5 rounded-xl bg-surface border border-surface-high hover:border-primary text-gray-200 hover:text-primary font-bold text-xs font-mono transition-all"
+                >
+                    Reenviar correo de verificación
+                </button>
+            </div>
+        </div>
     </div>
 
-    <!-- CONTROLADOR VISUAL INMEDIATO DE TARJETAS Y MÉTODOS DE PAGO (QR / TARJETA / TRANSFERENCIA) -->
-    <script>
-        (function () {
-            const params = new URLSearchParams(window.location.search);
-            const urlPlan = params.get("plan");
-            const urlPago = params.get("pago");
+    <!-- CONTROLADOR INTEGRADO DE PLANES, BANCOS, REGISTRO Y VALIDACIÓN DE CORREO -->
+    <script type="module">
+        import {
+            auth,
+            db,
+            createUserWithEmailAndPassword,
+            sendEmailVerification,
+            onAuthStateChanged,
+            doc,
+            setDoc,
+            collection,
+            addDoc
+        } from "./js/2-core/firebase.service.js";
+        import { isMasterAdmin } from "./js/2-core/state.store.js";
 
-            const planHiddenInput = document.getElementById("reg-plan-select");
-            const planCards = document.querySelectorAll(".plan-card");
-            const paySelect = document.getElementById("reg-payment-select");
+        const params = new URLSearchParams(window.location.search);
+        const urlPlan = params.get("plan");
+        const urlPago = params.get("pago");
+        const isVerifyPending = params.get("verify") === "pending";
 
-            const qrSection = document.getElementById("qr-payment-section");
-            const bankSection = document.getElementById("bank-transfer-section");
-            const cardSection = document.getElementById("card-payment-section");
-            const evidenceSection = document.getElementById("payment-evidence-section");
-            const payAmountInput = document.getElementById("pay-amount");
-            const dateInput = document.getElementById("pay-receipt-date");
+        const registrationCard = document.getElementById("registration-card");
+        const verificationCard = document.getElementById("verification-card");
+        const verifyEmailDisplay = document.getElementById("verify-email-display");
+        const verifyStatusMsg = document.getElementById("verify-status-msg");
 
-            if (dateInput && !dateInput.value) {
-                dateInput.value = new Date().toISOString().split("T")[0];
-            }
+        const planHiddenInput = document.getElementById("reg-plan-select");
+        const planCards = document.querySelectorAll(".plan-card");
+        const paySelect = document.getElementById("reg-payment-select");
 
-            const planPrices = {
-                basico: "0.00",
-                pro_mensual: "17.99",
-                pro_anual: "139.99",
-                vip: "49.99"
-            };
+        const qrSection = document.getElementById("qr-payment-section");
+        const bankSection = document.getElementById("bank-transfer-section");
+        const cardSection = document.getElementById("card-payment-section");
+        const evidenceSection = document.getElementById("payment-evidence-section");
+        const slaWarning = document.getElementById("payment-sla-warning");
+        const payAmountInput = document.getElementById("pay-amount");
+        const dateInput = document.getElementById("pay-receipt-date");
 
-            function highlightPlanCards(selectedKey) {
-                planCards.forEach((card) => {
-                    const isSelected = card.dataset.planCard === selectedKey;
-                    const icon = card.querySelector(".check-icon");
-                    if (isSelected) {
-                        card.className = "plan-card cursor-pointer rounded-xl p-4 border-2 border-primary bg-surface-high/95 shadow-[0_0_20px_rgba(0,229,255,0.2)] transition-all relative flex flex-col justify-between";
-                        if (icon) {
-                            icon.textContent = "check_circle";
-                            icon.className = "material-symbols-outlined text-primary text-base check-icon";
-                        }
-                    } else {
-                        card.className = "plan-card cursor-pointer rounded-xl p-4 border border-surface-high bg-surface hover:border-gray-600 transition-all relative flex flex-col justify-between";
-                        if (icon) {
-                            icon.textContent = "radio_button_unchecked";
-                            icon.className = "material-symbols-outlined text-gray-600 text-base check-icon";
-                        }
+        if (dateInput && !dateInput.value) {
+            dateInput.value = new Date().toISOString().split("T")[0];
+        }
+
+        const planPrices = {
+            basico: "0.00",
+            pro_mensual: "17.99",
+            pro_anual: "139.99",
+            vip: "49.99"
+        };
+
+        function highlightPlanCards(selectedKey) {
+            planCards.forEach((card) => {
+                const isSelected = card.dataset.planCard === selectedKey;
+                const icon = card.querySelector(".check-icon");
+                if (isSelected) {
+                    card.className = "plan-card cursor-pointer rounded-xl p-4 border-2 border-primary bg-surface-high/95 shadow-[0_0_20px_rgba(0,229,255,0.2)] transition-all relative flex flex-col justify-between";
+                    if (icon) {
+                        icon.textContent = "check_circle";
+                        icon.className = "material-symbols-outlined text-primary text-base check-icon";
                     }
+                } else {
+                    card.className = "plan-card cursor-pointer rounded-xl p-4 border border-surface-high bg-surface hover:border-gray-600 transition-all relative flex flex-col justify-between";
+                    if (icon) {
+                        icon.textContent = "radio_button_unchecked";
+                        icon.className = "material-symbols-outlined text-gray-600 text-base check-icon";
+                    }
+                }
+            });
+        }
+
+        function refreshPaymentUI() {
+            const currentPlan = planHiddenInput?.value || "basico";
+            const method = paySelect?.value || "ninguno";
+
+            qrSection?.classList.add("hidden");
+            bankSection?.classList.add("hidden");
+            cardSection?.classList.add("hidden");
+            evidenceSection?.classList.add("hidden");
+
+            const requiredEvidenceIds = [
+                "pay-receipt-number",
+                "pay-holder-name",
+                "pay-holder-id",
+                "pay-amount",
+                "pay-receipt-date",
+                "pay-receipt-file"
+            ];
+
+            if (method === "ninguno") {
+                slaWarning?.classList.add("hidden");
+                requiredEvidenceIds.forEach((id) => {
+                    const el = document.getElementById(id);
+                    if (el) el.required = false;
                 });
+                return;
             }
 
-            function refreshPaymentUI() {
-                const currentPlan = planHiddenInput?.value || "basico";
-                const method = paySelect?.value || "ninguno";
+            // Mostrar siempre la advertencia de 72 horas laborables cuando se elige un método de pago
+            slaWarning?.classList.remove("hidden");
 
-                qrSection?.classList.add("hidden");
-                bankSection?.classList.add("hidden");
-                cardSection?.classList.add("hidden");
-                evidenceSection?.classList.add("hidden");
+            if (method === "qr") {
+                qrSection?.classList.remove("hidden");
+            } else if (method === "transferencia") {
+                bankSection?.classList.remove("hidden");
+            } else if (method === "tarjeta") {
+                cardSection?.classList.remove("hidden");
+                const originBankSelect = document.getElementById("pay-origin-bank");
+                if (originBankSelect) {
+                    originBankSelect.value = "Tarjeta Visa/Mastercard -> Banco Pichincha (2205616642)";
+                }
+            }
 
-                const requiredEvidenceIds = [
-                    "pay-receipt-number",
-                    "pay-holder-name",
-                    "pay-holder-id",
-                    "pay-origin-bank",
-                    "pay-amount",
-                    "pay-receipt-date",
-                    "pay-receipt-file"
+            // Habilitar formulario de comprobante tanto para QR, Transferencia como Tarjeta
+            evidenceSection?.classList.remove("hidden");
+            const amountForPlan = currentPlan === "basico" ? "17.99" : (planPrices[currentPlan] || "17.99");
+            if (payAmountInput) payAmountInput.value = amountForPlan;
+
+            requiredEvidenceIds.forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.required = currentPlan !== "basico";
+            });
+        }
+
+        function applyPlanSelection(planKey, preferredPago = "") {
+            const valid = ["basico", "pro_mensual", "pro_anual", "vip"];
+            const chosen = valid.includes(planKey) ? planKey : "pro_mensual";
+            if (planHiddenInput) planHiddenInput.value = chosen;
+
+            highlightPlanCards(chosen);
+
+            if (paySelect) {
+                paySelect.innerHTML = "";
+                const allOptions = [
+                    { value: "qr", text: "Código QR Deuna! (Pichincha 2205616642) o QR Pacífico (1068767358)" },
+                    { value: "transferencia", text: "Transferencia Bancaria Directa (Pichincha / Pacífico / Diners Club)" },
+                    { value: "tarjeta", text: "Tarjeta de Crédito / Débito (Visa / Mastercard → Banco Pichincha 2205616642)" },
+                    { value: "ninguno", text: "Sin pago por ahora (Iniciar con Plan Básico $0)" }
                 ];
 
-                if (method === "qr" || method === "transferencia") {
-                    if (method === "qr") qrSection?.classList.remove("hidden");
-                    if (method === "transferencia") bankSection?.classList.remove("hidden");
-                    evidenceSection?.classList.remove("hidden");
-
-                    const amountForPlan = currentPlan === "basico" ? "17.99" : (planPrices[currentPlan] || "17.99");
-                    if (payAmountInput) payAmountInput.value = amountForPlan;
-
-                    requiredEvidenceIds.forEach((id) => {
-                        const el = document.getElementById(id);
-                        if (el) el.required = currentPlan !== "basico";
-                    });
-                } else if (method === "tarjeta") {
-                    cardSection?.classList.remove("hidden");
-                    requiredEvidenceIds.forEach((id) => {
-                        const el = document.getElementById(id);
-                        if (el) el.required = false;
-                    });
-                } else {
-                    requiredEvidenceIds.forEach((id) => {
-                        const el = document.getElementById(id);
-                        if (el) el.required = false;
-                    });
-                }
-            }
-
-            function applyPlanSelection(planKey, preferredPago = "") {
-                const valid = ["basico", "pro_mensual", "pro_anual", "vip"];
-                const chosen = valid.includes(planKey) ? planKey : "pro_mensual";
-                if (planHiddenInput) planHiddenInput.value = chosen;
-
-                highlightPlanCards(chosen);
-
-                if (paySelect) {
-                    paySelect.innerHTML = "";
-                    const allOptions = [
-                        { value: "qr", text: "Código QR Deuna! o Bancario (Pichincha / Pacífico)" },
-                        { value: "tarjeta", text: "Tarjeta de Crédito / Débito (Visa / Mastercard)" },
-                        { value: "transferencia", text: "Transferencia Bancaria Directa" },
-                        { value: "ninguno", text: "Sin pago por ahora (Iniciar con Plan Básico $0)" }
-                    ];
-
-                    allOptions.forEach((o) => {
-                        if (chosen !== "basico" && o.value === "ninguno") return;
-                        const opt = document.createElement("option");
-                        opt.value = o.value;
-                        opt.textContent = o.text;
-                        paySelect.appendChild(opt);
-                    });
-
-                    if (chosen === "basico" && !preferredPago) {
-                        paySelect.value = "ninguno";
-                    } else if (preferredPago === "tarjeta" || preferredPago === "payphone") {
-                        paySelect.value = "tarjeta";
-                    } else if (preferredPago === "transferencia") {
-                        paySelect.value = "transferencia";
-                    } else {
-                        paySelect.value = "qr";
-                    }
-                }
-
-                refreshPaymentUI();
-            }
-
-            planCards.forEach((card) => {
-                card.addEventListener("click", () => {
-                    const currentMethod = paySelect?.value === "ninguno" ? "qr" : (paySelect?.value || "qr");
-                    applyPlanSelection(card.dataset.planCard, card.dataset.planCard === "basico" ? "" : currentMethod);
+                allOptions.forEach((o) => {
+                    if (chosen !== "basico" && o.value === "ninguno") return;
+                    const opt = document.createElement("option");
+                    opt.value = o.value;
+                    opt.textContent = o.text;
+                    paySelect.appendChild(opt);
                 });
-            });
 
-            paySelect?.addEventListener("change", () => {
-                // Si estaba en Plan Básico y elige un método de pago pagado, pasa a PRO Mensual automáticamente
-                if (planHiddenInput?.value === "basico" && paySelect.value !== "ninguno") {
-                    planHiddenInput.value = "pro_mensual";
-                    highlightPlanCards("pro_mensual");
+                if (chosen === "basico" && (!preferredPago || preferredPago === "ninguno")) {
+                    paySelect.value = "ninguno";
+                } else if (preferredPago === "tarjeta" || preferredPago === "payphone") {
+                    paySelect.value = "tarjeta";
+                } else if (preferredPago === "transferencia") {
+                    paySelect.value = "transferencia";
+                } else {
+                    paySelect.value = "qr";
                 }
-                refreshPaymentUI();
-            });
+            }
 
-            // Autocompletar Cédula/Nombre del titular de pago con los datos del estudiante si están vacíos
-            const regCedula = document.getElementById("reg-cedula");
-            const payHolderId = document.getElementById("pay-holder-id");
-            regCedula?.addEventListener("blur", () => {
-                if (payHolderId && !payHolderId.value.trim()) {
-                    payHolderId.value = regCedula.value.trim();
+            refreshPaymentUI();
+        }
+
+        planCards.forEach((card) => {
+            card.addEventListener("click", () => {
+                const currentMethod = paySelect?.value === "ninguno" ? "qr" : (paySelect?.value || "qr");
+                applyPlanSelection(card.dataset.planCard, card.dataset.planCard === "basico" ? "ninguno" : currentMethod);
+            });
+        });
+
+        paySelect?.addEventListener("change", () => {
+            if (planHiddenInput?.value === "basico" && paySelect.value !== "ninguno") {
+                planHiddenInput.value = "pro_mensual";
+                highlightPlanCards("pro_mensual");
+            }
+            refreshPaymentUI();
+        });
+
+        // Autocompletar Cédula del titular si está vacía
+        const regCedula = document.getElementById("reg-cedula");
+        const payHolderId = document.getElementById("pay-holder-id");
+        regCedula?.addEventListener("blur", () => {
+            if (payHolderId && !payHolderId.value.trim()) {
+                payHolderId.value = regCedula.value.trim();
+            }
+        });
+
+        applyPlanSelection(urlPlan || "pro_mensual", urlPago || "qr");
+
+        // Compresor de comprobante (JPG, PNG o PDF a Base64 para Firestore)
+        function fileToDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                if (file.size > 900 * 1024 && file.type.startsWith("image/")) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement("canvas");
+                            const maxDim = 1100;
+                            let w = img.width;
+                            let h = img.height;
+                            if (w > maxDim || h > maxDim) {
+                                if (w > h) {
+                                    h = Math.round((h * maxDim) / w);
+                                    w = maxDim;
+                                } else {
+                                    w = Math.round((w * maxDim) / h);
+                                    h = maxDim;
+                                }
+                            }
+                            canvas.width = w;
+                            canvas.height = h;
+                            const ctx = canvas.getContext("2d");
+                            ctx.drawImage(img, 0, 0, w, h);
+                            resolve(canvas.toDataURL("image/jpeg", 0.78));
+                        };
+                        img.onerror = reject;
+                        img.src = ev.target.result;
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                } else {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
                 }
             });
+        }
 
-            applyPlanSelection(urlPlan || "pro_mensual", urlPago || "qr");
-        })();
+        // Mostrar pantalla de Verificación de Correo Pendiente
+        function openVerificationScreen(user) {
+            registrationCard?.classList.add("hidden");
+            verificationCard?.classList.remove("hidden");
+            if (verifyEmailDisplay && user?.email) {
+                verifyEmailDisplay.textContent = user.email;
+            }
+        }
+
+        if (isVerifyPending) {
+            onAuthStateChanged(auth, (u) => {
+                if (u) openVerificationScreen(u);
+            });
+        }
+
+        // Botón: "Ya verifiqué mi correo"
+        document.getElementById("btn-check-verified")?.addEventListener("click", async () => {
+            const user = auth.currentUser;
+            if (!user) {
+                window.location.href = "index.html";
+                return;
+            }
+            await user.reload();
+            if (user.emailVerified || isMasterAdmin(user.email)) {
+                try {
+                    await setDoc(doc(db, "usuarios", user.uid), { correoConfirmadoMakai: true }, { merge: true });
+                } catch (e) {
+                    console.warn("Aviso actualizando confirmación:", e);
+                }
+                window.location.href = "dashboard.html";
+            } else {
+                verifyStatusMsg.textContent = "⚠️ Aún no detectamos la confirmación. Abre el enlace enviado a tu correo (revisa Spam) y vuelve a pulsar este botón.";
+                verifyStatusMsg.className = "p-3 rounded-xl border border-warning bg-warning/15 text-warning text-xs font-mono max-w-xl mx-auto";
+                verifyStatusMsg.classList.remove("hidden");
+            }
+        });
+
+        // Botón: "Reenviar correo de verificación"
+        document.getElementById("btn-resend-email")?.addEventListener("click", async () => {
+            const user = auth.currentUser;
+            if (!user) return;
+            try {
+                await sendEmailVerification(user);
+                verifyStatusMsg.textContent = `✅ Enlace reenviado exitosamente a ${user.email}. Revisa tu bandeja principal y Spam.`;
+                verifyStatusMsg.className = "p-3 rounded-xl border border-secondary bg-secondary/15 text-secondary text-xs font-mono max-w-xl mx-auto";
+                verifyStatusMsg.classList.remove("hidden");
+            } catch (err) {
+                verifyStatusMsg.textContent = "⚠️ Espera 60 segundos antes de solicitar otro correo: " + err.message;
+                verifyStatusMsg.className = "p-3 rounded-xl border border-danger bg-danger/15 text-danger text-xs font-mono max-w-xl mx-auto";
+                verifyStatusMsg.classList.remove("hidden");
+            }
+        });
+
+        // Envío del Formulario de Registro
+        const form = document.getElementById("full-register-form");
+        const errorBox = document.getElementById("reg-error-box");
+        const submitBtn = document.getElementById("btn-submit-register");
+
+        form?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            errorBox?.classList.add("hidden");
+
+            const title = document.getElementById("reg-title")?.value || "Dr.";
+            const firstName = document.getElementById("reg-firstname")?.value.trim() || "";
+            const lastName = document.getElementById("reg-lastname")?.value.trim() || "";
+            const cedula = document.getElementById("reg-cedula")?.value.trim() || "";
+            const nickname = document.getElementById("reg-nickname")?.value.trim() || "";
+            const career = document.getElementById("reg-career")?.value || "medicina";
+            const country = document.getElementById("reg-country")?.value || "Ecuador";
+            const phoneExt = document.getElementById("reg-phone-ext")?.value || "+593";
+            const phoneNumber = document.getElementById("reg-phone-number")?.value.trim() || "";
+            const bday = String(document.getElementById("reg-bday")?.value || "01").padStart(2, "0");
+            const bmonth = String(document.getElementById("reg-bmonth")?.value || "01").padStart(2, "0");
+            const byear = document.getElementById("reg-byear")?.value || "2000";
+            const email = document.getElementById("reg-email")?.value.trim() || "";
+            const backupEmail = document.getElementById("reg-backup-email")?.value.trim() || "";
+            const pass = document.getElementById("reg-password")?.value || "";
+            const confirmPass = document.getElementById("reg-confirm-password")?.value || "";
+            const chosenPlan = planHiddenInput?.value || "basico";
+            const chosenPayment = paySelect?.value || "ninguno";
+
+            if (pass !== confirmPass) {
+                errorBox.textContent = "⚠️ Las contraseñas no coinciden. Verifícalas e intenta de nuevo.";
+                errorBox.classList.remove("hidden");
+                return;
+            }
+
+            if (email.toLowerCase() === backupEmail.toLowerCase()) {
+                errorBox.textContent = "⚠️ El correo de respaldo debe ser diferente a tu correo electrónico principal.";
+                errorBox.classList.remove("hidden");
+                return;
+            }
+
+            const requiresReceipt = chosenPlan !== "basico" && chosenPayment !== "ninguno";
+            const receiptFile = document.getElementById("pay-receipt-file")?.files?.[0];
+
+            if (requiresReceipt && !receiptFile) {
+                errorBox.textContent = "⚠️ Para activar un plan PRO o VIP debes adjuntar la captura o PDF de tu comprobante de pago.";
+                errorBox.classList.remove("hidden");
+                return;
+            }
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = "<span>Creando expediente y enviando correo de verificación...</span>";
+
+                let receiptDataUrl = null;
+                if (requiresReceipt && receiptFile) {
+                    receiptDataUrl = await fileToDataUrl(receiptFile);
+                }
+
+                const cred = await createUserWithEmailAndPassword(auth, email, pass);
+                const nowIso = new Date().toISOString();
+                const nowReadable = new Date().toLocaleString("es-EC", { timeZone: "America/Guayaquil" });
+
+                const paymentVerificationDetails = requiresReceipt ? {
+                    numeroComprobante: document.getElementById("pay-receipt-number")?.value.trim() || "",
+                    titularCuenta: document.getElementById("pay-holder-name")?.value.trim() || `${firstName} ${lastName}`,
+                    cedulaTitular: document.getElementById("pay-holder-id")?.value.trim() || cedula,
+                    bancoOrigen: document.getElementById("pay-origin-bank")?.value || "Banco Pichincha (2205616642)",
+                    montoDeclarado: document.getElementById("pay-amount")?.value.trim() || "17.99",
+                    fechaComprobante: document.getElementById("pay-receipt-date")?.value || "",
+                    archivoNombre: receiptFile ? receiptFile.name : "",
+                    archivoTipo: receiptFile ? receiptFile.type : "",
+                    comprobanteBase64: receiptDataUrl,
+                    plazoMaximoActivacion: "72 horas laborables",
+                    fechaHoraEnvioExacta: nowReadable
+                } : null;
+
+                const isUserAdmin = isMasterAdmin(email);
+
+                const profileData = {
+                    uid: cred.user.uid,
+                    titulo: title,
+                    primerNombre: firstName,
+                    apellido: lastName,
+                    nombre: `${title} ${firstName} ${lastName}`,
+                    cedula: cedula,
+                    nickname: nickname,
+                    carrera: career,
+                    pais: country,
+                    telefonoExtension: phoneExt,
+                    telefonoNumero: phoneNumber,
+                    telefonoCompleto: `${phoneExt} ${phoneNumber}`,
+                    email: email,
+                    emailRespaldo: backupEmail,
+                    cumpleanos: `${bday}/${bmonth}/${byear}`,
+                    rol: isUserAdmin ? "admin" : "estudiante",
+                    subscriptionLevel: isUserAdmin ? "PRO" : "Básico",
+                    planSolicitado: chosenPlan,
+                    metodoPagoPreferido: chosenPayment,
+                    estadoPago: chosenPlan === "basico" ? "activo_gratis" : "pendiente_verificacion_72h",
+                    datosComprobante: paymentVerificationDetails,
+                    correoConfirmadoMakai: isUserAdmin,
+                    casesUsedThisMonth: 0,
+                    totalExamsCompleted: 0,
+                    globalAverage: 0,
+                    createdAt: nowIso
+                };
+
+                try {
+                    await setDoc(doc(db, "usuarios", cred.user.uid), profileData);
+
+                    if (requiresReceipt && paymentVerificationDetails) {
+                        await addDoc(collection(db, "solicitudes_pago"), {
+                            uid: cred.user.uid,
+                            estudianteNombre: `${title} ${firstName} ${lastName}`,
+                            estudianteCedula: cedula,
+                            estudianteEmail: email,
+                            estudianteTelefono: `${phoneExt} ${phoneNumber}`,
+                            planSolicitado: chosenPlan,
+                            metodoPago: chosenPayment,
+                            cuentaReceptoraPichincha: "2205616642",
+                            estado: "pendiente",
+                            ...paymentVerificationDetails,
+                            createdAt: nowIso
+                        });
+                    }
+                } catch (fireErr) {
+                    console.warn("Aviso guardando en Firestore:", fireErr);
+                }
+
+                if (isUserAdmin) {
+                    window.location.href = "dashboard.html";
+                    return;
+                }
+
+                await sendEmailVerification(cred.user);
+                openVerificationScreen(cred.user);
+            } catch (err) {
+                errorBox.textContent = "⚠️ Error al registrar: " + err.message;
+                errorBox.classList.remove("hidden");
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span class="material-symbols-outlined text-xl">how_to_reg</span><span>Registrar Expediente y Enviar Correo de Verificación</span>';
+            }
+        });
     </script>
-
-    <!-- DIRECTOR DE ORQUESTA MODULAR -->
-    <script type="module" src="js/2-core/app.orchestrator.js"></script>
 </body>
 </html>
