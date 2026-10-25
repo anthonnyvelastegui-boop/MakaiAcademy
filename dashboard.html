@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Makai Academy • Ecosistema Clínico & Simulador CACES</title>
-    <link rel="icon" type="image/png" href="assets/1-branding/logos/logo.png">
+    <link id="dynamic-favicon" rel="icon" type="image/png" href="assets/1-branding/logos/logo.png">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,7 +50,13 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* Forzar contraste oscuro perfecto cuando un botón del menú lateral está activo */
+        /* Ocultar cualquier inyección duplicada de versiones anteriores de router.spa.js */
+        #makai-carrera-dynamic-root,
+        #makai-caces-dynamic-root {
+            display: none !important;
+        }
+
+        /* Contraste oscuro nítido cuando un botón del menú lateral está activo */
         .nav-btn.bg-primary {
             color: #06090e !important;
             font-weight: 800 !important;
@@ -72,7 +78,7 @@
         ::-webkit-scrollbar-thumb:hover { background: #00e5ff; }
     </style>
 
-    <!-- Definiciones Vectoriales: Ícono Nirvana y Logo Oficial de Respaldo Makai Academy -->
+    <!-- Definiciones Vectoriales: Ícono Nirvana y Emblema Completo Makai Academy -->
     <svg id="svg-defs" style="display: none;">
         <symbol id="nirvana-icon" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="45" fill="#ffbe0b" stroke="#00e5ff" stroke-width="4"/>
@@ -82,23 +88,28 @@
             <path d="M 45 73 Q 50 92 56 73" fill="#ff4d4d" stroke="#06090e" stroke-width="2.5"/>
         </symbol>
 
-        <symbol id="makai-logo-fallback" viewBox="0 0 120 100">
+        <!-- Emblema Vectorial Alta Definición inspirado en Fondo MAKAI Academy 2 -->
+        <symbol id="makai-logo-fallback" viewBox="0 0 120 120">
             <defs>
-                <linearGradient id="makaiRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <linearGradient id="makaiOuterRing" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stop-color="#00e5ff" />
-                    <stop offset="100%" stop-color="#0284c7" />
+                    <stop offset="50%" stop-color="#0284c7" />
+                    <stop offset="100%" stop-color="#0369a1" />
                 </linearGradient>
-                <linearGradient id="makaiBookGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <linearGradient id="makaiGreenBook" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stop-color="#b5ec42" />
-                    <stop offset="100%" stop-color="#6db321" />
+                    <stop offset="100%" stop-color="#65a30d" />
                 </linearGradient>
             </defs>
-            <circle cx="62" cy="50" r="40" fill="none" stroke="url(#makaiRingGrad)" stroke-width="7" stroke-dasharray="200 55" stroke-linecap="round"/>
-            <circle cx="44" cy="52" r="27" fill="none" stroke="#00e5ff" stroke-width="6" stroke-dasharray="125 45" stroke-dashoffset="30" stroke-linecap="round"/>
-            <path d="M27 64 L30 45 Q38 45 44 48 L44 66 Q37 63 27 64 Z" fill="none" stroke="url(#makaiBookGrad)" stroke-width="3" stroke-linejoin="round"/>
-            <path d="M61 64 L58 45 Q50 45 44 48 L44 66 Q51 63 61 64 Z" fill="none" stroke="url(#makaiBookGrad)" stroke-width="3" stroke-linejoin="round"/>
-            <circle cx="44" cy="35" r="6.5" fill="none" stroke="url(#makaiBookGrad)" stroke-width="3"/>
-            <path d="M40 42 L48 42 M44 35 L44 42" stroke="url(#makaiBookGrad)" stroke-width="2.5" stroke-linecap="round"/>
+            <rect x="4" y="4" width="112" height="112" rx="24" fill="#0b1320" stroke="#00e5ff" stroke-width="2.5"/>
+            <circle cx="66" cy="60" r="42" fill="none" stroke="url(#makaiOuterRing)" stroke-width="8" stroke-dasharray="200 60" stroke-linecap="round"/>
+            <circle cx="48" cy="62" r="30" fill="none" stroke="#00e5ff" stroke-width="6.5" stroke-dasharray="135 50" stroke-dashoffset="28" stroke-linecap="round"/>
+            <path d="M27 75 L31 52 Q40 52 48 56 L48 77 Q39 73 27 75 Z" fill="url(#makaiGreenBook)" opacity="0.25"/>
+            <path d="M69 75 L65 52 Q56 52 48 56 L48 77 Q57 73 69 75 Z" fill="url(#makaiGreenBook)" opacity="0.25"/>
+            <path d="M27 75 L31 52 Q40 52 48 56 L48 77 Q39 73 27 75 Z" fill="none" stroke="url(#makaiGreenBook)" stroke-width="3.5" stroke-linejoin="round"/>
+            <path d="M69 75 L65 52 Q56 52 48 56 L48 77 Q57 73 69 75 Z" fill="none" stroke="url(#makaiGreenBook)" stroke-width="3.5" stroke-linejoin="round"/>
+            <circle cx="48" cy="39" r="8" fill="#0b1320" stroke="#94de2d" stroke-width="3.5"/>
+            <path d="M43 49 L53 49 M48 39 L48 49" stroke="#00e5ff" stroke-width="3" stroke-linecap="round"/>
         </symbol>
     </svg>
 </head>
@@ -109,17 +120,25 @@
     <!-- =================================================================== -->
     <aside class="w-72 bg-surface-container border-r border-surface-high flex flex-col h-full flex-shrink-0 select-none">
 
-        <!-- CABECERA DEL SIDEBAR: LOGO + MAKAI ACADEMY + VERSIÓN 4.4.2 -->
+        <!-- CABECERA DEL SIDEBAR: LOGO INTERACTIVO + MAKAI ACADEMY + VERSIÓN 4.4.2 -->
         <div class="p-4 border-b border-surface-high">
             <div class="flex items-center gap-3.5 mb-3.5">
-                <div class="w-11 h-11 rounded-xl bg-surface border border-primary/50 p-1.5 flex items-center justify-center shadow-[0_0_15px_rgba(0,229,255,0.2)] flex-shrink-0 overflow-hidden">
+                <!-- Contenedor del Logo (Permite cargar Fondo MAKAI Academy 2 con 1 clic si aún no está en GitHub) -->
+                <div id="brand-logo-box"
+                     onclick="document.getElementById('brand-logo-file-input').click()"
+                     title="Haz clic aquí para seleccionar tu imagen 'Fondo MAKAI Academy 2' si aún no aparece"
+                     class="group relative w-12 h-12 rounded-xl bg-surface border border-primary/60 p-1 flex items-center justify-center shadow-[0_0_15px_rgba(0,229,255,0.22)] flex-shrink-0 overflow-hidden cursor-pointer hover:border-secondary transition-all">
                     <img id="sidebar-brand-logo"
                          src="assets/1-branding/logos/logo.png"
                          alt="Makai Academy"
-                         class="w-full h-full object-contain"
-                         onerror="if(!this.dataset.t1){this.dataset.t1=1;this.src='logo.png';}else if(!this.dataset.t2){this.dataset.t2=1;this.src='Fondo MAKAI Academy 2.png';}else if(!this.dataset.t3){this.dataset.t3=1;this.src='assets/1-branding/logos/Fondo MAKAI Academy 2.png';}else if(!this.dataset.t4){this.dataset.t4=1;this.src='logo1.png';}else{this.style.display='none';document.getElementById('sidebar-svg-fallback').classList.remove('hidden');}">
-                    <svg id="sidebar-svg-fallback" class="w-9 h-9 hidden"><use href="#makai-logo-fallback"></use></svg>
+                         class="w-full h-full object-contain">
+                    <svg id="sidebar-svg-fallback" class="w-10 h-10 hidden"><use href="#makai-logo-fallback"></use></svg>
+                    <div class="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                        <span class="material-symbols-outlined text-primary text-base">upload</span>
+                    </div>
+                    <input type="file" id="brand-logo-file-input" accept="image/*" class="hidden">
                 </div>
+
                 <div class="leading-none">
                     <h1 class="text-xl font-extrabold text-white tracking-wider">MAKAI</h1>
                     <p class="text-[11px] font-mono font-bold text-primary tracking-[0.22em] uppercase mt-1">ACADEMY</p>
@@ -144,7 +163,7 @@
         <!-- MENÚ DE NAVEGACIÓN PRINCIPAL -->
         <nav class="flex-1 overflow-y-auto p-3.5 space-y-2">
 
-            <!-- 1. CARRERA (11 ÁREAS) - Con contraste oscuro nítido igual a CACES -->
+            <!-- 1. CARRERA (11 ÁREAS) -->
             <button type="button"
                     class="nav-btn w-full flex items-center justify-between px-4 py-3 text-sm font-extrabold rounded-xl bg-primary text-surface-container transition-all"
                     data-target="view-launcher">
@@ -272,7 +291,7 @@
                        placeholder="Buscar materia, diagnóstico CIE-11 o guía MSP...">
             </div>
 
-            <!-- Reproductor de Audio Estudio CC0 (Libre de Derechos de Autor) -->
+            <!-- Reproductor de Audio Estudio CC0 -->
             <div class="hidden lg:flex items-center gap-3 bg-surface border border-surface-high rounded-xl px-3.5 py-1.5">
                 <div class="leading-tight">
                     <div class="flex items-center gap-2">
@@ -366,11 +385,7 @@
                 </div>
 
                 <!-- Contenedor Dinámico de las 3 Pantallas de CARRERA -->
-                <div id="carrera-flow-container" class="space-y-6"></div>
-
-                <!-- Selectores ocultos de compatibilidad para controladores heredados -->
-                <div id="career-selector" class="hidden"></div>
-                <div id="subject-pills" class="hidden"></div>
+                <div id="carrera-flow-container" class="space-y-6 pb-10"></div>
             </div>
 
             <!-- =========================================================== -->
@@ -408,12 +423,50 @@
                     </div>
                 </div>
 
-                <!-- Contenedor Dinámico del Flujo CACES (4 Carreras -> Materias + 4 Niveles) -->
-                <div id="caces-flow-container" class="space-y-6"></div>
+                <!-- Contenedor Dinámico del Flujo CACES -->
+                <div id="caces-flow-container" class="space-y-6 pb-10"></div>
             </div>
 
             <!-- =========================================================== -->
-            <!-- VISTA 3: MÓDULO DE SALUD RURAL & GUARDIAS (MSP-EC)          -->
+            <!-- VISTA 3: MATERIALES DE ESTUDIO Y BIBLIOTECA CLÍNICA 1D      -->
+            <!-- =========================================================== -->
+            <div id="view-materials" class="tab-content hidden max-w-6xl mx-auto">
+                <!-- Cabecera con Botones Fijos a la Derecha -->
+                <div class="flex flex-wrap items-start justify-between gap-4 pb-5 border-b border-surface-high mb-6">
+                    <div>
+                        <span id="materials-context-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning/15 border border-warning/40 text-warning text-[10px] font-mono font-extrabold uppercase tracking-wider">
+                            ● BIBLIOTECA CLÍNICA & MATERIALES DE ESTUDIO 1D
+                        </span>
+                        <h2 id="materials-main-title" class="text-2xl sm:text-3xl font-extrabold text-white mt-2">
+                            Materiales de Estudio y Guías Clínicas
+                        </h2>
+                        <p id="materials-main-subtitle" class="text-xs sm:text-sm text-gray-400 mt-1">
+                            Libros PDF, Guías de Práctica Clínica (GPC-MSP), Infografías, Algoritmos y Resúmenes de la asignatura.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button type="button"
+                                onclick="window.MakaiDashboardUI.openView('view-classrooms')"
+                                class="px-4 py-2.5 rounded-xl bg-surface-container border border-primary/40 hover:border-primary text-primary text-xs font-extrabold font-mono flex items-center gap-2 transition-all">
+                            <span class="material-symbols-outlined text-base text-danger">videocam</span>
+                            <span>Aulas Virtuales</span>
+                        </button>
+                        <button type="button"
+                                onclick="window.MakaiDashboardUI.openView('view-metrics')"
+                                class="px-4 py-2.5 rounded-xl bg-surface-container border border-secondary/40 hover:border-secondary text-secondary text-xs font-extrabold font-mono flex items-center gap-2 transition-all">
+                            <span class="material-symbols-outlined text-base">bar_chart</span>
+                            <span>Mis Métricas</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contenedor Dinámico de Materiales de Estudio -->
+                <div id="study-materials-view-root" class="space-y-6 pb-12"></div>
+            </div>
+
+            <!-- =========================================================== -->
+            <!-- VISTA 4: MÓDULO DE SALUD RURAL & GUARDIAS (MSP-EC)          -->
             <!-- =========================================================== -->
             <div id="view-rural" class="tab-content hidden max-w-6xl mx-auto">
                 <div class="pb-5 border-b border-surface-high mb-6">
@@ -438,7 +491,7 @@
                             </p>
                         </div>
                         <button type="button"
-                                onclick="window.MakaiDashboardUI.openView('view-spaced')"
+                                onclick="window.MakaiDashboardUI.openMaterialsForSubject('medicina', 'Año de Salud Rural MSP', 'Guías GPC-MSP Oficiales')"
                                 class="w-full py-3 rounded-xl bg-surface border border-primary/50 text-primary hover:bg-primary hover:text-surface font-mono font-extrabold text-xs transition-all">
                             Abrir Visor 1D de Guías PDF
                         </button>
@@ -472,7 +525,7 @@
                             </p>
                         </div>
                         <button type="button"
-                                onclick="window.MakaiDashboardUI.openView('view-spaced')"
+                                onclick="window.MakaiDashboardUI.openMaterialsForSubject('medicina', 'Año de Salud Rural MSP', 'Vademécum y Dosis Pediátricas')"
                                 class="w-full py-3 rounded-xl bg-surface border border-warning/50 text-warning hover:bg-warning hover:text-surface font-mono font-extrabold text-xs transition-all">
                             Consultar Dosis Pediátricas
                         </button>
@@ -481,7 +534,7 @@
             </div>
 
             <!-- =========================================================== -->
-            <!-- VISTA 4: HUB DE SIMULADORES (1D • 2D • 3D)                  -->
+            <!-- VISTA 5: HUB DE SIMULADORES (1D • 2D • 3D)                  -->
             <!-- =========================================================== -->
             <div id="view-simulators" class="tab-content hidden max-w-6xl mx-auto">
                 <div class="pb-5 border-b border-surface-high mb-6">
@@ -495,7 +548,6 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- 1D -->
                     <div class="bg-surface-container border border-primary/40 rounded-2xl p-6 flex flex-col justify-between shadow-lg">
                         <div>
                             <span class="px-2.5 py-1 rounded bg-primary/15 text-primary font-mono text-[10px] font-bold">DIMENSIÓN 1D • ACTIVO</span>
@@ -511,7 +563,6 @@
                         </button>
                     </div>
 
-                    <!-- 2D -->
                     <div class="bg-surface-container border border-secondary/40 rounded-2xl p-6 flex flex-col justify-between shadow-lg">
                         <div>
                             <span class="px-2.5 py-1 rounded bg-secondary/15 text-secondary font-mono text-[10px] font-bold">DIMENSIÓN 2D • INTERACTIVO</span>
@@ -527,7 +578,6 @@
                         </button>
                     </div>
 
-                    <!-- 3D -->
                     <div class="bg-surface-container border border-warning/40 rounded-2xl p-6 flex flex-col justify-between shadow-lg">
                         <div>
                             <span class="px-2.5 py-1 rounded bg-warning/15 text-warning font-mono text-[10px] font-bold">DIMENSIÓN 3D • WEBGL UCI</span>
@@ -546,7 +596,7 @@
             </div>
 
             <!-- =========================================================== -->
-            <!-- VISTA 5: MOTOR 1D (REPETICIÓN SINÁPTICA v4.4)               -->
+            <!-- VISTA 6: MOTOR 1D (REPETICIÓN SINÁPTICA v4.4)               -->
             <!-- =========================================================== -->
             <div id="view-spaced" class="tab-content hidden max-w-4xl mx-auto h-full flex flex-col">
                 <div class="mb-6 flex flex-wrap justify-between items-end gap-4">
@@ -559,12 +609,19 @@
                             Motor Sináptico Predictivo • Retención Activa
                         </p>
                     </div>
-                    <select id="spaced-deck-selector" class="bg-surface-container border border-surface-high text-white text-xs font-mono rounded-xl p-2.5">
-                        <option value="medicina">Medicina Humana (Global)</option>
-                        <option value="enfermeria">Enfermería & Cuidados Críticos</option>
-                        <option value="odontologia">Odontología Clínica</option>
-                        <option value="obstetricia">Obstetricia & Salud Materna</option>
-                    </select>
+                    <div class="flex items-center gap-2">
+                        <button type="button"
+                                onclick="window.MakaiDashboardUI.openView('view-launcher')"
+                                class="px-3.5 py-2 rounded-xl bg-surface-container border border-surface-high hover:border-primary text-xs font-bold text-gray-300">
+                            ← Volver a Materias
+                        </button>
+                        <select id="spaced-deck-selector" class="bg-surface-container border border-surface-high text-white text-xs font-mono rounded-xl p-2.5">
+                            <option value="medicina">Medicina Humana (Global)</option>
+                            <option value="enfermeria">Enfermería & Cuidados Críticos</option>
+                            <option value="odontologia">Odontología Clínica</option>
+                            <option value="obstetricia">Obstetricia & Salud Materna</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="flex-1 bg-surface-container border border-surface-high rounded-2xl flex flex-col items-center justify-center p-8 relative">
@@ -600,22 +657,22 @@
             </div>
 
             <!-- =========================================================== -->
-            <!-- VISTA 6: SIMULADOR 2D (CONTROLADO POR sim2d.controller.js)  -->
+            <!-- VISTA 7: SIMULADOR 2D (CONTROLADO POR sim2d.controller.js)  -->
             <!-- =========================================================== -->
             <div id="view-sim2d" class="tab-content hidden max-w-6xl mx-auto"></div>
 
             <!-- =========================================================== -->
-            <!-- VISTA 7: SIMULADOR 3D (CONTROLADO POR sim3d.controller.js)  -->
+            <!-- VISTA 8: SIMULADOR 3D (CONTROLADO POR sim3d.controller.js)  -->
             <!-- =========================================================== -->
             <div id="view-sim3d" class="tab-content hidden max-w-6xl mx-auto"></div>
 
             <!-- =========================================================== -->
-            <!-- VISTA 8: MENTORÍA VIP / AULAS (classroom.controller.js)     -->
+            <!-- VISTA 9: MENTORÍA VIP / AULAS (classroom.controller.js)     -->
             <!-- =========================================================== -->
             <div id="view-classrooms" class="tab-content hidden max-w-6xl mx-auto"></div>
 
             <!-- =========================================================== -->
-            <!-- VISTA 9: SIMULADOR DE EXAMEN ACTIVO (#view-simulator)       -->
+            <!-- VISTA 10: SIMULADOR DE EXAMEN ACTIVO (#view-simulator)      -->
             <!-- =========================================================== -->
             <div id="view-simulator" class="tab-content hidden h-full flex flex-col max-w-6xl mx-auto">
                 <div class="flex flex-wrap justify-between items-center bg-surface-container p-4 rounded-2xl border border-surface-high mb-6 gap-4">
@@ -671,7 +728,7 @@
             </div>
 
             <!-- =========================================================== -->
-            <!-- VISTA 10: MIS MÉTRICAS Y DESEMPEÑO (#view-metrics)          -->
+            <!-- VISTA 11: MIS MÉTRICAS Y DESEMPEÑO (#view-metrics)          -->
             <!-- =========================================================== -->
             <div id="view-metrics" class="tab-content hidden max-w-5xl mx-auto">
                 <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
@@ -722,7 +779,7 @@
             </div>
 
             <!-- =========================================================== -->
-            <!-- VISTA 11: CONFIGURACIONES DE PERFIL (#view-profile)         -->
+            <!-- VISTA 12: CONFIGURACIONES DE PERFIL (#view-profile)         -->
             <!-- =========================================================== -->
             <div id="view-profile" class="tab-content hidden max-w-4xl mx-auto">
                 <div class="mb-8 border-b border-surface-high pb-4 flex items-center justify-between">
@@ -740,7 +797,7 @@
             </div>
 
             <!-- =========================================================== -->
-            <!-- VISTA 12: BÓVEDA DE ADMINISTRACIÓN MAESTRA (#view-admin)    -->
+            <!-- VISTA 13: BÓVEDA DE ADMINISTRACIÓN MAESTRA (#view-admin)    -->
             <!-- =========================================================== -->
             <div id="view-admin" class="tab-content hidden max-w-6xl mx-auto"></div>
 
@@ -760,11 +817,92 @@
     </main>
 
     <!-- =================================================================== -->
-    <!-- MOTOR INTERACTIVO INMEDIATO PARA CARRERA (11) Y CACES (4) + AUDIO   -->
+    <!-- MOTOR INTERACTIVO PARA CARRERA (11), CACES (4) Y MATERIALES 1D      -->
     <!-- =================================================================== -->
     <script>
         (function () {
+            // =================================================================
+            // 0. DETECTOR Y GUARDADO PERMANENTE DEL LOGO OFICIAL MAKAI ACADEMY
+            // =================================================================
+            const LOGO_CANDIDATE_PATHS = [
+                "assets/1-branding/logos/logo.png",
+                "assets/1-branding/logos/Logo.png",
+                "assets/1-branding/logos/logo.jpg",
+                "assets/1-branding/logos/logo.jpeg",
+                "assets/1-branding/logos/logo.webp",
+                "assets/1-branding/logos/Fondo MAKAI Academy 2.png",
+                "assets/1-branding/logos/Fondo MAKAI Academy 2.jpg",
+                "assets/1-branding/logo.png",
+                "logo.png",
+                "Logo.png",
+                "logo.jpg",
+                "Fondo MAKAI Academy 2.png",
+                "Fondo MAKAI Academy 2.jpg",
+                "logo1.png"
+            ];
+
+            function initBrandLogoResolver() {
+                const imgEl = document.getElementById("sidebar-brand-logo");
+                const svgFallback = document.getElementById("sidebar-svg-fallback");
+                const faviconEl = document.getElementById("dynamic-favicon");
+                const fileInput = document.getElementById("brand-logo-file-input");
+
+                if (!imgEl) return;
+
+                // 1. Verificar si ya se guardó el logo en localStorage
+                const savedLogoBase64 = localStorage.getItem("makai_official_logo_base64");
+                if (savedLogoBase64) {
+                    imgEl.src = savedLogoBase64;
+                    imgEl.style.display = "block";
+                    svgFallback?.classList.add("hidden");
+                    if (faviconEl) faviconEl.href = savedLogoBase64;
+                } else {
+                    // 2. Probar secuencialmente todas las rutas posibles en GitHub
+                    let pathIdx = 0;
+                    imgEl.onerror = function () {
+                        pathIdx++;
+                        if (pathIdx < LOGO_CANDIDATE_PATHS.length) {
+                            imgEl.src = LOGO_CANDIDATE_PATHS[pathIdx];
+                        } else {
+                            imgEl.style.display = "none";
+                            svgFallback?.classList.remove("hidden");
+                        }
+                    };
+                }
+
+                // 3. Permitir al Admin subir "Fondo MAKAI Academy 2" con un clic y guardarlo permanentemente
+                fileInput?.addEventListener("change", (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement("canvas");
+                            const maxDim = 256;
+                            const scale = Math.min(maxDim / img.width, maxDim / img.height, 1);
+                            canvas.width = Math.round(img.width * scale);
+                            canvas.height = Math.round(img.height * scale);
+                            const ctx = canvas.getContext("2d");
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                            const dataUrl = canvas.toDataURL("image/png");
+
+                            localStorage.setItem("makai_official_logo_base64", dataUrl);
+                            imgEl.onerror = null;
+                            imgEl.src = dataUrl;
+                            imgEl.style.display = "block";
+                            svgFallback?.classList.add("hidden");
+                            if (faviconEl) faviconEl.href = dataUrl;
+                        };
+                        img.src = ev.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            // =================================================================
             // 1. CATÁLOGO DE LAS 11 CARRERAS DE CIENCIAS DE LA SALUD
+            // =================================================================
             const UNIVERSITY_CAREERS = [
                 { id: "medicina", num: "01", nombre: "Medicina Humana", icon: "stethoscope", semestres: 12, desc: "Preuniversitario, Nivelación, 1° a 10° Semestre e Internado Rotativo." },
                 { id: "enfermeria", num: "02", nombre: "Enfermería", icon: "medical_information", semestres: 9, desc: "Proceso de Atención de Enfermería (PAE), Clínico-Quirúrgica, Materno-Infantil y Críticos." },
@@ -779,7 +917,9 @@
                 { id: "paramedicina", num: "11", nombre: "Atención Prehospitalaria y Emergencias", icon: "ambulance", semestres: 8, desc: "Soporte Vital BLS/ACLS, Trauma Prehospitalario (PHTLS), Triaje START y Emergencias." }
             ];
 
-            // 2. MATERIAS UNIVERSALES POR NIVEL / SEMESTRE (ABARCANDO TODAS LAS UNIVERSIDADES)
+            // =================================================================
+            // 2. MATERIAS UNIVERSALES POR NIVEL / SEMESTRE
+            // =================================================================
             const SUBJECTS_BY_LEVEL = {
                 preuniversitario: [
                     "Biología Celular y Molecular",
@@ -808,7 +948,9 @@
                 internado: ["Rotación de Medicina Interna", "Rotación de Pediatría", "Rotación de Ginecología y Obstetricia", "Rotación de Cirugía y Emergencias", "Rotación Comunitaria y Rural MSP"]
             };
 
+            // =================================================================
             // 3. CATÁLOGO DE LAS 4 CARRERAS OFICIALES CACES
+            // =================================================================
             const CACES_OFFICIAL_CAREERS = [
                 {
                     id: "medicina",
@@ -876,10 +1018,15 @@
                 cacesStep: 1,
                 selectedCacesCareer: null,
                 expandedCacesSubject: null,
-                showCacesDifficultyLevels: false
+                showCacesDifficultyLevels: false,
+                activeMaterialCareer: "medicina",
+                activeMaterialLevel: "Nivelación Académica",
+                activeMaterialSubject: "Morfofisiología Básica I",
+                activeMaterialCategoryFilter: "all",
+                openReaderDoc: null,
+                readerNightMode: false
             };
 
-            // Construye los niveles dinámicos según la carrera universitaria seleccionada
             function getLevelsForCareer(careerObj) {
                 const levels = [
                     { id: "preuniversitario", tag: "Admisión", nombre: "Preuniversitario", desc: "Biología, Química, Anatomía preliminar y Razonamiento." },
@@ -914,6 +1061,9 @@
                 const title = document.getElementById("carrera-main-title");
                 const subtitle = document.getElementById("carrera-main-subtitle");
                 if (!root) return;
+
+                // Limpiar cualquier inyección duplicada externa
+                document.getElementById("makai-carrera-dynamic-root")?.remove();
 
                 // PANTALLA 1: LAS 11 CARRERAS DE SALUD
                 if (uiState.carreraStep === 1 || !uiState.selectedUnivCareer) {
@@ -1001,13 +1151,13 @@
                     return;
                 }
 
-                // PANTALLA 3: TODAS LAS MATERIAS DEL NIVEL SELECCIONADO
+                // PANTALLA 3: TODAS LAS MATERIAS DEL NIVEL SELECCIONADO (CON LAS 3 OPCIONES)
                 const levelObj = levels.find(l => l.id === uiState.selectedUnivLevel) || levels[0];
                 const subjects = SUBJECTS_BY_LEVEL[levelObj.id] || SUBJECTS_BY_LEVEL.sem_1;
 
                 if (badge) badge.textContent = `● MÓDULO UNIVERSITARIO • PASO 3 DE 3 • ${careerObj.nombre.toUpperCase()}`;
                 if (title) title.textContent = `${levelObj.nombre} • ${careerObj.nombre}`;
-                if (subtitle) subtitle.textContent = "Selecciona la materia para practicar en el Simulador Clínico o repasar en Sináptico v4.4.";
+                if (subtitle) subtitle.textContent = "Selecciona la materia para practicar en el Simulador Clínico, repasar en Sináptico v4.4 o abrir Materiales de Estudio.";
 
                 root.innerHTML = `
                     <div class="flex flex-wrap items-center justify-between gap-3 bg-surface-container border border-surface-high rounded-2xl p-4">
@@ -1025,11 +1175,20 @@
                             </button>
                         </div>
 
-                        <button type="button"
-                                onclick="window.MakaiDashboardUI.startSubjectExam('${careerObj.id}', 'Todas las Materias de ${levelObj.nombre}', 'tutor')"
-                                class="px-5 py-2.5 rounded-xl bg-primary text-surface font-extrabold text-xs uppercase tracking-wider hover:bg-opacity-90 transition-all shadow-[0_0_15px_rgba(0,229,255,0.3)]">
-                            ⚡ Simulacro Global de ${levelObj.nombre}
-                        </button>
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <button type="button"
+                                    onclick="window.MakaiDashboardUI.openMaterialsForSubject('${careerObj.id}', '${levelObj.nombre}', 'Biblioteca General de ${levelObj.nombre}')"
+                                    class="px-4 py-2.5 rounded-xl bg-surface border border-warning/50 text-warning hover:bg-warning hover:text-surface font-extrabold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-base">menu_book</span>
+                                <span>Biblioteca del Nivel</span>
+                            </button>
+
+                            <button type="button"
+                                    onclick="window.MakaiDashboardUI.startSubjectExam('${careerObj.id}', 'Todas las Materias de ${levelObj.nombre}', 'tutor')"
+                                    class="px-5 py-2.5 rounded-xl bg-primary text-surface font-extrabold text-xs uppercase tracking-wider hover:bg-opacity-90 transition-all shadow-[0_0_15px_rgba(0,229,255,0.3)]">
+                                ⚡ Simulacro Global de ${levelObj.nombre}
+                            </button>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1042,24 +1201,33 @@
                                         </span>
                                         <h4 class="text-base font-extrabold text-white mt-1">${subj}</h4>
                                         <p class="text-xs text-gray-400 mt-1">
-                                            Banco de reactivos por semestre, tarjetas de memorización y guías clínicas.
+                                            Banco de reactivos por semestre, tarjetas de memorización y materiales de estudio (PDFs, GPC e infografías).
                                         </p>
                                     </div>
                                     <span class="material-symbols-outlined text-primary">clinical_notes</span>
                                 </div>
 
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-3 border-t border-surface-high">
+                                <!-- 3 OPCIONES POR ASIGNATURA: SIMULADOR + SINÁPTICO + MATERIALES DE ESTUDIO -->
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3 border-t border-surface-high">
                                     <button type="button"
                                             onclick="window.MakaiDashboardUI.startSubjectExam('${careerObj.id}', '${subj}', 'tutor')"
-                                            class="py-2.5 px-3 rounded-xl bg-primary text-surface font-extrabold text-xs flex items-center justify-center gap-1.5 hover:bg-opacity-90 transition-all">
+                                            class="py-2.5 px-3 rounded-xl bg-primary text-surface font-extrabold text-xs flex items-center justify-center gap-1.5 hover:bg-opacity-90 transition-all shadow-[0_0_12px_rgba(0,229,255,0.2)]">
                                         <span class="material-symbols-outlined text-sm">quiz</span>
                                         <span>Simulador de Materia</span>
                                     </button>
+
                                     <button type="button"
                                             onclick="window.MakaiDashboardUI.openSinapticoForSubject('${careerObj.id}', '${subj}')"
                                             class="py-2.5 px-3 rounded-xl bg-surface border border-secondary/50 text-secondary hover:bg-secondary hover:text-surface font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all">
                                         <span class="material-symbols-outlined text-sm">psychology</span>
                                         <span>Repetición Sináptica</span>
+                                    </button>
+
+                                    <button type="button"
+                                            onclick="window.MakaiDashboardUI.openMaterialsForSubject('${careerObj.id}', '${levelObj.nombre}', '${subj}')"
+                                            class="py-2.5 px-3 rounded-xl bg-surface border border-warning/60 text-warning hover:bg-warning hover:text-surface font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all">
+                                        <span class="material-symbols-outlined text-sm">menu_book</span>
+                                        <span>Materiales de Estudio</span>
                                     </button>
                                 </div>
                             </div>
@@ -1076,6 +1244,8 @@
                 const title = document.getElementById("caces-main-title");
                 const subtitle = document.getElementById("caces-main-subtitle");
                 if (!root) return;
+
+                document.getElementById("makai-caces-dynamic-root")?.remove();
 
                 // PANTALLA 1 CACES: LAS 4 CARRERAS CONVOCADAS AL CACES
                 if (uiState.cacesStep === 1 || !uiState.selectedCacesCareer) {
@@ -1102,7 +1272,7 @@
                                         </p>
                                     </div>
                                     <div class="mt-5 pt-3.5 border-t border-surface-high flex items-center justify-between text-xs font-mono">
-                                        <span class="text-gray-300">Materias + 4 Niveles de Dificultad + Sináptico</span>
+                                        <span class="text-gray-300">Materias + 4 Niveles + Sináptico + Materiales</span>
                                         <span class="text-primary font-extrabold">Ingresar →</span>
                                     </div>
                                 </div>
@@ -1112,13 +1282,12 @@
                     return;
                 }
 
-                // PANTALLA 2 CACES: MATERIAS (DESPLIEGAN SIMULADOR O SINÁPTICO) + SIMULADORES (4 NIVELES) + SINÁPTICO GENERAL
+                // PANTALLA 2 CACES: MATERIAS (SIMULADOR + SINÁPTICO + MATERIALES DE ESTUDIO) + 4 NIVELES
                 const cacesObj = CACES_OFFICIAL_CAREERS.find(c => c.id === uiState.selectedCacesCareer) || CACES_OFFICIAL_CAREERS[0];
                 if (title) title.textContent = `CACES • ${cacesObj.nombre}`;
-                if (subtitle) subtitle.textContent = "Selecciona cualquier materia para elegir entre Simulador o Repetición Sináptica, o lanza un Simulacro por Nivel de Dificultad.";
+                if (subtitle) subtitle.textContent = "Selecciona cualquier materia para desplegar su Simulador, Repetición Sináptica o Materiales de Estudio.";
 
                 root.innerHTML = `
-                    <!-- Barra Superior de Regreso y Accesos Generales CACES -->
                     <div class="flex flex-wrap items-center justify-between gap-3 bg-surface-container border border-surface-high rounded-2xl p-4">
                         <button type="button"
                                 onclick="window.MakaiDashboardUI.resetCacesStep()"
@@ -1127,24 +1296,31 @@
                             <span>Volver a las 4 Carreras CACES</span>
                         </button>
 
-                        <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex flex-wrap items-center gap-2.5">
                             <button type="button"
                                     onclick="window.MakaiDashboardUI.toggleCacesDifficulty()"
                                     class="px-4 py-2.5 rounded-xl bg-primary text-surface font-extrabold text-xs flex items-center gap-2 shadow-[0_0_15px_rgba(0,229,255,0.25)]">
                                 <span class="material-symbols-outlined text-base">tune</span>
-                                <span>Simuladores CACES (4 Niveles de Dificultad)</span>
+                                <span>Simuladores CACES (4 Niveles)</span>
                             </button>
 
                             <button type="button"
                                     onclick="window.MakaiDashboardUI.openSinapticoForSubject('${cacesObj.id}', 'General CACES')"
                                     class="px-4 py-2.5 rounded-xl bg-surface border border-secondary text-secondary hover:bg-secondary hover:text-surface font-extrabold text-xs flex items-center gap-2 transition-all">
                                 <span class="material-symbols-outlined text-base">neurology</span>
-                                <span>Repetición Sináptica en General</span>
+                                <span>Repetición Sináptica General</span>
+                            </button>
+
+                            <button type="button"
+                                    onclick="window.MakaiDashboardUI.openMaterialsForSubject('${cacesObj.id}', 'Preparación CACES Oficial', 'Guías Oficiales ${cacesObj.nombre}')"
+                                    class="px-4 py-2.5 rounded-xl bg-surface border border-warning text-warning hover:bg-warning hover:text-surface font-extrabold text-xs flex items-center gap-2 transition-all">
+                                <span class="material-symbols-outlined text-base">menu_book</span>
+                                <span>Materiales CACES</span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Desplegable de los 4 Niveles de Dificultad de Simuladores CACES -->
+                    <!-- Desplegable de los 4 Niveles de Dificultad -->
                     <div class="${uiState.showCacesDifficultyLevels ? "block" : "hidden"} bg-surface-container border-2 border-primary/50 rounded-2xl p-5 space-y-4">
                         <div class="flex items-center justify-between">
                             <div>
@@ -1177,10 +1353,10 @@
                         </div>
                     </div>
 
-                    <!-- Lista de Materias Oficiales CACES (Al elegir cualquiera se despliegan las 2 opciones) -->
+                    <!-- Lista de Materias Oficiales CACES (Despliegan las 3 Opciones) -->
                     <div class="space-y-3">
                         <h3 class="text-xs font-mono uppercase tracking-wider text-gray-400 font-bold">
-                            Componentes y Materias Oficiales de ${cacesObj.nombre} (Haz clic en una materia para desplegar sus 2 modalidades):
+                            Componentes Oficiales de ${cacesObj.nombre} (Haz clic en una materia para desplegar sus 3 opciones):
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             ${cacesObj.materias.map((mat, index) => {
@@ -1198,25 +1374,267 @@
                                             </span>
                                         </div>
 
-                                        <!-- 2 Opciones Desplegables: Simulador de la Materia o Repetición Sináptica -->
-                                        <div class="${isExpanded ? "grid" : "hidden"} grid-cols-1 sm:grid-cols-2 gap-3 mt-4 pt-4 border-t border-surface-high">
+                                        <!-- 3 Opciones Desplegables: Simulador + Sináptico + Materiales de Estudio -->
+                                        <div class="${isExpanded ? "grid" : "hidden"} grid-cols-1 sm:grid-cols-3 gap-2.5 mt-4 pt-4 border-t border-surface-high">
                                             <button type="button"
                                                     onclick="window.MakaiDashboardUI.startSubjectExam('${cacesObj.id}', '${mat}', 'tutor')"
-                                                    class="py-3 px-3.5 rounded-xl bg-primary text-surface font-extrabold text-xs flex items-center justify-center gap-2 hover:bg-opacity-90 transition-all">
-                                                <span class="material-symbols-outlined text-base">bolt</span>
-                                                <span>Simulador de la Materia</span>
+                                                    class="py-2.5 px-3 rounded-xl bg-primary text-surface font-extrabold text-xs flex items-center justify-center gap-1.5 hover:bg-opacity-90 transition-all">
+                                                <span class="material-symbols-outlined text-sm">bolt</span>
+                                                <span>Simulador</span>
                                             </button>
                                             <button type="button"
                                                     onclick="window.MakaiDashboardUI.openSinapticoForSubject('${cacesObj.id}', '${mat}')"
-                                                    class="py-3 px-3.5 rounded-xl bg-surface border border-secondary text-secondary hover:bg-secondary hover:text-surface font-extrabold text-xs flex items-center justify-center gap-2 transition-all">
-                                                <span class="material-symbols-outlined text-base">psychology</span>
-                                                <span>Repetición Sináptica</span>
+                                                    class="py-2.5 px-3 rounded-xl bg-surface border border-secondary text-secondary hover:bg-secondary hover:text-surface font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all">
+                                                <span class="material-symbols-outlined text-sm">psychology</span>
+                                                <span>Sináptico</span>
+                                            </button>
+                                            <button type="button"
+                                                    onclick="window.MakaiDashboardUI.openMaterialsForSubject('${cacesObj.id}', 'Preparación CACES Oficial', '${mat}')"
+                                                    class="py-2.5 px-3 rounded-xl bg-surface border border-warning text-warning hover:bg-warning hover:text-surface font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all">
+                                                <span class="material-symbols-outlined text-sm">menu_book</span>
+                                                <span>Materiales</span>
                                             </button>
                                         </div>
                                     </div>
                                 `;
                             }).join("")}
                         </div>
+                    </div>
+                `;
+            }
+
+            // =================================================================
+            // 4. CENTRO DE MATERIALES DE ESTUDIO Y VISOR CLÍNICO 1D POR MATERIA
+            // =================================================================
+            function buildMaterialsCatalogForSubject(careerId, levelName, subjectName) {
+                return [
+                    {
+                        id: "mat-pdf-1",
+                        titulo: `Guía Clínica & Texto Base: ${subjectName}`,
+                        codigo: "GPC-MAKAI-01",
+                        categoria: "guias-pdf",
+                        tipoLabel: "📄 Guía PDF / Texto Base",
+                        paginas: "42 páginas • Lectura 1D",
+                        plan: "Básico",
+                        resumen: `Compendio estructurado de ${subjectName} (${levelName}) con definiciones clave, tablas diagnósticas, criterios de severidad y perlas de examen.`,
+                        contenidoLectura: [
+                            `1. OBJETIVO CLÍNICO DE ${subjectName.toUpperCase()}: Dominar los fundamentos morfofuncionales, diagnósticos y terapéuticos evaluados tanto en los exámenes universitarios de ${levelName} como en los estándares nacionales de habilitación profesional.`,
+                            `2. PUNTOS DE ALTA RENTABILIDAD: Todo caso clínico de ${subjectName} debe analizarse identificando primero signos de alarma, constantes vitales y el estándar de oro (Gold Standard) diagnóstico antes de elegir la conducta terapéutica.`,
+                            `3. PROTOCOLO DE ESTUDIO MAKAI ACADEMY: Revisa los esquemas diagnósticos de este documento, subraya las dosis o valores de referencia normales y posteriormente realiza 20 preguntas en el Simulador de Materia para consolidar tu memoria a largo plazo.`
+                        ]
+                    },
+                    {
+                        id: "mat-alg-2",
+                        titulo: `Algoritmos y Mapas Mentales de ${subjectName}`,
+                        codigo: "ALG-1D-02",
+                        categoria: "infografias-y-algoritmos",
+                        tipoLabel: "🧠 Infografía & Algoritmo",
+                        paginas: "12 Diagramas de Flujo HD",
+                        plan: "Básico",
+                        resumen: `Árboles de decisión rápida, clasificación por escalas y esquemas visuales de alta retención para ${subjectName}.`,
+                        contenidoLectura: [
+                            `ALGORITMO 1 — RUTA DE DECISIÓN EN ${subjectName.toUpperCase()}: Paso A: Identificación sindrómica e interrogatorio dirigido -> Paso B: Clasificación de riesgo y pruebas confirmatorias -> Paso C: Intervención escalonada según guías vigentes.`,
+                            `ALGORITMO 2 — DIAGNÓSTICO DIFERENCIAL: Comparación directa entre las patologías y conceptos más preguntados en ${levelName}, destacando los distractores clásicos de examen.`
+                        ]
+                    },
+                    {
+                        id: "mat-vid-3",
+                        titulo: `Micro-Resumen Audiovisual 1D: ${subjectName}`,
+                        codigo: "VID-1D-03",
+                        categoria: "micro-videos-1d",
+                        tipoLabel: "🎬 Micro-Video & Resumen",
+                        paginas: "18 min • Síntesis Magistral",
+                        plan: "PRO",
+                        resumen: `Explicación paso a paso de los mecanismos esenciales y resolución comentada de reactivos representativos de ${subjectName}.`,
+                        contenidoLectura: [
+                            `SÍNTESIS MAGISTRAL DE LA CÁTEDRA: En esta cápsula de estudio revisamos los 10 conceptos indispensables de ${subjectName} que representan el 80% de las preguntas de evaluación en ${levelName}.`,
+                            `CONSEJO DEL ESPECIALISTA: Combina este resumen con el mazo de Repetición Espaciada Sináptico v4.4 para retener los valores de laboratorio y clasificaciones sin fatiga visual.`
+                        ]
+                    },
+                    {
+                        id: "mat-atl-4",
+                        titulo: `Atlas Clínico, Láminas y Casos de ${subjectName}`,
+                        codigo: "ATL-CLIN-04",
+                        categoria: "atlas-visual",
+                        tipoLabel: "🔬 Atlas Visual & Casos",
+                        paginas: "25 Láminas Comentadas",
+                        plan: "Básico",
+                        resumen: `Banco de imágenes comentadas, correlaciones anatomoclínicas, placas diagnósticas y tablas de referencia rápida para ${subjectName}.`,
+                        contenidoLectura: [
+                            `CORRELACIÓN VISUAL Y ESTRUCTURAL: Identificación detallada de estructuras, hallazgos normales frente a patológicos y su aplicación directa en viñetas clínicas de ${subjectName}.`
+                        ]
+                    }
+                ];
+            }
+
+            function openMaterialsForSubject(careerId, levelName, subjectName) {
+                uiState.activeMaterialCareer = careerId || "medicina";
+                uiState.activeMaterialLevel = levelName || "Nivel Universitario";
+                uiState.activeMaterialSubject = subjectName || "Asignatura General";
+                uiState.activeMaterialCategoryFilter = "all";
+                uiState.openReaderDoc = null;
+
+                openView("view-materials");
+                renderStudyMaterialsView();
+            }
+
+            function renderStudyMaterialsView() {
+                const root = document.getElementById("study-materials-view-root");
+                const badge = document.getElementById("materials-context-badge");
+                const title = document.getElementById("materials-main-title");
+                const subtitle = document.getElementById("materials-main-subtitle");
+                if (!root) return;
+
+                const careerObj = UNIVERSITY_CAREERS.find(c => c.id === uiState.activeMaterialCareer) || { nombre: uiState.activeMaterialCareer.toUpperCase() };
+
+                if (badge) badge.textContent = `● MATERIALES DE ESTUDIO 1D • ${careerObj.nombre.toUpperCase()} • ${uiState.activeMaterialLevel.toUpperCase()}`;
+                if (title) title.textContent = `${uiState.activeMaterialSubject}`;
+                if (subtitle) subtitle.textContent = `Guías PDF, libros base, algoritmos diagnósticos, infografías y resúmenes clínicos de ${uiState.activeMaterialSubject}.`;
+
+                const allItems = buildMaterialsCatalogForSubject(
+                    uiState.activeMaterialCareer,
+                    uiState.activeMaterialLevel,
+                    uiState.activeMaterialSubject
+                );
+
+                const filteredItems = uiState.activeMaterialCategoryFilter === "all"
+                    ? allItems
+                    : allItems.filter(item => item.categoria === uiState.activeMaterialCategoryFilter);
+
+                const activeDoc = uiState.openReaderDoc
+                    ? allItems.find(d => d.id === uiState.openReaderDoc)
+                    : null;
+
+                root.innerHTML = `
+                    <!-- BARRA DE NAVEGACIÓN Y ACCIONES RÁPIDAS DE LA MATERIA -->
+                    <div class="bg-surface-container border border-surface-high rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button type="button"
+                                    onclick="window.MakaiDashboardUI.openView('view-launcher')"
+                                    class="px-4 py-2 rounded-xl bg-surface border border-surface-high hover:border-primary text-xs font-extrabold text-gray-200 flex items-center gap-2 transition-all">
+                                <span class="material-symbols-outlined text-sm">arrow_back</span>
+                                <span>Volver a las Materias (${uiState.activeMaterialLevel})</span>
+                            </button>
+
+                            <button type="button"
+                                    onclick="window.MakaiDashboardUI.startSubjectExam('${uiState.activeMaterialCareer}', '${uiState.activeMaterialSubject}', 'tutor')"
+                                    class="px-3.5 py-2 rounded-xl bg-primary/15 border border-primary/40 text-primary hover:bg-primary hover:text-surface text-xs font-extrabold flex items-center gap-1.5 transition-all">
+                                <span class="material-symbols-outlined text-sm">quiz</span>
+                                <span>Ir al Simulador de esta Materia</span>
+                            </button>
+
+                            <button type="button"
+                                    onclick="window.MakaiDashboardUI.openSinapticoForSubject('${uiState.activeMaterialCareer}', '${uiState.activeMaterialSubject}')"
+                                    class="px-3.5 py-2 rounded-xl bg-secondary/15 border border-secondary/40 text-secondary hover:bg-secondary hover:text-surface text-xs font-extrabold flex items-center gap-1.5 transition-all">
+                                <span class="material-symbols-outlined text-sm">psychology</span>
+                                <span>Ir a Sináptico de esta Materia</span>
+                            </button>
+                        </div>
+
+                        <button type="button"
+                                onclick="window.MakaiDashboardUI.openAdminMaterialsManager()"
+                                class="px-4 py-2 rounded-xl bg-warning/15 border border-warning/40 text-warning hover:bg-warning hover:text-surface text-xs font-extrabold font-mono flex items-center gap-1.5 transition-all">
+                            <span class="material-symbols-outlined text-sm">upload_file</span>
+                            <span>+ Subir PDF / Guía (Admin)</span>
+                        </button>
+                    </div>
+
+                    <!-- PÍLDORAS DE FILTRO POR FORMATO MULTIMEDIA 1D -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        ${[
+                            { id: "all", label: "📚 Todos los Materiales" },
+                            { id: "guias-pdf", label: "📄 Guías PDF y Libros" },
+                            { id: "infografias-y-algoritmos", label: "🧠 Infografías y Algoritmos" },
+                            { id: "micro-videos-1d", label: "🎬 Micro-Videos 1D" },
+                            { id: "atlas-visual", label: "🔬 Atlas Visual Clínico" }
+                        ].map(f => `
+                            <button type="button"
+                                    onclick="window.MakaiDashboardUI.filterStudyMaterials('${f.id}')"
+                                    class="px-4 py-2 rounded-xl text-xs font-mono font-bold border transition-all ${
+                                        uiState.activeMaterialCategoryFilter === f.id
+                                            ? "bg-primary text-surface border-primary shadow-[0_0_12px_rgba(0,229,255,0.25)]"
+                                            : "bg-surface-container border-surface-high text-gray-300 hover:border-primary/50"
+                                    }">
+                                ${f.label}
+                            </button>
+                        `).join("")}
+                    </div>
+
+                    <!-- VISOR CLÍNICO 1D EN MODO OSCURO (SI HAY UN DOCUMENTO ABIERTO) -->
+                    ${activeDoc ? `
+                        <div class="bg-surface-container border-2 border-primary rounded-2xl p-6 space-y-5 shadow-[0_0_30px_rgba(0,229,255,0.12)]">
+                            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-surface-high pb-4">
+                                <div>
+                                    <span class="text-[10px] font-mono text-primary uppercase font-bold">
+                                        VISOR DE LECTURA CLÍNICA 1D • ${activeDoc.codigo}
+                                    </span>
+                                    <h3 class="text-xl font-extrabold text-white mt-0.5">${activeDoc.titulo}</h3>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button type="button"
+                                            onclick="window.MakaiDashboardUI.toggleReaderNightMode()"
+                                            class="px-3.5 py-2 rounded-xl bg-surface border border-surface-high hover:border-primary text-xs font-mono font-bold text-secondary">
+                                        ${uiState.readerNightMode ? "☀️ Modo Estándar" : "🌙 Descanso Ocular"}
+                                    </button>
+                                    <button type="button"
+                                            onclick="window.MakaiDashboardUI.closeMaterialDoc()"
+                                            class="px-3.5 py-2 rounded-xl bg-danger/20 border border-danger text-danger hover:bg-danger hover:text-white text-xs font-extrabold">
+                                        ✕ Cerrar Visor
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="${uiState.readerNightMode ? "bg-[#04070b] text-amber-100" : "bg-surface text-gray-200"} border border-surface-high rounded-xl p-6 space-y-4 leading-relaxed text-sm">
+                                ${activeDoc.contenidoLectura.map(p => `<p class="border-l-2 border-primary pl-4">${p}</p>`).join("")}
+                            </div>
+
+                            <div class="bg-surface border border-surface-high rounded-xl p-4 space-y-2">
+                                <label class="block text-[11px] font-mono text-secondary uppercase font-bold">
+                                    📝 Bloc de Apuntes Clínicos Personales (${uiState.activeMaterialSubject}):
+                                </label>
+                                <textarea id="student-material-notes"
+                                          rows="3"
+                                          placeholder="Escribe aquí tus apuntes, nemotecnias o valores clave de esta guía..."
+                                          class="w-full bg-surface-container border border-surface-high rounded-xl p-3 text-xs text-white focus:border-primary focus:outline-none">${localStorage.getItem("makai_note_" + activeDoc.id + "_" + uiState.activeMaterialSubject) || ""}</textarea>
+                                <div class="flex justify-end">
+                                    <button type="button"
+                                            onclick="window.MakaiDashboardUI.saveMaterialNote('${activeDoc.id}')"
+                                            class="px-4 py-2 rounded-xl bg-secondary text-surface font-extrabold text-xs">
+                                        Guardar Apuntes de Estudio
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ""}
+
+                    <!-- TARJETAS DE MATERIALES DE LA ASIGNATURA -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${filteredItems.map(item => `
+                            <div class="bg-surface-container border border-surface-high hover:border-warning/60 rounded-2xl p-5 flex flex-col justify-between gap-4 transition-all">
+                                <div>
+                                    <div class="flex items-center justify-between gap-2 mb-2.5">
+                                        <span class="px-2.5 py-1 rounded-lg bg-surface border border-warning/40 text-warning font-mono text-[10px] font-extrabold">
+                                            ${item.tipoLabel}
+                                        </span>
+                                        <span class="px-2.5 py-0.5 rounded bg-secondary/15 text-secondary font-mono text-[10px] font-bold">
+                                            Plan ${item.plan} • ${item.codigo}
+                                        </span>
+                                    </div>
+                                    <h4 class="text-base font-extrabold text-white">${item.titulo}</h4>
+                                    <p class="text-xs text-gray-400 mt-1.5 leading-relaxed">${item.resumen}</p>
+                                </div>
+
+                                <div class="pt-3 border-t border-surface-high flex items-center justify-between gap-3">
+                                    <span class="text-[11px] font-mono text-gray-400">${item.paginas}</span>
+                                    <button type="button"
+                                            onclick="window.MakaiDashboardUI.openMaterialDoc('${item.id}')"
+                                            class="px-4 py-2 rounded-xl bg-warning text-surface font-extrabold text-xs flex items-center gap-1.5 hover:bg-opacity-90 transition-all">
+                                        <span class="material-symbols-outlined text-sm">visibility</span>
+                                        <span>Abrir en Visor 1D</span>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join("")}
                     </div>
                 `;
             }
@@ -1237,10 +1655,11 @@
                     target.classList.add("active");
                 }
 
-                // Actualizar estilo de los botones del menú lateral asegurando texto oscuro sobre fondo cian
+                const navHighlightTarget = viewId === "view-materials" ? "view-launcher" : viewId;
+
                 document.querySelectorAll(".nav-btn").forEach(btn => {
                     if (btn.id === "admin-nav-btn") return;
-                    const isActive = btn.dataset.target === viewId;
+                    const isActive = btn.dataset.target === navHighlightTarget;
                     if (isActive) {
                         btn.classList.remove("text-gray-300", "text-gray-400", "text-white", "hover:bg-surface-high");
                         btn.classList.add("bg-primary", "text-surface-container");
@@ -1425,27 +1844,52 @@
                     renderCacesFlow();
                 },
                 startSubjectExam,
-                openSinapticoForSubject
+                openSinapticoForSubject,
+                openMaterialsForSubject,
+                filterStudyMaterials(catId) {
+                    uiState.activeMaterialCategoryFilter = catId;
+                    renderStudyMaterialsView();
+                },
+                openMaterialDoc(docId) {
+                    uiState.openReaderDoc = docId;
+                    renderStudyMaterialsView();
+                },
+                closeMaterialDoc() {
+                    uiState.openReaderDoc = null;
+                    renderStudyMaterialsView();
+                },
+                toggleReaderNightMode() {
+                    uiState.readerNightMode = !uiState.readerNightMode;
+                    renderStudyMaterialsView();
+                },
+                saveMaterialNote(docId) {
+                    const val = document.getElementById("student-material-notes")?.value || "";
+                    localStorage.setItem("makai_note_" + docId + "_" + uiState.activeMaterialSubject, val);
+                    alert("✅ Apuntes guardados en tu cuaderno clínico de " + uiState.activeMaterialSubject);
+                },
+                openAdminMaterialsManager() {
+                    openView("view-admin");
+                    const matTabBtn = document.querySelector('[data-admin-tab="materiales"]');
+                    if (matTabBtn) matTabBtn.click();
+                }
             };
 
             document.addEventListener("DOMContentLoaded", () => {
+                initBrandLogoResolver();
                 renderCarreraFlow();
                 renderCacesFlow();
 
-                // Enlazar botones laterales (.nav-btn) inmediatamente
                 document.querySelectorAll(".nav-btn").forEach(btn => {
                     btn.addEventListener("click", () => {
                         if (btn.dataset.target) openView(btn.dataset.target);
                     });
                 });
 
-                // Enlazar tarjeta Sináptica 1D
                 document.getElementById("btn-show-answer")?.addEventListener("click", () => {
                     document.getElementById("fc-back")?.classList.remove("hidden");
                     document.getElementById("fc-controls")?.classList.remove("hidden");
                 });
 
-                // Enlazar reproductor CC0
                 document.getElementById("btn-cc0-toggle")?.addEventListener("click", toggleCC0Audio);
                 document.getElementById("cc0-local-file")?.addEventListener("change", (e) => {
                     const file = e.target.files?.[0];
