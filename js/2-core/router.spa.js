@@ -2,12 +2,13 @@
 // ARCHIVO: js/2-core/router.spa.js
 // PROYECTO: MakaiAcademy (Proyecto ALICIZATION)
 // RESPONSABILIDAD: Subcomponente de Navegación SPA, Conmutador de Vistas
-//                  (switchView) y Despliegue Encadenado CARRERA (11) / CACES (4).
+//                  (switchView) y Despliegue Curricular Encadenado para las
+//                  vistas independientes de CARRERA (11 Áreas) y CACES (4 Oficiales).
 // ============================================================================
 
 import * as StateStore from "./state.store.js";
 
-// --- CORREOS MAESTROS DE ADMINISTRACIÓN (RESPALDO DE SEGURIDAD) ---
+// --- CORREOS MAESTROS DE ADMINISTRACIÓN (ACCESO TOTAL DESBLOQUEADO) ---
 const FALLBACK_MASTER_ADMINS = [
     "anthonnyvelastegui@gmail.com",
     "aavemakaihc@gmail.com"
@@ -16,6 +17,10 @@ const FALLBACK_MASTER_ADMINS = [
 // --- REGISTRO OFICIAL DE VISTAS DEL LIENZO SPA (dashboard.html) ---
 export const SPA_VIEWS = {
     LAUNCHER: "view-launcher",
+    CARRERA: "view-carrera",
+    CACES: "view-caces",
+    RURAL: "view-rural",
+    SIMULATORS_HUB: "view-simulators",
     SIMULATOR: "view-simulator",
     SPACED_1D: "view-spaced",
     SIM_2D: "view-sim2d",
@@ -25,11 +30,14 @@ export const SPA_VIEWS = {
     ADMIN: "view-admin"
 };
 
-// --- CATÁLOGO DE RESPALDO: 4 CARRERAS OFICIALES CACES ---
+// --- CATÁLOGO OFICIAL: 4 CARRERAS CONVOCADAS AL EXAMEN CACES ---
 const DEFAULT_CACES_CAREERS = [
     {
         id: "medicina",
         nombre: "Medicina Humana (FCS-EC)",
+        codigo: "CACES-MED",
+        icono: "medical_services",
+        descripcion: "Habilitación profesional para Médicos Generales • Matriz oficial de casos clínicos integrales.",
         activa: true,
         materias: [
             "Medicina Interna",
@@ -37,193 +45,395 @@ const DEFAULT_CACES_CAREERS = [
             "Ginecología y Obstetricia",
             "Cirugía General",
             "Salud Pública y Bioética",
-            "Urgencias y Cuidados Críticos"
+            "Salud Mental y Urgencias Críticas"
         ],
         nivelesCaces: [
-            "Eje Básico Clínico",
-            "Eje Quirúrgico y Materno-Infantil",
-            "Simulacro Integral CACES (100 Reactivos)"
+            { id: "basico", nombre: "Nivel 1 • Básico (Conceptos y GPC)" },
+            { id: "intermedio", nombre: "Nivel 2 • Intermedio (Casos Clínicos)" },
+            { id: "avanzado", nombre: "Nivel 3 • Avanzado (Diagnóstico Diferencial)" },
+            { id: "elite", nombre: "Nivel 4 • Élite CACES (Simulacro Complejo)" }
         ]
     },
     {
         id: "enfermeria",
         nombre: "Enfermería & Cuidados Críticos",
+        codigo: "CACES-ENF",
+        icono: "Monitor_Heart",
+        descripcion: "Proceso de Atención de Enfermería (PAE), NANDA/NIC/NOC, farmacología y cuidados intensivos.",
         activa: true,
         materias: [
             "Enfermería Clínico-Quirúrgica",
-            "Enfermería Materno-Infantil",
-            "Salud Comunitaria y Epidemiología",
-            "Farmacología Aplicada",
-            "Gestión y Bioética en Enfermería",
-            "Cuidados Intensivos y Emergencias"
+            "Enfermería Materno-Infantil y Pediátrica",
+            "Enfermería Comunitaria y Epidemiología",
+            "Fundamentos y Proceso de Enfermería (PAE)",
+            "Administración y Bioética en Enfermería",
+            "Urgencias y Cuidados Críticos"
         ],
         nivelesCaces: [
-            "Cuidado Directo y Farmacología",
-            "Salud Pública y Materno-Infantil",
-            "Simulacro Integral CACES (100 Reactivos)"
+            { id: "basico", nombre: "Nivel 1 • Básico (Fundamentos y PAE)" },
+            { id: "intermedio", nombre: "Nivel 2 • Intermedio (Cuidado Clínico)" },
+            { id: "avanzado", nombre: "Nivel 3 • Avanzado (Críticos y Materno)" },
+            { id: "elite", nombre: "Nivel 4 • Élite CACES (Simulacro Complejo)" }
         ]
     },
     {
         id: "odontologia",
         nombre: "Odontología Clínica",
+        codigo: "CACES-ODO",
+        icono: "dentistry",
+        descripcion: "Diagnóstico oral, cirugía maxilofacial, endodoncia, periodoncia, rehabilitación y bioseguridad.",
         activa: false,
         materias: [
-            "Patología y Diagnóstico Oral",
-            "Cirugía Oral y Maxilofacial",
-            "Endodoncia y Periodoncia",
-            "Rehabilitación y Operatoria Dental",
+            "Patología Bucal y Diagnóstico",
+            "Endodoncia y Operatoria Dental",
+            "Periodoncia y Cirugía Maxilofacial",
+            "Rehabilitación Oral y Prótesis",
             "Odontopediatría y Ortodoncia",
-            "Farmacología y Bioseguridad Odontológica"
+            "Farmacología y Salud Pública Odontológica"
         ],
         nivelesCaces: [
-            "Diagnóstico y Cirugía Oral",
-            "Especialidades Clínicas Odontológicas",
-            "Simulacro Integral CACES (100 Reactivos)"
+            { id: "basico", nombre: "Nivel 1 • Básico (Diagnóstico y Bioseguridad)" },
+            { id: "intermedio", nombre: "Nivel 2 • Intermedio (Clínica y Endodoncia)" },
+            { id: "avanzado", nombre: "Nivel 3 • Avanzado (Cirugía y Rehabilitación)" },
+            { id: "elite", nombre: "Nivel 4 • Élite CACES (Simulacro Complejo)" }
         ]
     },
     {
         id: "obstetricia",
         nombre: "Obstetricia & Salud Materna",
+        codigo: "CACES-OBS",
+        icono: "pregnant_woman",
+        descripcion: "Control prenatal, Claves Obstétricas MSP (Roja, Azul, Amarilla), Score MAMÁ y perinatología.",
         activa: false,
         materias: [
             "Obstetricia Fisiológica y Alto Riesgo",
-            "Ginecología y Salud Sexual",
-            "Neonatología e Inmunizaciones",
-            "Salud Pública y Normativa MSP",
+            "Claves Obstétricas y Emergencias (MSP)",
+            "Ginecología y Salud Sexual Reproductiva",
+            "Neonatología y Perinatología",
             "Farmacología Obstétrica",
-            "Emergencias Obstétricas (Clave Roja/Azul/Amarilla)"
+            "Salud Pública Materna y Normativa"
         ],
         nivelesCaces: [
-            "Control Prenatal y Parto Humanizado",
-            "Claves Obstétricas y Alto Riesgo",
-            "Simulacro Integral CACES (100 Reactivos)"
+            { id: "basico", nombre: "Nivel 1 • Básico (Prenatal y Normativa MSP)" },
+            { id: "intermedio", nombre: "Nivel 2 • Intermedio (Parto y Puerperio)" },
+            { id: "avanzado", nombre: "Nivel 3 • Avanzado (Claves Obstétricas)" },
+            { id: "elite", nombre: "Nivel 4 • Élite CACES (Simulacro Complejo)" }
         ]
     }
 ];
 
-// --- CATÁLOGO DE RESPALDO: 11 CARRERAS DE CIENCIAS DE LA SALUD ---
+// --- CATÁLOGO OFICIAL: 11 CARRERAS UNIVERSITARIAS DE CIENCIAS DE LA SALUD ---
 const DEFAULT_UNIVERSITY_CAREERS = [
-    { id: "medicina", nombre: "1. Medicina Humana", activa: true },
-    { id: "enfermeria", nombre: "2. Enfermería", activa: true },
-    { id: "odontologia", nombre: "3. Odontología", activa: true },
-    { id: "obstetricia", nombre: "4. Obstetricia", activa: true },
-    { id: "nutricion", nombre: "5. Nutrición y Dietética", activa: true },
-    { id: "fisioterapia", nombre: "6. Fisioterapia y Rehabilitación", activa: true },
-    { id: "laboratorio", nombre: "7. Laboratorio Clínico", activa: true },
-    { id: "imagenologia", nombre: "8. Imagenología y Radiología", activa: true },
-    { id: "farmacia", nombre: "9. Bioquímica y Farmacia", activa: true },
-    { id: "psicologia_clinica", nombre: "10. Psicología Clínica", activa: true },
-    { id: "paramedicina", nombre: "11. Atención Prehospitalaria y Emergencias", activa: true }
+    {
+        id: "medicina",
+        numero: "01",
+        nombre: "Medicina Humana",
+        icono: "stethoscope",
+        duracion: "12 Semestres + Internado Rotativo",
+        activa: true,
+        materiasEspeciales: ["Clínica Médica", "Cirugía General", "Pediatría", "Ginecología y Obstetricia", "Emergencias y UCI"]
+    },
+    {
+        id: "enfermeria",
+        numero: "02",
+        nombre: "Enfermería",
+        icono: "medical_information",
+        duracion: "9 Semestres + Internado Rotativo",
+        activa: true,
+        materiasEspeciales: ["Proceso de Atención de Enfermería (PAE)", "Enfermería Quirúrgica", "Cuidados Críticos", "Enfermería Materno-Infantil"]
+    },
+    {
+        id: "odontologia",
+        numero: "03",
+        nombre: "Odontología",
+        icono: "dentistry",
+        duracion: "10 Semestres Clínicos",
+        activa: true,
+        materiasEspeciales: ["Anatomía Dental", "Operatoria y Endodoncia", "Periodoncia", "Cirugía Oral y Maxilofacial", "Rehabilitación Oral"]
+    },
+    {
+        id: "obstetricia",
+        numero: "04",
+        nombre: "Obstetricia y Puericultura",
+        icono: "pregnant_woman",
+        duracion: "9 Semestres + Internado",
+        activa: true,
+        materiasEspeciales: ["Obstetricia Clínica", "Claves Obstétricas MSP", "Monitoreo Fetal", "Salud Sexual y Reproductiva", "Neonatología"]
+    },
+    {
+        id: "nutricion",
+        numero: "05",
+        nombre: "Nutrición y Dietética",
+        icono: "nutrition",
+        duracion: "8 Semestres + Prácticas Hospitalarias",
+        activa: true,
+        materiasEspeciales: ["Dietoterapia del Adulto y Pediátrica", "Evaluación Nutricional ABCD", "Soporte Nutricional Enteral y Parenteral", "Bromatología"]
+    },
+    {
+        id: "fisioterapia",
+        numero: "06",
+        nombre: "Fisioterapia y Rehabilitación",
+        icono: "physical_therapy",
+        duracion: "8 Semestres Clínicos",
+        activa: true,
+        materiasEspeciales: ["Biomecánica y Kinesiología", "Rehabilitación Musculoesquelética", "Fisioterapia Neurológica", "Fisioterapia Cardiorrespiratoria"]
+    },
+    {
+        id: "laboratorio",
+        numero: "07",
+        nombre: "Laboratorio Clínico",
+        icono: "biotech",
+        duracion: "8 Semestres de Diagnóstico",
+        activa: true,
+        materiasEspeciales: ["Hematología y Coagulación", "Bioquímica Clínica", "Microbiología y Parasitología Diagnóstica", "Inmunología y Biología Molecular"]
+    },
+    {
+        id: "imagenologia",
+        numero: "08",
+        nombre: "Imagenología y Radiología",
+        icono: "radiology",
+        duracion: "8 Semestres Tecnológicos",
+        activa: true,
+        materiasEspeciales: ["Anatomía Radiológica", "Tomografía Computarizada (TC)", "Resonancia Magnética (RMN)", "Ecografía y Doppler", "Protección Radiológica"]
+    },
+    {
+        id: "farmacia",
+        numero: "09",
+        nombre: "Bioquímica y Farmacia",
+        icono: "science",
+        duracion: "10 Semestres Científicos",
+        activa: true,
+        materiasEspeciales: ["Química Farmacéutica", "Farmacología y Farmacoterapia", "Toxicología Analítica y Clínica", "Farmacia Hospitalaria"]
+    },
+    {
+        id: "psicologia_clinica",
+        numero: "10",
+        nombre: "Psicología Clínica",
+        icono: "psychology",
+        duracion: "8 Semestres + Práctica Clínica",
+        activa: true,
+        materiasEspeciales: ["Psicopatología DSM-5 / CIE-11", "Neuropsicología Clínica", "Psicodiagnóstico y Evaluación", "Intervención en Crisis y Psicoterapia"]
+    },
+    {
+        id: "paramedicina",
+        numero: "11",
+        nombre: "Atención Prehospitalaria y Emergencias",
+        icono: "ambulance",
+        duracion: "8 Semestres Tácticos (APH)",
+        activa: true,
+        materiasEspeciales: ["Soporte Vital Básico y Avanzado (BLS/ACLS)", "Trauma Prehospitalario (PHTLS)", "Triaje START y Desastres", "Farmacología de Emergencias"]
+    }
 ];
 
-// --- ETAPAS FORMATIVAS Y MATERIAS UNIVERSALES POR NIVEL (SECCIÓN CARRERA) ---
+// --- ETAPAS FORMATIVAS Y SEMESTRES ACADÉMICOS (PASO 2 DE CARRERA) ---
 const ACADEMIC_STAGES = [
     {
         id: "preuniversitario",
+        etiqueta: "Etapa Inicial",
         nombre: "Preuniversitario",
+        descripcion: "Admisión a Ciencias de la Salud: Biología, Química, Anatomía preliminar y Razonamiento.",
         materias: [
             "Biología Celular y Molecular",
-            "Química General y Orgánica",
-            "Anatomía y Fisiología Básica",
-            "Razonamiento Lógico y Verbal",
-            "Terminología Médica"
+            "Química General e Inorgánica",
+            "Química Orgánica Aplicada",
+            "Anatomía y Fisiología Elemental",
+            "Terminología Médica y Razonamiento"
         ]
     },
     {
         id: "nivelacion",
-        nombre: "Nivelación",
+        etiqueta: "Semestre 0",
+        nombre: "Nivelación Académica",
+        descripcion: "Bases morfológicas y bioquímicas para el primer año universitario.",
         materias: [
-            "Morfofisiología I",
+            "Morfofisiología Básica I",
             "Bioquímica Médica Elemental",
-            "Salud y Sociedad",
-            "Biofísica Aplicada",
-            "Metodología de la Investigación"
+            "Biofísica Aplicada a la Salud",
+            "Salud, Sociedad y Bioética",
+            "Metodología de la Investigación Científica"
         ]
     },
     {
-        id: "semestre_1_2",
-        nombre: "1° y 2° Semestre (Ciencias Básicas)",
+        id: "semestre_1",
+        etiqueta: "Nivel 1",
+        nombre: "1° Semestre (Ciencias Básicas I)",
+        descripcion: "Estructura macroscópica y microscópica del cuerpo humano.",
         materias: [
-            "Anatomía Humana Descriptiva",
-            "Histología y Embriología",
-            "Fisiología Humana I",
-            "Bioquímica Clínica",
-            "Bioestadística"
+            "Anatomía Humana Descriptiva I",
+            "Histología General",
+            "Embriología Humana y Genética Básica",
+            "Biología Molecular Clínica",
+            "Bioestadística Descriptiva"
         ]
     },
     {
-        id: "semestre_3_4",
-        nombre: "3° y 4° Semestre (Preclínicas)",
+        id: "semestre_2",
+        etiqueta: "Nivel 2",
+        nombre: "2° Semestre (Morfofunción)",
+        descripcion: "Fisiología de sistemas y metabolismo humano normal.",
         materias: [
-            "Fisiopatología General",
-            "Microbiología y Parasitología",
-            "Farmacología Básica",
-            "Anatomía Patológica",
-            "Inmunología y Genética"
+            "Anatomía Humana Neurovascular II",
+            "Fisiología Humana General y Neurofisiología",
+            "Bioquímica Clínica y Metabolismo",
+            "Histología de Sistemas",
+            "Salud Pública y Atención Primaria (MAIS-FCI)"
         ]
     },
     {
-        id: "semestre_5_6",
-        nombre: "5° y 6° Semestre (Semiología y Clínica I)",
+        id: "semestre_3",
+        etiqueta: "Nivel 3",
+        nombre: "3° Semestre (Agentes y Mecanismos)",
+        descripcion: "Microbiología, parasitología, inmunología y bases patológicas.",
         materias: [
-            "Semiología y Propedéutica Clínica",
+            "Microbiología Médica (Bacteriología y Virología)",
+            "Parasitología y Micología Clínica",
+            "Fisiopatología General I",
+            "Inmunología Clínica",
+            "Anatomía Patológica General"
+        ]
+    },
+    {
+        id: "semestre_4",
+        etiqueta: "Nivel 4",
+        nombre: "4° Semestre (Preclínicas y Semiología)",
+        descripcion: "Propedéutica clínica, examen físico, signos vitales y farmacología básica.",
+        materias: [
+            "Semiología y Propedéutica Clínica I",
+            "Fisiopatología de Sistemas II",
+            "Farmacología Básica y Mecanismos de Acción",
+            "Laboratorio Clínico e Interpretación Diagnóstica",
+            "Epidemiología Clínica"
+        ]
+    },
+    {
+        id: "semestre_5",
+        etiqueta: "Nivel 5",
+        nombre: "5° Semestre (Clínicas I)",
+        descripcion: "Síndromes clínicos cardiovasculares, respiratorios, renales y digestivos.",
+        materias: [
+            "Semiología Avanzada y Razonamiento Clínico",
+            "Medicina Interna I (Cardio, Neumo, Nefro, Gastro)",
             "Farmacología Clínica y Terapéutica",
-            "Medicina Interna I / Cuidados Clínicos",
-            "Imagenología Diagnóstica",
-            "Epidemiología y Salud Pública"
+            "Imagenología Diagnóstica Básica",
+            "Psicología Médica y Comunicación Clínica"
         ]
     },
     {
-        id: "semestre_7_8",
-        nombre: "7° y 8° Semestre (Clínico-Quirúrgicas)",
+        id: "semestre_6",
+        etiqueta: "Nivel 6",
+        nombre: "6° Semestre (Clínicas II)",
+        descripcion: "Endocrinología, infectología, hematología, neurología y reumatología.",
         materias: [
-            "Clínica Médica Avanzada",
-            "Cirugía y Trauma",
-            "Pediatría y Neonatología",
+            "Medicina Interna II (Endocrino, Infecto, Neuro, Hemato)",
+            "Terapéutica Basada en Evidencia y GPC",
+            "Nutrición Clínica y Dietoterapia",
+            "Salud Mental y Psiquiatría Clínica",
+            "Dermatología e Infectología Tropical"
+        ]
+    },
+    {
+        id: "semestre_7",
+        etiqueta: "Nivel 7",
+        nombre: "7° Semestre (Quirúrgicas y Trauma)",
+        descripcion: "Patología quirúrgica, técnica aséptica, anestesiología y manejo del trauma.",
+        materias: [
+            "Cirugía General y Abdomen Agudo",
+            "Traumatología y Ortopedia",
+            "Anestesiología y Reanimación",
+            "Especialidades Quirúrgicas (ORL, Oftalmología, Urología)",
+            "Soporte Vital en Trauma"
+        ]
+    },
+    {
+        id: "semestre_8",
+        etiqueta: "Nivel 8",
+        nombre: "8° Semestre (Materno-Infantil)",
+        descripcion: "Ginecología, control prenatal, claves obstétricas, pediatría y neonatología.",
+        materias: [
             "Ginecología y Salud Reproductiva",
-            "Bioética y Medicina Legal"
+            "Obstetricia y Claves Obstétricas MSP",
+            "Pediatría Clínica y Crecimiento",
+            "Neonatología y Reanimación Neonatal",
+            "AIEPI Clínico y Esquema de Vacunación MSP"
         ]
     },
     {
         id: "semestre_9_10",
-        nombre: "9° y 10° Semestre (Especialidades y Urgencias)",
+        etiqueta: "Niveles 9 - 10",
+        nombre: "9° y 10° Semestre (Urgencias y Críticos)",
+        descripcion: "Medicina de urgencias, cuidados intensivos, geriatría, medicina legal y gestión.",
         materias: [
-            "Urgencias y Cuidados Críticos",
-            "Salud Mental y Psiquiatría",
+            "Urgencias Médicas y Cuidados Críticos (UCI)",
+            "Toxicología Clínica y Envenenamientos",
             "Geriatría y Cuidados Paliativos",
-            "Administración y Gestión en Salud",
-            "Normativa del MSP y Guías Clínicas"
+            "Medicina Legal, Deontología y Bioética",
+            "Administración y Gerencia Hospitalaria"
         ]
     },
     {
         id: "internado_rotativo",
-        nombre: "Internado Rotativo / Año Rural",
+        etiqueta: "Etapa Final",
+        nombre: "Internado Rotativo & Preparación CACES",
+        descripcion: "Integración hospitalaria por rotaciones clínicas y simulacros comprehensivos.",
         materias: [
             "Rotación de Medicina Interna",
-            "Rotación de Pediatría",
+            "Rotación de Pediatría y Neonatología",
             "Rotación de Ginecología y Obstetricia",
             "Rotación de Cirugía y Emergencias",
-            "Salud Comunitaria y Rural (MAIS-FCI)"
+            "Rotación de Salud Comunitaria y Rural (MSP)"
         ]
     }
 ];
 
-// Estado interno del Router SPA
+// --- MODOS DE EVALUACIÓN Y SIMULACRO ---
+const EXAM_MODES = [
+    {
+        id: "tutor",
+        titulo: "Práctica Rápida (Modo Tutor)",
+        subtitulo: "20 Reactivos • 30 Minutos",
+        icono: "bolt",
+        badge: "RECOMENDADO DIARIO",
+        color: "primary",
+        descripcion: "Revela la respuesta correcta y el Racional Clínico GPC al instante tras responder cada caso."
+    },
+    {
+        id: "estandar",
+        titulo: "Simulacro Oficial Estándar",
+        subtitulo: "100 Reactivos • 150 Minutos",
+        icono: "assignment_turned_in",
+        badge: "CONDICIONES REALES CACES",
+        color: "secondary",
+        descripcion: "Cronómetro estricto sin retroalimentación hasta finalizar. Calificación mínima aprobatoria: 70/100."
+    },
+    {
+        id: "critico",
+        titulo: "Refuerzo de Puntos Críticos",
+        subtitulo: "30 Reactivos • 45 Minutos",
+        icono: "emergency",
+        badge: "ALTA DIFICULTAD",
+        color: "warning",
+        descripcion: "Prioriza casos clínicos de alta complejidad, diagnósticos diferenciales y áreas vulnerables."
+    }
+];
+
+// Estado reactivo interno del Router SPA
 let routerInitialized = false;
 let routerState = {
-    activeView: SPA_VIEWS.LAUNCHER,
-    academicTrack: "caces", // "caces" (4 carreras) | "carrera" (11 carreras)
+    activeView: SPA_VIEWS.CARRERA,
+    academicTrack: "carrera", // "carrera" (11 áreas) | "caces" (4 oficiales)
+    carreraStep: 1,           // Paso visual activo en la vista CARRERA (1, 2 o 3)
     selectedCareer: "medicina",
-    selectedStage: "semestre_5_6",
+    selectedStage: "preuniversitario",
     selectedSubject: "Todas las Materias",
+    selectedCacesCareer: "medicina",
+    selectedCacesLevel: "intermedio",
+    selectedCacesSubject: "Todas las Materias",
     selectedMode: "tutor",
-    viewHistory: [SPA_VIEWS.LAUNCHER]
+    viewHistory: []
 };
 
 /**
  * Verifica si un correo corresponde a un Administrador Maestro autorizado.
- * @param {string} email
- * @returns {boolean}
  */
 function checkIsAdmin(email) {
     if (!email) return false;
@@ -235,7 +445,6 @@ function checkIsAdmin(email) {
 
 /**
  * Obtiene el correo del usuario autenticado actualmente desde StateStore o window.
- * @returns {string}
  */
 function getCurrentUserEmail() {
     return (
@@ -248,55 +457,811 @@ function getCurrentUserEmail() {
 }
 
 /**
- * Muestra la notificación Toast inferior de `dashboard.html` para funciones
- * con sello (Próximamente) o avisos de navegación.
- * @param {string} customMessage - Mensaje opcional para mostrar en el Toast
+ * Despliega la notificación emergente (#toast) o crea una si no existe en el DOM.
  */
-export function showRouterToast(customMessage = "") {
-    const toastEl = document.getElementById("toast");
-    if (!toastEl) return;
-
-    if (customMessage) {
+export function showRouterToast(customMessage = "Módulo en calibración final • Disponible próximamente") {
+    let toastEl = document.getElementById("toast");
+    if (!toastEl) {
+        toastEl = document.createElement("div");
+        toastEl.id = "toast";
+        toastEl.className = "fixed bottom-6 right-6 z-50 bg-surface-container border border-primary text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 translate-y-24 opacity-0";
+        toastEl.innerHTML = `
+            <span class="material-symbols-outlined text-primary">info</span>
+            <span class="toast-message text-xs font-mono font-bold">${customMessage}</span>
+        `;
+        document.body.appendChild(toastEl);
+    } else if (customMessage) {
         const textNode = toastEl.querySelector(".toast-message") || toastEl.querySelector("span:last-child");
-        if (textNode) {
-            textNode.textContent = customMessage;
-        }
+        if (textNode) textNode.textContent = customMessage;
     }
 
     toastEl.classList.remove("translate-y-24", "opacity-0");
     clearTimeout(toastEl._hideTimeout);
     toastEl._hideTimeout = setTimeout(() => {
         toastEl.classList.add("translate-y-24", "opacity-0");
-    }, 3000);
+    }, 3200);
 }
 
 /**
  * Sincroniza las selecciones del Router SPA con `state.store.js` y emite
- * un evento global para que los demás controladores se actualicen.
+ * el evento `makai:curriculumChanged` para los motores de examen, 1D y aulas.
  */
 function syncRouterWithStore() {
+    const isCaces = routerState.academicTrack === "caces";
+    const activeCareer = isCaces ? routerState.selectedCacesCareer : routerState.selectedCareer;
+    const activeStage = isCaces ? routerState.selectedCacesLevel : routerState.selectedStage;
+    const activeSubject = isCaces ? routerState.selectedCacesSubject : routerState.selectedSubject;
+
     if (StateStore.appState) {
         StateStore.appState.currentActiveView = routerState.activeView;
-        StateStore.appState.currentCareer = routerState.selectedCareer;
-        StateStore.appState.currentMode = routerState.selectedMode;
         StateStore.appState.currentAcademicTrack = routerState.academicTrack;
-        StateStore.appState.currentAcademicStage = routerState.selectedStage;
-        StateStore.appState.currentSubject = routerState.selectedSubject;
+        StateStore.appState.currentCareer = activeCareer;
+        StateStore.appState.currentStage = activeStage;
+        StateStore.appState.currentAcademicStage = activeStage;
+        StateStore.appState.currentSubject = activeSubject;
+        StateStore.appState.currentMode = routerState.selectedMode;
     }
 
-    window.dispatchEvent(
-        new CustomEvent("makai:curriculumChanged", {
-            detail: { ...routerState }
-        })
-    );
+    if (typeof StateStore.setCurriculumSelection === "function") {
+        StateStore.setCurriculumSelection({
+            track: routerState.academicTrack,
+            career: activeCareer,
+            stage: activeStage,
+            subject: activeSubject === "Todas las Materias" ? "todas" : activeSubject,
+            mode: routerState.selectedMode
+        });
+    } else {
+        window.dispatchEvent(
+            new CustomEvent("makai:curriculumChanged", {
+                detail: {
+                    track: routerState.academicTrack,
+                    career: activeCareer,
+                    stage: activeStage,
+                    subject: activeSubject === "Todas las Materias" ? "todas" : activeSubject,
+                    mode: routerState.selectedMode,
+                    ...routerState
+                }
+            })
+        );
+    }
+}
+
+// ============================================================================
+// DETECCIÓN INTELIGENTE DE CONTENEDORES EN DASHBOARD.HTML
+// ============================================================================
+
+/**
+ * Localiza el contenedor `.tab-content` correspondiente a "CARRERA (11 ÁREAS)"
+ * buscando por ID o por el título "Carreras de Ciencias de la Salud".
+ */
+function findCarreraViewContainer() {
+    const directIds = ["view-carrera", "view-careers", "view-launcher", "tab-carrera"];
+    for (const id of directIds) {
+        const el = document.getElementById(id);
+        if (el && (el.textContent.includes("Carreras de Ciencias de la Salud") || el.textContent.includes("MÓDULO UNIVERSITARIO") || id === "view-carrera" || id === "view-launcher")) {
+            return el;
+        }
+    }
+
+    const allTabs = document.querySelectorAll(".tab-content, #views-container > div, main > section, main > div");
+    for (const tab of allTabs) {
+        const txt = tab.textContent || "";
+        if (txt.includes("Carreras de Ciencias de la Salud") || txt.includes("MÓDULO UNIVERSITARIO")) {
+            return tab;
+        }
+    }
+
+    return document.getElementById("view-launcher") || document.querySelector(".tab-content");
 }
 
 /**
- * Cambia de vista dentro de `#views-container` en `dashboard.html` sin recargar la página.
- * Incluye validación de simulacro en curso (`isExamActive`) y protección de `#view-admin`.
- * @param {string} viewId - ID del contenedor `.tab-content` (ej: "view-launcher", "view-admin")
- * @param {Object} options - Opciones adicionales ({ force: boolean, updateHash: boolean })
- * @returns {boolean} Indica si la transición de vista se realizó con éxito
+ * Localiza el contenedor `.tab-content` correspondiente a "CACES (OFICIAL)"
+ * buscando por ID o por el título "Examen Oficial CACES".
+ */
+function findCacesViewContainer() {
+    const directIds = ["view-caces", "view-caces-oficial", "tab-caces"];
+    for (const id of directIds) {
+        const el = document.getElementById(id);
+        if (el) return el;
+    }
+
+    const allTabs = document.querySelectorAll(".tab-content, #views-container > div, main > section, main > div");
+    for (const tab of allTabs) {
+        const txt = tab.textContent || "";
+        if (txt.includes("Examen Oficial CACES") || txt.includes("HABILITACIÓN PROFESIONAL CACES")) {
+            return tab;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Lanza el simulador de examen configurando previamente los parámetros elegidos,
+ * o navega hacia `#view-simulator` invocando `startExam` si está disponible.
+ */
+function triggerStartSimulation(trackType = "carrera") {
+    routerState.academicTrack = trackType;
+    syncRouterWithStore();
+
+    // Intentar invocar el controlador de exámenes si expone startExam en window o en un botón oculto
+    if (typeof window.MakaiExamController?.startExam === "function") {
+        window.MakaiExamController.startExam({
+            track: routerState.academicTrack,
+            career: trackType === "caces" ? routerState.selectedCacesCareer : routerState.selectedCareer,
+            stage: trackType === "caces" ? routerState.selectedCacesLevel : routerState.selectedStage,
+            subject: trackType === "caces" ? routerState.selectedCacesSubject : routerState.selectedSubject,
+            mode: routerState.selectedMode
+        });
+        return;
+    }
+
+    const legacyStartBtn = document.getElementById("btn-start-exam");
+    if (legacyStartBtn && !legacyStartBtn.dataset.routerInternalTrigger) {
+        legacyStartBtn.click();
+        return;
+    }
+
+    // Cambiar directamente a la vista del simulador y emitir evento de inicio
+    const switched = switchView(SPA_VIEWS.SIMULATOR);
+    window.dispatchEvent(
+        new CustomEvent("makai:startExamRequested", {
+            detail: {
+                track: routerState.academicTrack,
+                career: trackType === "caces" ? routerState.selectedCacesCareer : routerState.selectedCareer,
+                stage: trackType === "caces" ? routerState.selectedCacesLevel : routerState.selectedStage,
+                subject: trackType === "caces" ? routerState.selectedCacesSubject : routerState.selectedSubject,
+                mode: routerState.selectedMode
+            }
+        })
+    );
+
+    if (!switched) {
+        showRouterToast("Preparando motor de evaluación clínica...");
+    }
+}
+
+// ============================================================================
+// CONSTRUCCIÓN Y RENDERIZADO DE LA VISTA: CARRERA (11 ÁREAS • 3 PASOS)
+// ============================================================================
+
+/**
+ * Construye e inyecta el sistema interactivo de 3 pasos dentro de la vista
+ * "Carreras de Ciencias de la Salud" (#view-carrera / #view-launcher).
+ */
+export function renderCarreraUniversityView() {
+    const container = findCarreraViewContainer();
+    if (!container) return;
+
+    // Actualizar el badge superior nativo ("MÓDULO UNIVERSITARIO • PASO X DE 3") si existe en el encabezado
+    const headerBadges = container.querySelectorAll("span, div, p");
+    headerBadges.forEach(node => {
+        if (node.children.length === 0 && node.textContent && node.textContent.includes("PASO") && node.textContent.includes("DE 3")) {
+            node.textContent = `MÓDULO UNIVERSITARIO • PASO ${routerState.carreraStep} DE 3`;
+        }
+    });
+
+    // Crear o recuperar el lienzo dinámico debajo de la cabecera
+    let dynamicRoot = document.getElementById("makai-carrera-dynamic-root");
+    if (!dynamicRoot) {
+        dynamicRoot = document.createElement("div");
+        dynamicRoot.id = "makai-carrera-dynamic-root";
+        dynamicRoot.className = "mt-6 space-y-6 pb-12";
+        container.appendChild(dynamicRoot);
+    }
+
+    const isAdmin = checkIsAdmin(getCurrentUserEmail());
+    const activeCareerObj = DEFAULT_UNIVERSITY_CAREERS.find(c => c.id === routerState.selectedCareer) || DEFAULT_UNIVERSITY_CAREERS[0];
+    const activeStageObj = ACADEMIC_STAGES.find(s => s.id === routerState.selectedStage) || ACADEMIC_STAGES[0];
+
+    // Combinar las materias del semestre/etapa con las materias troncales de la carrera elegida
+    const combinedSubjects = [
+        ...activeStageObj.materias,
+        ...(activeCareerObj.materiasEspeciales || [])
+    ].filter((v, i, a) => a.indexOf(v) === i);
+
+    dynamicRoot.innerHTML = `
+        <!-- BARRA PROGRESIVA INTERACTIVA DE LOS 3 PASOS -->
+        <div class="bg-surface-container border border-surface-high rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-lg">
+            <div class="flex flex-wrap items-center gap-2 md:gap-3">
+                <button type="button" data-goto-step="1" class="carrera-step-pill flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-mono font-extrabold transition-all border ${
+                    routerState.carreraStep === 1
+                        ? "bg-primary text-surface border-primary shadow-[0_0_15px_rgba(0,229,255,0.25)]"
+                        : "bg-surface text-primary border-primary/40 hover:border-primary"
+                }">
+                    <span class="w-5 h-5 rounded-full bg-black/20 flex items-center justify-center text-[11px]">1</span>
+                    <span>Carrera: ${activeCareerObj.nombre}</span>
+                </button>
+
+                <span class="text-gray-600 font-mono">→</span>
+
+                <button type="button" data-goto-step="2" class="carrera-step-pill flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-mono font-extrabold transition-all border ${
+                    routerState.carreraStep === 2
+                        ? "bg-primary text-surface border-primary shadow-[0_0_15px_rgba(0,229,255,0.25)]"
+                        : "bg-surface text-gray-300 border-surface-high hover:border-primary/50"
+                }">
+                    <span class="w-5 h-5 rounded-full bg-black/20 flex items-center justify-center text-[11px]">2</span>
+                    <span>Etapa: ${activeStageObj.nombre}</span>
+                </button>
+
+                <span class="text-gray-600 font-mono">→</span>
+
+                <button type="button" data-goto-step="3" class="carrera-step-pill flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-mono font-extrabold transition-all border ${
+                    routerState.carreraStep === 3
+                        ? "bg-primary text-surface border-primary shadow-[0_0_15px_rgba(0,229,255,0.25)]"
+                        : "bg-surface text-gray-300 border-surface-high hover:border-primary/50"
+                }">
+                    <span class="w-5 h-5 rounded-full bg-black/20 flex items-center justify-center text-[11px]">3</span>
+                    <span>Materia: ${routerState.selectedSubject}</span>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <span class="px-3 py-1 rounded-lg bg-secondary/15 border border-secondary/40 text-secondary text-[11px] font-mono font-bold">
+                    11 Carreras Activas
+                </span>
+            </div>
+        </div>
+
+        <!-- =============================================================== -->
+        <!-- PASO 1: SELECCIÓN DE LAS 11 CARRERAS DE CIENCIAS DE LA SALUD    -->
+        <!-- =============================================================== -->
+        <div class="bg-surface-container border border-surface-high rounded-2xl p-5 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-surface-high pb-3">
+                <div>
+                    <span class="text-[10px] font-mono text-primary uppercase tracking-widest font-bold">
+                        PASO 1 DE 3 • CATÁLOGO UNIVERSITARIO
+                    </span>
+                    <h3 class="text-base font-extrabold text-white">
+                        1. Selecciona tu Carrera de Ciencias de la Salud (11 Áreas)
+                    </h3>
+                </div>
+                <span class="text-xs font-mono text-gray-400">
+                    Haz clic en una carrera para desplegar sus semestres y materias
+                </span>
+            </div>
+
+            <div id="carrera-grid-11" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
+                ${DEFAULT_UNIVERSITY_CAREERS.map(career => {
+                    const isSelected = career.id === routerState.selectedCareer;
+                    const isLocked = !career.activa && !isAdmin;
+                    return `
+                        <div data-univ-career="${career.id}" class="univ-career-card group relative p-4 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+                            isSelected
+                                ? "bg-surface-high border-primary text-white shadow-[0_0_20px_rgba(0,229,255,0.15)]"
+                                : "bg-surface border-surface-high text-gray-300 hover:border-primary/60 hover:bg-surface-high/60"
+                        } ${isLocked ? "opacity-60" : ""}">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-9 h-9 rounded-lg flex items-center justify-center font-mono text-xs font-extrabold ${
+                                        isSelected ? "bg-primary text-surface" : "bg-surface-container text-primary border border-primary/30"
+                                    }">
+                                        ${career.numero}
+                                    </div>
+                                    <div>
+                                        <h4 class="font-extrabold text-sm ${isSelected ? "text-white" : "text-gray-100 group-hover:text-white"}">
+                                            ${career.nombre}
+                                        </h4>
+                                        <span class="text-[10px] font-mono text-gray-400 block">
+                                            ${career.duracion}
+                                        </span>
+                                    </div>
+                                </div>
+                                ${
+                                    isSelected
+                                        ? `<span class="material-symbols-outlined text-primary text-lg">check_circle</span>`
+                                        : `<span class="material-symbols-outlined text-gray-600 group-hover:text-primary text-base">arrow_forward_ios</span>`
+                                }
+                            </div>
+                            <div class="mt-3 pt-2.5 border-t border-surface-high/80 flex items-center justify-between text-[10px] font-mono">
+                                <span class="${isSelected ? "text-primary font-bold" : "text-gray-400"}">
+                                    Preuniv • Nivelación • 1°-10° Sem
+                                </span>
+                                <span class="px-2 py-0.5 rounded bg-secondary/15 text-secondary font-bold">
+                                    HABILITADA
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                }).join("")}
+            </div>
+        </div>
+
+        <!-- =============================================================== -->
+        <!-- PASO 2: ETAPA FORMATIVA (PREUNIVERSITARIO, NIVELACIÓN, SEMESTRES)-->
+        <!-- =============================================================== -->
+        <div id="carrera-step2-box" class="bg-surface-container border ${
+            routerState.carreraStep >= 2 ? "border-primary/50 shadow-[0_0_25px_rgba(0,229,255,0.08)]" : "border-surface-high"
+        } rounded-2xl p-5 space-y-4 transition-all">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-surface-high pb-3">
+                <div>
+                    <span class="text-[10px] font-mono text-secondary uppercase tracking-widest font-bold">
+                        PASO 2 DE 3 • MALLA CURRICULAR DE ${activeCareerObj.nombre.toUpperCase()}
+                    </span>
+                    <h3 class="text-base font-extrabold text-white">
+                        2. Selecciona tu Etapa Formativa o Semestre Académico
+                    </h3>
+                </div>
+                <span class="text-xs font-mono text-primary">
+                    Etapa activa: ${activeStageObj.nombre}
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                ${ACADEMIC_STAGES.map(stage => {
+                    const isStageSelected = stage.id === routerState.selectedStage;
+                    return `
+                        <button type="button" data-univ-stage="${stage.id}" class="univ-stage-btn text-left p-3.5 rounded-xl border transition-all flex flex-col justify-between ${
+                            isStageSelected
+                                ? "bg-primary/15 border-primary text-white shadow-[0_0_15px_rgba(0,229,255,0.18)]"
+                                : "bg-surface border-surface-high text-gray-300 hover:border-primary/50 hover:text-white"
+                        }">
+                            <div>
+                                <div class="flex items-center justify-between gap-2 mb-1">
+                                    <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded font-bold ${
+                                        isStageSelected ? "bg-primary text-surface" : "bg-surface-high text-primary"
+                                    }">
+                                        ${stage.etiqueta}
+                                    </span>
+                                    ${isStageSelected ? `<span class="text-xs font-mono text-primary font-extrabold">✓ ACTIVO</span>` : ""}
+                                </div>
+                                <div class="font-extrabold text-xs mt-1.5">${stage.nombre}</div>
+                                <p class="text-[11px] text-gray-400 mt-1 line-clamp-2">${stage.descripcion}</p>
+                            </div>
+                            <div class="mt-2.5 pt-2 border-t border-surface-high/60 text-[10px] font-mono text-secondary">
+                                ${stage.materias.length} asignaturas disponibles →
+                            </div>
+                        </button>
+                    `;
+                }).join("")}
+            </div>
+        </div>
+
+        <!-- =============================================================== -->
+        <!-- PASO 3: MATERIAS DEL SEMESTRE Y LANZADOR DE EVALUACIÓN / 1D     -->
+        <!-- =============================================================== -->
+        <div id="carrera-step3-box" class="bg-surface-container border ${
+            routerState.carreraStep === 3 ? "border-primary shadow-[0_0_25px_rgba(0,229,255,0.12)]" : "border-surface-high"
+        } rounded-2xl p-5 space-y-6 transition-all">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-surface-high pb-3">
+                <div>
+                    <span class="text-[10px] font-mono text-primary uppercase tracking-widest font-bold">
+                        PASO 3 DE 3 • ASIGNATURAS Y MODALIDAD DE ESTUDIO
+                    </span>
+                    <h3 class="text-base font-extrabold text-white">
+                        3. Elige la Materia de ${activeStageObj.nombre} (${activeCareerObj.nombre})
+                    </h3>
+                </div>
+                <span class="text-xs font-mono text-secondary">
+                    Materia seleccionada: ${routerState.selectedSubject}
+                </span>
+            </div>
+
+            <!-- PÍLDORAS DE MATERIAS -->
+            <div class="flex flex-wrap gap-2.5">
+                ${["Todas las Materias", ...combinedSubjects].map(subj => {
+                    const isSubjSelected = routerState.selectedSubject === subj;
+                    return `
+                        <button type="button" data-univ-subject="${subj}" class="univ-subject-pill px-4 py-2 rounded-xl text-xs font-mono transition-all border ${
+                            isSubjSelected
+                                ? "bg-primary text-surface border-primary font-extrabold shadow-[0_0_12px_rgba(0,229,255,0.3)]"
+                                : "bg-surface border-surface-high text-gray-300 hover:border-primary/60 hover:text-white"
+                        }">
+                            ${isSubjSelected ? "● " : ""}${subj}
+                        </button>
+                    `;
+                }).join("")}
+            </div>
+
+            <!-- TARJETAS DE MODO DE EVALUACIÓN -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                ${EXAM_MODES.map(m => {
+                    const isModeSelected = routerState.selectedMode === m.id;
+                    return `
+                        <div data-exam-mode="${m.id}" class="univ-mode-card p-4 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+                            isModeSelected
+                                ? "bg-surface-high border-primary shadow-[0_0_15px_rgba(0,229,255,0.15)]"
+                                : "bg-surface border-surface-high hover:border-gray-500"
+                        }">
+                            <div>
+                                <div class="flex items-center justify-between gap-2 mb-2">
+                                    <span class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-primary/15 text-primary">
+                                        ${m.badge}
+                                    </span>
+                                    <span class="material-symbols-outlined ${isModeSelected ? "text-primary" : "text-gray-500"}">
+                                        ${isModeSelected ? "radio_button_checked" : "radio_button_unchecked"}
+                                    </span>
+                                </div>
+                                <h4 class="text-sm font-extrabold text-white">${m.titulo}</h4>
+                                <p class="text-xs font-mono text-secondary mt-0.5">${m.subtitulo}</p>
+                                <p class="text-xs text-gray-400 mt-2 leading-relaxed">${m.descripcion}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join("")}
+            </div>
+
+            <!-- BOTONES DE ACCIÓN INMEDIATA -->
+            <div class="pt-4 border-t border-surface-high flex flex-wrap items-center justify-between gap-4">
+                <div class="text-xs font-mono text-gray-300">
+                    Ruta lista: <strong class="text-primary">${activeCareerObj.nombre}</strong> •
+                    <strong class="text-secondary">${activeStageObj.nombre}</strong> •
+                    <strong class="text-white">${routerState.selectedSubject}</strong>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <button type="button" id="btn-carrera-go-1d" class="px-4 py-3 rounded-xl bg-surface border border-primary/60 text-primary hover:bg-primary/15 text-xs font-extrabold font-mono transition-all flex items-center gap-2">
+                        <span class="material-symbols-outlined text-base">psychology</span>
+                        <span>Estudiar en Sináptico 1D & PDFs</span>
+                    </button>
+
+                    <button type="button" id="btn-carrera-start-exam" class="px-6 py-3 rounded-xl bg-primary text-surface hover:bg-opacity-90 text-xs font-extrabold uppercase tracking-wider transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(0,229,255,0.3)]">
+                        <span class="material-symbols-outlined text-base">play_arrow</span>
+                        <span>Iniciar Evaluación de Carrera</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Enlazar eventos de las tarjetas de las 11 carreras (Paso 1)
+    dynamicRoot.querySelectorAll(".univ-career-card").forEach(card => {
+        card.addEventListener("click", () => {
+            const careerId = card.dataset.univCareer;
+            routerState.academicTrack = "carrera";
+            routerState.selectedCareer = careerId;
+            routerState.selectedSubject = "Todas las Materias";
+            routerState.carreraStep = 2;
+            renderCarreraUniversityView();
+            syncRouterWithStore();
+            document.getElementById("carrera-step2-box")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        });
+    });
+
+    // Enlazar eventos de Etapas / Semestres (Paso 2)
+    dynamicRoot.querySelectorAll(".univ-stage-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const stageId = btn.dataset.univStage;
+            routerState.academicTrack = "carrera";
+            routerState.selectedStage = stageId;
+            routerState.selectedSubject = "Todas las Materias";
+            routerState.carreraStep = 3;
+            renderCarreraUniversityView();
+            syncRouterWithStore();
+            document.getElementById("carrera-step3-box")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        });
+    });
+
+    // Enlazar eventos de Píldoras de Materias (Paso 3)
+    dynamicRoot.querySelectorAll(".univ-subject-pill").forEach(pill => {
+        pill.addEventListener("click", () => {
+            routerState.academicTrack = "carrera";
+            routerState.selectedSubject = pill.dataset.univSubject || "Todas las Materias";
+            routerState.carreraStep = 3;
+            renderCarreraUniversityView();
+            syncRouterWithStore();
+        });
+    });
+
+    // Enlazar selección de Modo de Examen
+    dynamicRoot.querySelectorAll(".univ-mode-card").forEach(modeCard => {
+        modeCard.addEventListener("click", () => {
+            routerState.selectedMode = modeCard.dataset.examMode || "tutor";
+            renderCarreraUniversityView();
+            syncRouterWithStore();
+        });
+    });
+
+    // Enlazar píldoras superiores de navegación de pasos (1, 2, 3)
+    dynamicRoot.querySelectorAll(".carrera-step-pill").forEach(stepBtn => {
+        stepBtn.addEventListener("click", () => {
+            routerState.carreraStep = Number(stepBtn.dataset.gotoStep) || 1;
+            renderCarreraUniversityView();
+        });
+    });
+
+    // Botón para ir a Sináptico 1D / Guías PDF con el filtro actual
+    document.getElementById("btn-carrera-go-1d")?.addEventListener("click", () => {
+        routerState.academicTrack = "carrera";
+        syncRouterWithStore();
+        switchView(SPA_VIEWS.SPACED_1D);
+    });
+
+    // Botón para iniciar el simulacro de Carrera
+    document.getElementById("btn-carrera-start-exam")?.addEventListener("click", () => {
+        triggerStartSimulation("carrera");
+    });
+}
+
+// ============================================================================
+// CONSTRUCCIÓN Y RENDERIZADO DE LA VISTA: CACES OFICIAL (4 CARRERAS)
+// ============================================================================
+
+/**
+ * Construye e inyecta el selector oficial de las 4 carreras CACES, sus niveles
+ * de dificultad, sus 6 materias oficiales y los 3 modos de simulacro dentro
+ * de la vista "Examen Oficial CACES" (#view-caces).
+ */
+export function renderCacesOfficialView() {
+    const container = findCacesViewContainer();
+    if (!container) return;
+
+    let dynamicRoot = document.getElementById("makai-caces-dynamic-root");
+    if (!dynamicRoot) {
+        dynamicRoot = document.createElement("div");
+        dynamicRoot.id = "makai-caces-dynamic-root";
+        dynamicRoot.className = "mt-6 space-y-6 pb-12";
+        container.appendChild(dynamicRoot);
+    }
+
+    const isAdmin = checkIsAdmin(getCurrentUserEmail());
+    const dataCareers = Array.isArray(window.makaiData?.carreras) && window.makaiData.carreras.length > 0
+        ? DEFAULT_CACES_CAREERS.map(def => {
+            const found = window.makaiData.carreras.find(c => c.id === def.id);
+            return found ? { ...def, materias: found.materias || def.materias, activa: found.activa ?? def.activa } : def;
+        })
+        : DEFAULT_CACES_CAREERS;
+
+    const activeCacesCareer = dataCareers.find(c => c.id === routerState.selectedCacesCareer) || dataCareers[0];
+    const activeLevels = activeCacesCareer.nivelesCaces || DEFAULT_CACES_CAREERS[0].nivelesCaces;
+
+    dynamicRoot.innerHTML = `
+        <!-- PASO 1 CACES: LAS 4 CARRERAS CONVOCADAS AL EXAMEN OFICIAL -->
+        <div class="bg-surface-container border border-surface-high rounded-2xl p-5 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-surface-high pb-3">
+                <div>
+                    <span class="text-[10px] font-mono text-primary uppercase tracking-widest font-bold">
+                        CONVOCATORIA NACIONAL • HABILITACIÓN PROFESIONAL
+                    </span>
+                    <h3 class="text-base font-extrabold text-white">
+                        1. Selecciona tu Carrera Oficial CACES (4 Carreras Habilitadas)
+                    </h3>
+                </div>
+                <span class="text-xs font-mono text-secondary">
+                    ${isAdmin ? "Modo Admin Maestro: 4/4 Desbloqueadas" : "Selecciona tu carrera para desplegar componentes"}
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                ${dataCareers.map(career => {
+                    const isSelected = career.id === routerState.selectedCacesCareer;
+                    const isLocked = !career.activa && !isAdmin;
+                    return `
+                        <div data-caces-career="${career.id}" class="caces-career-card p-4 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+                            isSelected
+                                ? "bg-surface-high border-primary text-white shadow-[0_0_20px_rgba(0,229,255,0.18)]"
+                                : "bg-surface border-surface-high text-gray-300 hover:border-primary/60"
+                        } ${isLocked ? "opacity-60" : ""}">
+                            <div>
+                                <div class="flex items-center justify-between gap-2 mb-2">
+                                    <span class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
+                                        isSelected ? "bg-primary text-surface" : "bg-surface-container text-primary border border-primary/30"
+                                    }">
+                                        ${career.codigo}
+                                    </span>
+                                    ${
+                                        isLocked
+                                            ? `<span class="text-[10px] font-mono text-warning font-bold">⏳ Próximamente</span>`
+                                            : isSelected
+                                                ? `<span class="material-symbols-outlined text-primary text-lg">verified</span>`
+                                                : `<span class="text-[10px] font-mono text-secondary font-bold">● Activa</span>`
+                                    }
+                                </div>
+                                <h4 class="font-extrabold text-sm text-white mt-1">${career.nombre}</h4>
+                                <p class="text-xs text-gray-400 mt-1.5 leading-relaxed">${career.descripcion}</p>
+                            </div>
+                            <div class="mt-4 pt-2.5 border-t border-surface-high flex items-center justify-between text-[10px] font-mono">
+                                <span class="text-gray-400">${career.materias.length} Componentes Oficiales</span>
+                                <span class="text-primary font-bold">100 Reactivos</span>
+                            </div>
+                        </div>
+                    `;
+                }).join("")}
+            </div>
+        </div>
+
+        <!-- PASO 2 CACES: NIVEL DE DIFICULTAD Y COMPONENTES/MATERIAS OFICIALES -->
+        <div class="bg-surface-container border border-surface-high rounded-2xl p-5 space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-surface-high pb-3">
+                <div>
+                    <span class="text-[10px] font-mono text-secondary uppercase tracking-widest font-bold">
+                        ESTRUCTURA DE EVALUACIÓN • ${activeCacesCareer.nombre.toUpperCase()}
+                    </span>
+                    <h3 class="text-base font-extrabold text-white">
+                        2. Selecciona el Nivel de Complejidad y Componente Curricular CACES
+                    </h3>
+                </div>
+                <span class="text-xs font-mono text-primary">
+                    Filtro activo: ${routerState.selectedCacesSubject}
+                </span>
+            </div>
+
+            <!-- 4 NIVELES DE COMPLEJIDAD CACES -->
+            <div>
+                <label class="block text-[11px] font-mono text-gray-400 uppercase mb-2 font-bold">
+                    Nivel de Complejidad del Banco de Reactivos:
+                </label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    ${activeLevels.map(lvl => {
+                        const isLvlActive = routerState.selectedCacesLevel === lvl.id;
+                        return `
+                            <button type="button" data-caces-level="${lvl.id}" class="caces-level-btn px-3.5 py-2.5 rounded-xl text-xs font-mono text-left transition-all border ${
+                                isLvlActive
+                                    ? "bg-secondary/20 border-secondary text-white font-extrabold shadow-[0_0_12px_rgba(148,222,45,0.2)]"
+                                    : "bg-surface border-surface-high text-gray-300 hover:border-secondary/60"
+                            }">
+                                ${isLvlActive ? "✓ " : ""}${lvl.nombre}
+                            </button>
+                        `;
+                    }).join("")}
+                </div>
+            </div>
+
+            <!-- PÍLDORAS DE LAS 6 MATERIAS OFICIALES CACES -->
+            <div>
+                <label class="block text-[11px] font-mono text-gray-400 uppercase mb-2 font-bold">
+                    Componentes y Subcomponentes Oficiales (${activeCacesCareer.nombre}):
+                </label>
+                <div class="flex flex-wrap gap-2.5">
+                    ${["Todas las Materias", ...activeCacesCareer.materias].map(subj => {
+                        const isSubjActive = routerState.selectedCacesSubject === subj;
+                        return `
+                            <button type="button" data-caces-subject="${subj}" class="caces-subject-pill px-4 py-2 rounded-xl text-xs font-mono transition-all border ${
+                                isSubjActive
+                                    ? "bg-primary text-surface border-primary font-extrabold shadow-[0_0_12px_rgba(0,229,255,0.25)]"
+                                    : "bg-surface border-surface-high text-gray-300 hover:border-primary/60 hover:text-white"
+                            }">
+                                ${isSubjActive ? "● " : ""}${subj}
+                            </button>
+                        `;
+                    }).join("")}
+                </div>
+            </div>
+        </div>
+
+        <!-- PASO 3 CACES: SELECCIÓN DEL MODO DE SIMULACRO Y ARRANQUE -->
+        <div class="bg-surface-container border border-primary/40 rounded-2xl p-5 space-y-5 shadow-xl">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-surface-high pb-3">
+                <div>
+                    <span class="text-[10px] font-mono text-primary uppercase tracking-widest font-bold">
+                        CONFIGURACIÓN DE SIMULACRO CACES
+                    </span>
+                    <h3 class="text-base font-extrabold text-white">
+                        3. Modalidad del Simulacro de Habilitación Profesional
+                    </h3>
+                </div>
+                <span class="text-xs font-mono text-secondary">
+                    Puntaje mínimo referencial CACES: 70 / 100
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                ${EXAM_MODES.map(m => {
+                    const isModeSelected = routerState.selectedMode === m.id;
+                    return `
+                        <div data-caces-mode="${m.id}" class="caces-mode-card p-4 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+                            isModeSelected
+                                ? "bg-surface-high border-primary shadow-[0_0_15px_rgba(0,229,255,0.18)]"
+                                : "bg-surface border-surface-high hover:border-gray-500"
+                        }">
+                            <div>
+                                <div class="flex items-center justify-between gap-2 mb-2">
+                                    <span class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-primary/15 text-primary">
+                                        ${m.badge}
+                                    </span>
+                                    <span class="material-symbols-outlined ${isModeSelected ? "text-primary" : "text-gray-500"}">
+                                        ${isModeSelected ? "radio_button_checked" : "radio_button_unchecked"}
+                                    </span>
+                                </div>
+                                <h4 class="text-sm font-extrabold text-white">${m.titulo}</h4>
+                                <p class="text-xs font-mono text-secondary mt-0.5">${m.subtitulo}</p>
+                                <p class="text-xs text-gray-400 mt-2 leading-relaxed">${m.descripcion}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join("")}
+            </div>
+
+            <div class="pt-4 border-t border-surface-high flex flex-wrap items-center justify-between gap-4">
+                <div class="text-xs font-mono text-gray-300">
+                    Configuración CACES: <strong class="text-primary">${activeCacesCareer.nombre}</strong> •
+                    <strong class="text-secondary">${routerState.selectedCacesSubject}</strong>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <button type="button" id="btn-caces-go-sinaptico" class="px-4 py-3 rounded-xl bg-surface border border-secondary/60 text-secondary hover:bg-secondary/15 text-xs font-extrabold font-mono transition-all flex items-center gap-2">
+                        <span class="material-symbols-outlined text-base">style</span>
+                        <span>Repasar Mazo CACES en Sináptico v4.4</span>
+                    </button>
+
+                    <button type="button" id="btn-caces-start-exam" class="px-6 py-3 rounded-xl bg-primary text-surface hover:bg-opacity-90 text-xs font-extrabold uppercase tracking-wider transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(0,229,255,0.3)]">
+                        <span class="material-symbols-outlined text-base">bolt</span>
+                        <span>Iniciar Nuevo Simulacro CACES</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Eventos de selección de Carrera CACES (4 oficiales)
+    dynamicRoot.querySelectorAll(".caces-career-card").forEach(card => {
+        card.addEventListener("click", () => {
+            const careerId = card.dataset.cacesCareer;
+            const targetObj = dataCareers.find(c => c.id === careerId);
+            const isLocked = targetObj && !targetObj.activa && !isAdmin;
+
+            if (isLocked) {
+                showRouterToast(`El banco oficial CACES de ${targetObj.nombre} estará disponible próximamente.`);
+                return;
+            }
+
+            routerState.academicTrack = "caces";
+            routerState.selectedCacesCareer = careerId;
+            routerState.selectedCacesSubject = "Todas las Materias";
+            renderCacesOfficialView();
+            syncRouterWithStore();
+        });
+    });
+
+    // Eventos de Nivel de Dificultad CACES
+    dynamicRoot.querySelectorAll(".caces-level-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            routerState.academicTrack = "caces";
+            routerState.selectedCacesLevel = btn.dataset.cacesLevel || "intermedio";
+            renderCacesOfficialView();
+            syncRouterWithStore();
+        });
+    });
+
+    // Eventos de Píldoras de Materias CACES
+    dynamicRoot.querySelectorAll(".caces-subject-pill").forEach(pill => {
+        pill.addEventListener("click", () => {
+            routerState.academicTrack = "caces";
+            routerState.selectedCacesSubject = pill.dataset.cacesSubject || "Todas las Materias";
+            renderCacesOfficialView();
+            syncRouterWithStore();
+        });
+    });
+
+    // Eventos de Modo de Simulacro CACES
+    dynamicRoot.querySelectorAll(".caces-mode-card").forEach(card => {
+        card.addEventListener("click", () => {
+            routerState.selectedMode = card.dataset.cacesMode || "tutor";
+            renderCacesOfficialView();
+            syncRouterWithStore();
+        });
+    });
+
+    // Botón para ir a Sináptico v4.4 desde CACES
+    document.getElementById("btn-caces-go-sinaptico")?.addEventListener("click", () => {
+        routerState.academicTrack = "caces";
+        syncRouterWithStore();
+        switchView(SPA_VIEWS.SPACED_1D);
+    });
+
+    // Botón para iniciar el Simulacro CACES
+    document.getElementById("btn-caces-start-exam")?.addEventListener("click", () => {
+        triggerStartSimulation("caces");
+    });
+}
+
+/**
+ * Renderiza simultáneamente ambos selectores curriculares (CARRERA y CACES)
+ * y mantiene retrocompatibilidad si existen `#career-selector` y `#subject-pills`.
+ */
+export function renderCascadingSelectors() {
+    renderCarreraUniversityView();
+    renderCacesOfficialView();
+}
+
+// ============================================================================
+// CONMUTADOR CENTRAL DE VISTAS SPA (switchView)
+// ============================================================================
+
+/**
+ * Cambia de vista dentro de `dashboard.html` sin recargar la página.
+ * Soporta tanto IDs directos como búsqueda inteligente si el botón lateral
+ * apunta a alias como `view-carrera`, `view-launcher` o `view-caces`.
  */
 export function switchView(viewId, options = { force: false, updateHash: true }) {
     if (!viewId) return false;
@@ -313,47 +1278,51 @@ export function switchView(viewId, options = { force: false, updateHash: true })
 
     // 2. Guardia de protección cuando hay un examen activo en el simulador
     const isExamRunning = !!StateStore.appState?.isExamActive;
-    if (
-        isExamRunning &&
-        viewId !== SPA_VIEWS.SIMULATOR &&
-        !options.force
-    ) {
+    if (isExamRunning && viewId !== SPA_VIEWS.SIMULATOR && !options.force) {
         const confirmLeave = confirm(
             "Tienes un simulacro activo en curso. ¿Deseas abandonar el examen actual y perder el progreso no enviado?"
         );
-        if (!confirmLeave) {
-            return false;
-        }
+        if (!confirmLeave) return false;
+
         if (StateStore.appState) {
             StateStore.appState.isExamActive = false;
         }
         window.dispatchEvent(new CustomEvent("makai:examAbortedByNavigation"));
     }
 
-    // 3. Ocultar todas las vistas (.tab-content) y activar únicamente la vista destino
-    const allTabs = document.querySelectorAll(".tab-content");
-    let targetFound = false;
+    // 3. Resolver el elemento DOM destino incluso si en dashboard.html usa un ID alternativo
+    let targetEl = document.getElementById(viewId);
+    if (!targetEl) {
+        if (viewId === "view-carrera" || viewId === "view-launcher") {
+            targetEl = findCarreraViewContainer();
+        } else if (viewId === "view-caces") {
+            targetEl = findCacesViewContainer();
+        }
+    }
 
+    if (!targetEl) {
+        console.warn(`[RouterSPA] No se encontró el contenedor #${viewId} en dashboard.html.`);
+        return false;
+    }
+
+    const resolvedId = targetEl.id || viewId;
+
+    // 4. Ocultar todas las vistas (.tab-content) y activar únicamente la vista destino
+    const allTabs = document.querySelectorAll(".tab-content");
     allTabs.forEach(tab => {
-        if (tab.id === viewId) {
+        if (tab === targetEl || tab.id === resolvedId) {
             tab.classList.remove("hidden");
             tab.classList.add("active");
-            targetFound = true;
         } else {
             tab.classList.remove("active");
             tab.classList.add("hidden");
         }
     });
 
-    if (!targetFound) {
-        console.warn(`[RouterSPA] No se encontró el contenedor #${viewId} en dashboard.html.`);
-        return false;
-    }
-
-    // 4. Actualizar estado visual de los botones de navegación lateral (.nav-btn)
+    // 5. Actualizar estado visual de los botones de navegación lateral (.nav-btn)
     const navBtns = document.querySelectorAll(".nav-btn");
     navBtns.forEach(btn => {
-        const isTarget = btn.dataset.target === viewId;
+        const isTarget = btn.dataset.target === viewId || btn.dataset.target === resolvedId;
         if (isTarget) {
             btn.classList.remove("text-gray-400", "hover:bg-surface-high");
             btn.classList.add("bg-primary", "text-surface-container");
@@ -366,21 +1335,29 @@ export function switchView(viewId, options = { force: false, updateHash: true })
         }
     });
 
-    // 5. Registrar historial interno y sincronizar con state.store.js
-    routerState.activeView = viewId;
-    if (routerState.viewHistory[routerState.viewHistory.length - 1] !== viewId) {
-        routerState.viewHistory.push(viewId);
+    // 6. Actualizar el track activo según la pestaña abierta y re-asegurar su renderizado
+    if (resolvedId.includes("caces") || targetEl === findCacesViewContainer()) {
+        routerState.academicTrack = "caces";
+        renderCacesOfficialView();
+    } else if (resolvedId.includes("carrera") || resolvedId.includes("launcher") || targetEl === findCarreraViewContainer()) {
+        routerState.academicTrack = "carrera";
+        renderCarreraUniversityView();
+    }
+
+    // 7. Registrar historial interno y sincronizar con state.store.js
+    routerState.activeView = resolvedId;
+    if (routerState.viewHistory[routerState.viewHistory.length - 1] !== resolvedId) {
+        routerState.viewHistory.push(resolvedId);
         if (routerState.viewHistory.length > 20) {
             routerState.viewHistory.shift();
         }
     }
 
     if (options.updateHash && window.history?.replaceState) {
-        const cleanHash = `#${viewId.replace(/^view-/, "")}`;
-        window.history.replaceState({ viewId }, "", cleanHash);
+        const cleanHash = `#${resolvedId.replace(/^view-/, "")}`;
+        window.history.replaceState({ viewId: resolvedId }, "", cleanHash);
     }
 
-    // Llevar el scroll del contenedor principal al inicio suavemente
     const viewsContainer = document.getElementById("views-container");
     if (viewsContainer) {
         viewsContainer.scrollTo({ top: 0, behavior: "smooth" });
@@ -390,7 +1367,7 @@ export function switchView(viewId, options = { force: false, updateHash: true })
 
     window.dispatchEvent(
         new CustomEvent("makai:viewChanged", {
-            detail: { viewId, routerState: { ...routerState } }
+            detail: { viewId: resolvedId, routerState: { ...routerState } }
         })
     );
 
@@ -406,293 +1383,96 @@ export function goBackView() {
         const previousView = routerState.viewHistory[routerState.viewHistory.length - 1];
         switchView(previousView);
     } else {
-        switchView(SPA_VIEWS.LAUNCHER);
+        switchView(SPA_VIEWS.CARRERA);
     }
 }
 
 /**
- * Alterna la modalidad curricular activa en el Lanzador entre:
- * - "caces": 4 carreras oficiales del CACES -> Materias y niveles CACES
- * - "carrera": 11 carreras de salud -> Preuniversitario/Nivelación/Semestres -> Materias universales
- * @param {"caces"|"carrera"} trackType
+ * Alterna la modalidad curricular activa ("caces" o "carrera").
  */
 export function selectAcademicTrack(trackType) {
-    routerState.academicTrack = trackType === "carrera" ? "carrera" : "caces";
-
-    // Si regresa a CACES y tenía elegida una de las carreras 5 a 11, ajustar a Medicina por defecto
-    const cacesIds = DEFAULT_CACES_CAREERS.map(c => c.id);
-    if (routerState.academicTrack === "caces" && !cacesIds.includes(routerState.selectedCareer)) {
-        routerState.selectedCareer = "medicina";
-    }
-
-    routerState.selectedSubject = "Todas las Materias";
+    routerState.academicTrack = trackType === "caces" ? "caces" : "carrera";
     renderCascadingSelectors();
     syncRouterWithStore();
 }
 
 /**
- * Actualiza de forma encadenada la Carrera, Etapa/Semestre y Materia activa.
- * @param {string} careerId
- * @param {string} [stageId]
- * @param {string} [subjectName]
+ * Selecciona programáticamente carrera, etapa/semestre y materia.
  */
 export function selectCareerAndStage(careerId, stageId = null, subjectName = null) {
-    if (careerId) {
-        routerState.selectedCareer = careerId;
-    }
-    if (stageId) {
-        routerState.selectedStage = stageId;
-    }
-    if (subjectName !== null) {
-        routerState.selectedSubject = subjectName;
+    if (routerState.academicTrack === "caces") {
+        if (careerId) routerState.selectedCacesCareer = careerId;
+        if (stageId) routerState.selectedCacesLevel = stageId;
+        routerState.selectedCacesSubject = subjectName !== null ? subjectName : "Todas las Materias";
+        renderCacesOfficialView();
     } else {
-        routerState.selectedSubject = "Todas las Materias";
+        if (careerId) routerState.selectedCareer = careerId;
+        if (stageId) routerState.selectedStage = stageId;
+        routerState.selectedSubject = subjectName !== null ? subjectName : "Todas las Materias";
+        renderCarreraUniversityView();
     }
-
-    renderCascadingSelectors();
     syncRouterWithStore();
 }
 
 /**
- * Asegura que el contenedor `#view-launcher` disponga de la barra superior de
- * conmutación entre **SECCIÓN CACES (4 Carreras)** y **SECCIÓN CARRERA (11 Carreras)**,
- * además del selector encadenado de Etapa/Nivel cuando corresponda.
+ * Enlaza automáticamente los botones de acceso rápido ("Aulas Virtuales",
+ * "Mis Métricas", "Sináptico v4.4") presentes en las cabeceras de CARRERA y CACES.
  */
-function ensureCascadingHeaderDOM() {
-    const careerSelector = document.getElementById("career-selector");
-    if (!careerSelector || document.getElementById("makai-cascading-track-bar")) return;
+function bindHeaderQuickButtons() {
+    const allButtons = document.querySelectorAll("button, a");
+    allButtons.forEach(btn => {
+        if (btn.dataset.boundQuickShortcut || btn.classList.contains("nav-btn")) return;
 
-    const trackBar = document.createElement("div");
-    trackBar.id = "makai-cascading-track-bar";
-    trackBar.className = "mb-5 space-y-4";
-    trackBar.innerHTML = `
-        <div class="flex flex-wrap items-center justify-between gap-3 bg-surface-container border border-surface-high p-2.5 rounded-2xl">
-            <div class="flex flex-wrap items-center gap-2">
-                <button type="button" id="btn-track-caces" class="px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all flex items-center gap-2 bg-primary text-surface-container shadow">
-                    <span class="material-symbols-outlined text-base">verified</span>
-                    <span>CACES Oficial (4 Carreras)</span>
-                </button>
-                <button type="button" id="btn-track-carrera" class="px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all flex items-center gap-2 text-gray-400 hover:text-white hover:bg-surface-high">
-                    <span class="material-symbols-outlined text-base">school</span>
-                    <span>CARRERA Universitaria (11 Carreras • Semestres)</span>
-                </button>
-            </div>
-            <div id="router-breadcrumb-badge" class="text-[11px] font-mono text-primary bg-surface px-3 py-1.5 rounded-xl border border-primary/30">
-                CACES • MEDICINA HUMANA
-            </div>
-        </div>
+        const text = (btn.textContent || "").trim().toLowerCase();
+        const targetAttr = btn.dataset.target || btn.dataset.viewTarget;
 
-        <!-- Desplegable Encadenado de Etapa Formativa / Semestre (Visible en Modo CARRERA o Nodos CACES) -->
-        <div id="cascading-stage-container" class="bg-surface-container border border-surface-high rounded-2xl p-4">
-            <div class="flex items-center justify-between mb-2.5">
-                <span id="cascading-stage-title" class="text-xs font-mono uppercase tracking-wider text-gray-400 font-bold">
-                    2. Selecciona el Eje / Nivel de Evaluación
-                </span>
-                <span id="cascading-stage-helper" class="text-[11px] font-mono text-secondary">
-                    Despliegue encadenado activo
-                </span>
-            </div>
-            <div id="cascading-stage-pills" class="flex flex-wrap gap-2"></div>
-        </div>
-    `;
+        if (targetAttr) {
+            btn.dataset.boundQuickShortcut = "1";
+            btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                switchView(targetAttr);
+            });
+            return;
+        }
 
-    careerSelector.parentNode.insertBefore(trackBar, careerSelector);
-
-    document.getElementById("btn-track-caces")?.addEventListener("click", () => {
-        selectAcademicTrack("caces");
-    });
-
-    document.getElementById("btn-track-carrera")?.addEventListener("click", () => {
-        selectAcademicTrack("carrera");
+        if (text.includes("aulas virtuales")) {
+            btn.dataset.boundQuickShortcut = "1";
+            btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                switchView(SPA_VIEWS.CLASSROOMS);
+            });
+        } else if (text.includes("mis métricas") || text.includes("mis metricas")) {
+            btn.dataset.boundQuickShortcut = "1";
+            btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                switchView(SPA_VIEWS.METRICS);
+            });
+        } else if (text.includes("sináptico v4.4") || text.includes("sinaptico v4.4")) {
+            btn.dataset.boundQuickShortcut = "1";
+            btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                switchView(SPA_VIEWS.SPACED_1D);
+            });
+        }
     });
 }
 
 /**
- * Renderiza el despliegue encadenado completo:
- * 1) Tarjetas de Carrera (4 en modo CACES / 11 en modo CARRERA)
- * 2) Selector de Etapa/Nivel (Ejes CACES o Preuniversitario/Nivelación/Semestres/Internado)
- * 3) Píldoras interactivas de Materias (#subject-pills)
- */
-export function renderCascadingSelectors() {
-    const careerSelector = document.getElementById("career-selector");
-    const subjectPills = document.getElementById("subject-pills");
-    if (!careerSelector || !subjectPills) return;
-
-    ensureCascadingHeaderDOM();
-
-    const isAdmin = checkIsAdmin(getCurrentUserEmail());
-    const data = window.makaiData || {};
-
-    // 1. Actualizar botones de modalidad (CACES vs CARRERA)
-    const btnCaces = document.getElementById("btn-track-caces");
-    const btnCarrera = document.getElementById("btn-track-carrera");
-
-    if (routerState.academicTrack === "caces") {
-        btnCaces?.classList.add("bg-primary", "text-surface-container", "shadow");
-        btnCaces?.classList.remove("text-gray-400", "hover:bg-surface-high");
-        btnCarrera?.classList.remove("bg-primary", "text-surface-container", "shadow");
-        btnCarrera?.classList.add("text-gray-400", "hover:bg-surface-high");
-    } else {
-        btnCarrera?.classList.add("bg-primary", "text-surface-container", "shadow");
-        btnCarrera?.classList.remove("text-gray-400", "hover:bg-surface-high");
-        btnCaces?.classList.remove("bg-primary", "text-surface-container", "shadow");
-        btnCaces?.classList.add("text-gray-400", "hover:bg-surface-high");
-    }
-
-    // 2. Determinar lista de carreras según la sección activa
-    const cacesCatalog = Array.isArray(data.carreras) && data.carreras.length > 0
-        ? data.carreras
-        : DEFAULT_CACES_CAREERS;
-
-    const universityCatalog = Array.isArray(data.carrerasUniversitarias) && data.carrerasUniversitarias.length > 0
-        ? data.carrerasUniversitarias
-        : DEFAULT_UNIVERSITY_CAREERS;
-
-    const activeCareerList = routerState.academicTrack === "caces"
-        ? cacesCatalog
-        : universityCatalog;
-
-    // 3. Renderizar tarjetas de carreras (#career-selector)
-    careerSelector.innerHTML = "";
-    activeCareerList.forEach(career => {
-        const isLocked = !career.activa && !isAdmin;
-        const isSelected = career.id === routerState.selectedCareer;
-
-        const card = document.createElement("div");
-        card.dataset.careerCard = career.id;
-        card.className = `p-4 border rounded-xl flex items-center justify-between cursor-pointer transition-all ${
-            isSelected
-                ? "bg-surface-high border-primary text-white shadow-[0_0_15px_rgba(0,229,255,0.15)]"
-                : "bg-surface border-surface-high text-gray-400 hover:border-gray-500"
-        } ${isLocked ? "opacity-50 cursor-not-allowed" : ""}`;
-
-        let innerHTML = `<span class="font-bold text-sm">${career.nombre}</span>`;
-        if (isLocked) {
-            innerHTML += `<svg class="w-5 h-5 flex-shrink-0"><use href="#nirvana-icon"></use></svg>`;
-        } else if (isSelected) {
-            innerHTML += `<span class="material-symbols-outlined text-primary text-base">check_circle</span>`;
-        }
-
-        card.innerHTML = innerHTML;
-
-        card.addEventListener("click", () => {
-            if (isLocked) {
-                showRouterToast(`La carrera ${career.nombre} se habilitará próximamente.`);
-                return;
-            }
-            selectCareerAndStage(career.id, null, "Todas las Materias");
-        });
-
-        careerSelector.appendChild(card);
-    });
-
-    // 4. Renderizar Etapas / Semestres o Ejes CACES (#cascading-stage-pills)
-    const stagePillsContainer = document.getElementById("cascading-stage-pills");
-    const stageTitleEl = document.getElementById("cascading-stage-title");
-    let subjectsToRender = [];
-
-    if (routerState.academicTrack === "carrera") {
-        if (stageTitleEl) {
-            stageTitleEl.textContent = "2. Nivel / Etapa Universitaria (Preuniversitario → Nivelación → Semestres)";
-        }
-
-        const currentStageObj = ACADEMIC_STAGES.find(s => s.id === routerState.selectedStage) || ACADEMIC_STAGES[0];
-        routerState.selectedStage = currentStageObj.id;
-        subjectsToRender = currentStageObj.materias;
-
-        if (stagePillsContainer) {
-            stagePillsContainer.innerHTML = "";
-            ACADEMIC_STAGES.forEach(stage => {
-                const active = stage.id === routerState.selectedStage;
-                const btn = document.createElement("button");
-                btn.type = "button";
-                btn.className = `px-3 py-1.5 rounded-xl text-xs font-mono transition-all border ${
-                    active
-                        ? "bg-primary text-surface-container border-primary font-extrabold"
-                        : "bg-surface text-gray-300 border-gray-700 hover:border-primary/60"
-                }`;
-                btn.textContent = stage.nombre;
-                btn.addEventListener("click", () => {
-                    selectCareerAndStage(routerState.selectedCareer, stage.id, "Todas las Materias");
-                });
-                stagePillsContainer.appendChild(btn);
-            });
-        }
-    } else {
-        if (stageTitleEl) {
-            stageTitleEl.textContent = "2. Ejes Oficiales de Evaluación CACES";
-        }
-
-        const cacesCareerObj = cacesCatalog.find(c => c.id === routerState.selectedCareer) || cacesCatalog[0];
-        const defaultCacesRef = DEFAULT_CACES_CAREERS.find(c => c.id === routerState.selectedCareer) || DEFAULT_CACES_CAREERS[0];
-        const cacesLevels = cacesCareerObj?.nivelesCaces || defaultCacesRef.nivelesCaces;
-        subjectsToRender = cacesCareerObj?.materias || defaultCacesRef.materias;
-
-        if (!cacesLevels.includes(routerState.selectedStage)) {
-            routerState.selectedStage = cacesLevels[0];
-        }
-
-        if (stagePillsContainer) {
-            stagePillsContainer.innerHTML = "";
-            cacesLevels.forEach(levelName => {
-                const active = levelName === routerState.selectedStage;
-                const btn = document.createElement("button");
-                btn.type = "button";
-                btn.className = `px-3 py-1.5 rounded-xl text-xs font-mono transition-all border ${
-                    active
-                        ? "bg-secondary text-surface-container border-secondary font-extrabold"
-                        : "bg-surface text-gray-300 border-gray-700 hover:border-secondary/60"
-                }`;
-                btn.textContent = levelName;
-                btn.addEventListener("click", () => {
-                    selectCareerAndStage(routerState.selectedCareer, levelName, routerState.selectedSubject);
-                });
-                stagePillsContainer.appendChild(btn);
-            });
-        }
-    }
-
-    // 5. Renderizar Píldoras Interactivas de Materias (#subject-pills)
-    subjectPills.innerHTML = "";
-    const allSubjectsList = ["Todas las Materias", ...subjectsToRender];
-
-    allSubjectsList.forEach(subj => {
-        const isSubjActive = routerState.selectedSubject === subj;
-        const pill = document.createElement("button");
-        pill.type = "button";
-        pill.className = `px-3 py-1.5 rounded-full text-xs font-mono transition-all border ${
-            isSubjActive
-                ? "bg-primary/20 border-primary text-primary font-bold shadow-[0_0_10px_rgba(0,229,255,0.2)]"
-                : "bg-surface-high border-gray-700 text-gray-300 hover:border-gray-500 hover:text-white"
-        }`;
-        pill.textContent = subj;
-        pill.addEventListener("click", () => {
-            selectCareerAndStage(routerState.selectedCareer, routerState.selectedStage, subj);
-        });
-        subjectPills.appendChild(pill);
-    });
-
-    // 6. Actualizar indicador de migas de pan (Breadcrumb)
-    const breadcrumbBadge = document.getElementById("router-breadcrumb-badge");
-    if (breadcrumbBadge) {
-        const activeCareerObj = activeCareerList.find(c => c.id === routerState.selectedCareer);
-        const careerLabel = (activeCareerObj?.nombre || routerState.selectedCareer).replace(/^\d+\.\s*/, "");
-        breadcrumbBadge.textContent = `${routerState.academicTrack.toUpperCase()} • ${careerLabel.toUpperCase()} • ${routerState.selectedSubject.toUpperCase()}`;
-    }
-}
-
-/**
- * Inicializa el enrutador de pestañas laterales (`.nav-btn`), accesos directos a
- * Aulas Virtuales, Mis Métricas, Bóveda Admin y escucha cambios en el hash de la URL.
- * @param {Object} user - Usuario activo de Firebase Auth
- * @param {Object} userData - Perfil sincronizado desde Cloud Firestore
+ * Inicializa el Router SPA, enlaza el menú lateral, inyecta los selectores
+ * encadenados en las vistas de CARRERA y CACES, y activa los accesos rápidos.
  */
 export function initRouterSPA(user = null, userData = null) {
     if (userData?.carrera) {
         routerState.selectedCareer = userData.carrera;
+        if (DEFAULT_CACES_CAREERS.some(c => c.id === userData.carrera)) {
+            routerState.selectedCacesCareer = userData.carrera;
+        }
     }
 
-    // 1. Enlazar todos los botones de navegación lateral (.nav-btn)
+    // 1. Inyectar y renderizar las vistas interactivas de CARRERA (11) y CACES (4)
+    renderCascadingSelectors();
+
+    // 2. Enlazar todos los botones de navegación lateral (.nav-btn)
     const navBtns = document.querySelectorAll(".nav-btn");
     navBtns.forEach(btn => {
         if (btn.dataset.boundSpaRouter) return;
@@ -701,12 +1481,22 @@ export function initRouterSPA(user = null, userData = null) {
         btn.addEventListener("click", (e) => {
             e.preventDefault();
             const targetView = btn.dataset.target;
-            if (!targetView) return;
-            switchView(targetView);
+            if (targetView) {
+                switchView(targetView);
+                return;
+            }
+
+            // Respaldo inteligente por texto del botón si no tuviera data-target
+            const label = (btn.textContent || "").toLowerCase();
+            if (label.includes("carrera")) switchView(SPA_VIEWS.CARRERA);
+            else if (label.includes("caces")) switchView(SPA_VIEWS.CACES);
+            else if (label.includes("rural")) switchView(SPA_VIEWS.RURAL);
+            else if (label.includes("mentoría") || label.includes("mentoria")) switchView(SPA_VIEWS.CLASSROOMS);
+            else if (label.includes("bóveda") || label.includes("admin")) switchView(SPA_VIEWS.ADMIN);
         });
     });
 
-    // 2. Enlazar botón rápido de Bóveda Admin en la barra superior (#header-admin-btn)
+    // 3. Enlazar botón rápido de Admin en el Header superior (#header-admin-btn)
     const headerAdminBtn = document.getElementById("header-admin-btn");
     if (headerAdminBtn && !headerAdminBtn.dataset.boundSpaRouter) {
         headerAdminBtn.dataset.boundSpaRouter = "1";
@@ -716,33 +1506,29 @@ export function initRouterSPA(user = null, userData = null) {
         });
     }
 
-    // 3. Enlazar botones con clase .upcoming-feature al Toast informativo
-    const upcomingBtns = document.querySelectorAll(".upcoming-feature");
-    upcomingBtns.forEach(btn => {
+    // 4. Enlazar botones superiores ("Aulas Virtuales", "Mis Métricas", "Sináptico v4.4")
+    bindHeaderQuickButtons();
+
+    // 5. Enlazar botones con clase .upcoming-feature al Toast informativo
+    document.querySelectorAll(".upcoming-feature").forEach(btn => {
         if (btn.dataset.boundSpaToast) return;
         btn.dataset.boundSpaToast = "1";
-        btn.addEventListener("click", () => {
-            showRouterToast();
-        });
+        btn.addEventListener("click", () => showRouterToast());
     });
 
-    // 4. Inicializar el despliegue encadenado CARRERA (11) / CACES (4)
-    renderCascadingSelectors();
-
-    // 5. Sobrescribir switchView en MakaiOrchestrator para centralizar toda la navegación
+    // 6. Centralizar switchView en window.MakaiOrchestrator
     if (window.MakaiOrchestrator) {
         window.MakaiOrchestrator.switchView = switchView;
     }
 
-    // 6. Leer hash inicial de la URL si el usuario recargó en una pestaña específica
+    // 7. Sincronizar hash inicial y eventos de navegación del navegador
     if (!routerInitialized) {
         routerInitialized = true;
 
         const initialHash = window.location.hash.replace("#", "").trim();
         if (initialHash) {
             const candidateViewId = initialHash.startsWith("view-") ? initialHash : `view-${initialHash}`;
-            const existsInDom = !!document.getElementById(candidateViewId);
-            if (existsInDom && candidateViewId !== SPA_VIEWS.SIMULATOR) {
+            if (document.getElementById(candidateViewId) && candidateViewId !== SPA_VIEWS.SIMULATOR) {
                 switchView(candidateViewId, { force: true, updateHash: false });
             }
         }
@@ -756,14 +1542,14 @@ export function initRouterSPA(user = null, userData = null) {
     }
 
     syncRouterWithStore();
-    console.info("[MakaiRouterSPA] Navegación SPA y despliegue curricular encadenado activos.");
+    console.info("[MakaiRouterSPA] Vistas CARRERA (11 Áreas) y CACES (4 Oficiales) renderizadas y activas.");
 }
 
-// Alias de compatibilidad invocado por app.orchestrator.js
+// Alias de compatibilidad invocados por app.orchestrator.js
 export const initRouter = initRouterSPA;
 export const initCascadingCurriculumRouter = renderCascadingSelectors;
 
-// Exposición global para que cualquier subcomponente pueda invocar al Router
+// Exposición global para cualquier módulo o inspección en consola
 window.MakaiRouter = {
     SPA_VIEWS,
     initRouterSPA,
@@ -772,6 +1558,8 @@ window.MakaiRouter = {
     selectAcademicTrack,
     selectCareerAndStage,
     renderCascadingSelectors,
+    renderCarreraUniversityView,
+    renderCacesOfficialView,
     showRouterToast,
     getRouterState: () => ({ ...routerState })
 };
