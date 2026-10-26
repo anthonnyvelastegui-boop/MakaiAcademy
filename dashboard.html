@@ -50,7 +50,7 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* Ocultar cualquier inyección duplicada de versiones anteriores de router.spa.js */
+        /* Bloquear cualquier contenedor duplicado de scripts externos */
         #makai-carrera-dynamic-root,
         #makai-caces-dynamic-root {
             display: none !important;
@@ -63,6 +63,7 @@
             box-shadow: 0 0 20px rgba(0, 229, 255, 0.25);
         }
         .nav-btn.bg-primary .nav-label,
+        .nav-btn.bg-primary .nav-sublabel,
         .nav-btn.bg-primary .nav-icon {
             color: #06090e !important;
         }
@@ -72,13 +73,42 @@
             border-color: rgba(6, 9, 14, 0.35) !important;
         }
 
+        /* =============================================================== */
+        /* ESTILOS DEL SIDEBAR CONTRAÍBLE (BOTÓN DE 3 LÍNEAS)              */
+        /* =============================================================== */
+        #main-sidebar {
+            transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #main-sidebar.sidebar-collapsed {
+            width: 5.25rem !important;
+        }
+        #main-sidebar.sidebar-collapsed .sidebar-hide-on-collapse,
+        #main-sidebar.sidebar-collapsed .nav-label,
+        #main-sidebar.sidebar-collapsed .nav-sublabel,
+        #main-sidebar.sidebar-collapsed .nav-badge,
+        #main-sidebar.sidebar-collapsed .nirvana-nav-svg {
+            display: none !important;
+        }
+        #main-sidebar.sidebar-collapsed .nav-btn {
+            justify-content: center !important;
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+        #main-sidebar.sidebar-collapsed #sidebar-brand-row {
+            justify-content: center !important;
+        }
+        #main-sidebar.sidebar-collapsed #user-profile-card {
+            justify-content: center !important;
+            padding: 0.5rem !important;
+        }
+
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #06090e; }
         ::-webkit-scrollbar-thumb { background: #151d28; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #00e5ff; }
     </style>
 
-    <!-- Definiciones Vectoriales: Ícono Nirvana y Emblema Completo Makai Academy -->
+    <!-- Definiciones Vectoriales: Ícono Nirvana y Emblema Makai Academy -->
     <svg id="svg-defs" style="display: none;">
         <symbol id="nirvana-icon" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="45" fill="#ffbe0b" stroke="#00e5ff" stroke-width="4"/>
@@ -88,7 +118,6 @@
             <path d="M 45 73 Q 50 92 56 73" fill="#ff4d4d" stroke="#06090e" stroke-width="2.5"/>
         </symbol>
 
-        <!-- Emblema Vectorial Alta Definición inspirado en Fondo MAKAI Academy 2 -->
         <symbol id="makai-logo-fallback" viewBox="0 0 120 120">
             <defs>
                 <linearGradient id="makaiOuterRing" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -116,37 +145,48 @@
 <body class="antialiased h-screen flex overflow-hidden">
 
     <!-- =================================================================== -->
-    <!-- SIDEBAR LATERAL IZQUIERDO                                           -->
+    <!-- SIDEBAR LATERAL IZQUIERDO CONTRAÍBLE                                -->
     <!-- =================================================================== -->
-    <aside class="w-72 bg-surface-container border-r border-surface-high flex flex-col h-full flex-shrink-0 select-none">
+    <aside id="main-sidebar" class="w-72 bg-surface-container border-r border-surface-high flex flex-col h-full flex-shrink-0 select-none z-30">
 
-        <!-- CABECERA DEL SIDEBAR: LOGO INTERACTIVO + MAKAI ACADEMY + VERSIÓN 4.4.2 -->
-        <div class="p-4 border-b border-surface-high">
-            <div class="flex items-center gap-3.5 mb-3.5">
-                <!-- Contenedor del Logo (Permite cargar Fondo MAKAI Academy 2 con 1 clic si aún no está en GitHub) -->
-                <div id="brand-logo-box"
-                     onclick="document.getElementById('brand-logo-file-input').click()"
-                     title="Haz clic aquí para seleccionar tu imagen 'Fondo MAKAI Academy 2' si aún no aparece"
-                     class="group relative w-12 h-12 rounded-xl bg-surface border border-primary/60 p-1 flex items-center justify-center shadow-[0_0_15px_rgba(0,229,255,0.22)] flex-shrink-0 overflow-hidden cursor-pointer hover:border-secondary transition-all">
-                    <img id="sidebar-brand-logo"
-                         src="assets/1-branding/logos/logo.png"
-                         alt="Makai Academy"
-                         class="w-full h-full object-contain">
-                    <svg id="sidebar-svg-fallback" class="w-10 h-10 hidden"><use href="#makai-logo-fallback"></use></svg>
-                    <div class="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                        <span class="material-symbols-outlined text-primary text-base">upload</span>
+        <!-- CABECERA DEL SIDEBAR: LOGO + MAKAI ACADEMY + BOTÓN DE 3 LÍNEAS -->
+        <div class="p-3.5 border-b border-surface-high">
+            <div id="sidebar-brand-row" class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <!-- Contenedor del Logo -->
+                    <div id="brand-logo-box"
+                         onclick="document.getElementById('brand-logo-file-input').click()"
+                         title="Haz clic para cargar o cambiar el logo de Makai Academy"
+                         class="group relative w-11 h-11 rounded-xl bg-surface border border-primary/60 p-1 flex items-center justify-center shadow-[0_0_15px_rgba(0,229,255,0.22)] flex-shrink-0 overflow-hidden cursor-pointer hover:border-secondary transition-all">
+                        <img id="sidebar-brand-logo"
+                             src="assets/1-branding/logos/logo.png"
+                             alt="Makai Academy"
+                             class="w-full h-full object-contain">
+                        <svg id="sidebar-svg-fallback" class="w-9 h-9 hidden"><use href="#makai-logo-fallback"></use></svg>
+                        <div class="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                            <span class="material-symbols-outlined text-primary text-sm">upload</span>
+                        </div>
+                        <input type="file" id="brand-logo-file-input" accept="image/*" class="hidden">
                     </div>
-                    <input type="file" id="brand-logo-file-input" accept="image/*" class="hidden">
+
+                    <div class="leading-none sidebar-hide-on-collapse">
+                        <h1 class="text-lg font-extrabold text-white tracking-wider">MAKAI</h1>
+                        <p class="text-[10px] font-mono font-bold text-primary tracking-[0.22em] uppercase mt-1">ACADEMY</p>
+                    </div>
                 </div>
 
-                <div class="leading-none">
-                    <h1 class="text-xl font-extrabold text-white tracking-wider">MAKAI</h1>
-                    <p class="text-[11px] font-mono font-bold text-primary tracking-[0.22em] uppercase mt-1">ACADEMY</p>
-                </div>
+                <!-- BOTÓN DE 3 LÍNEAS PARA CONTRAER / EXPANDIR EL MENÚ LATERAL -->
+                <button type="button"
+                        id="btn-toggle-sidebar"
+                        onclick="window.MakaiDashboardUI.toggleSidebar()"
+                        title="Contraer / Expandir menú lateral"
+                        class="w-9 h-9 rounded-xl bg-surface border border-surface-high hover:border-primary text-gray-300 hover:text-primary flex items-center justify-center transition-all flex-shrink-0">
+                    <span class="material-symbols-outlined text-xl" id="icon-toggle-sidebar">menu</span>
+                </button>
             </div>
 
             <!-- Indicador Versión 4.4.2 -->
-            <div class="bg-surface border border-surface-high rounded-xl px-3.5 py-2">
+            <div class="bg-surface border border-surface-high rounded-xl px-3 py-2 sidebar-hide-on-collapse">
                 <div class="flex items-center justify-between text-[10px] font-mono mb-1.5">
                     <span class="flex items-center gap-1.5 text-gray-200 font-bold">
                         <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
@@ -161,11 +201,12 @@
         </div>
 
         <!-- MENÚ DE NAVEGACIÓN PRINCIPAL -->
-        <nav class="flex-1 overflow-y-auto p-3.5 space-y-2">
+        <nav class="flex-1 overflow-y-auto p-3 space-y-1.5">
 
-            <!-- 1. CARRERA (11 ÁREAS) -->
+            <!-- 1. CARRERA (11 ÁREAS + TITULACIÓN: TESIS / COMPLEXIVO) -->
             <button type="button"
-                    class="nav-btn w-full flex items-center justify-between px-4 py-3 text-sm font-extrabold rounded-xl bg-primary text-surface-container transition-all"
+                    title="CARRERA (11 Áreas + Titulación)"
+                    class="nav-btn w-full flex items-center justify-between px-3.5 py-3 text-sm font-extrabold rounded-xl bg-primary text-surface-container transition-all"
                     data-target="view-launcher">
                 <div class="flex items-center gap-3">
                     <span class="material-symbols-outlined text-lg nav-icon">school</span>
@@ -178,7 +219,8 @@
 
             <!-- 2. CACES (OFICIAL) -->
             <button type="button"
-                    class="nav-btn w-full flex items-center justify-between px-4 py-3 text-sm font-extrabold rounded-xl text-gray-300 hover:text-white hover:bg-surface-high transition-all"
+                    title="CACES (4 Carreras Oficiales)"
+                    class="nav-btn w-full flex items-center justify-between px-3.5 py-3 text-sm font-extrabold rounded-xl text-gray-300 hover:text-white hover:bg-surface-high transition-all"
                     data-target="view-caces">
                 <div class="flex items-center gap-3">
                     <span class="material-symbols-outlined text-lg nav-icon">verified</span>
@@ -191,7 +233,8 @@
 
             <!-- 3. RURAL (MSP-EC) -->
             <button type="button"
-                    class="nav-btn w-full flex items-center justify-between px-4 py-3 text-sm font-extrabold rounded-xl text-gray-300 hover:text-white hover:bg-surface-high transition-all"
+                    title="RURAL (Año de Salud Rural MSP)"
+                    class="nav-btn w-full flex items-center justify-between px-3.5 py-3 text-sm font-extrabold rounded-xl text-gray-300 hover:text-white hover:bg-surface-high transition-all"
                     data-target="view-rural">
                 <div class="flex items-center gap-3">
                     <span class="material-symbols-outlined text-lg nav-icon">health_and_safety</span>
@@ -202,9 +245,27 @@
                 </span>
             </button>
 
-            <!-- 4. SIMULADORES (1D • 2D • 3D) -->
+            <!-- 4. PROFESIONALES (NUEVO: GRADUADOS, PSICOMÉTRICAS, ESPECIALIDAD Y EXTRANJERO B2) -->
             <button type="button"
-                    class="nav-btn w-full flex items-center justify-between px-4 py-3 text-sm font-extrabold rounded-xl text-gray-300 hover:text-white hover:bg-surface-high transition-all"
+                    title="PROFESIONALES (Psicométricas, Posgrado y Ejerce en el Extranjero B2)"
+                    class="nav-btn w-full flex items-center justify-between px-3.5 py-3 text-sm font-extrabold rounded-xl text-gray-300 hover:text-white hover:bg-surface-high transition-all"
+                    data-target="view-professionals">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-lg nav-icon">flight_takeoff</span>
+                    <div class="text-left leading-tight">
+                        <span class="nav-label block tracking-wide">PROFESIONALES</span>
+                        <span class="nav-sublabel text-[9px] font-mono text-primary font-normal block">Posgrado & Extranjero B2</span>
+                    </div>
+                </div>
+                <span class="nav-badge text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-primary/15 text-primary border border-primary/30">
+                    PRO/EXT
+                </span>
+            </button>
+
+            <!-- 5. SIMULADORES (1D • 2D • 3D) -->
+            <button type="button"
+                    title="SIMULADORES (1D • 2D • 3D)"
+                    class="nav-btn w-full flex items-center justify-between px-3.5 py-3 text-sm font-extrabold rounded-xl text-gray-300 hover:text-white hover:bg-surface-high transition-all"
                     data-target="view-simulators">
                 <div class="flex items-center gap-3">
                     <span class="material-symbols-outlined text-lg nav-icon">deployed_code</span>
@@ -215,38 +276,40 @@
                 </span>
             </button>
 
-            <!-- 5. MENTORÍA VIP (Aulas & Especialistas) -->
+            <!-- 6. MENTORÍA VIP (Aulas & Especialistas) -->
             <button type="button"
-                    class="nav-btn w-full flex items-center justify-between px-4 py-3 text-sm font-extrabold rounded-xl text-gray-300 hover:text-white hover:bg-surface-high transition-all"
+                    title="MENTORÍA VIP (Aulas & Especialistas)"
+                    class="nav-btn w-full flex items-center justify-between px-3.5 py-3 text-sm font-extrabold rounded-xl text-gray-300 hover:text-white hover:bg-surface-high transition-all"
                     data-target="view-classrooms">
                 <div class="flex items-center gap-3">
                     <span class="material-symbols-outlined text-lg nav-icon">workspace_premium</span>
                     <div class="text-left leading-tight">
                         <span class="nav-label block tracking-wide">MENTORÍA VIP</span>
-                        <span class="text-[10px] font-mono text-secondary font-normal block">Aulas & Especialistas</span>
+                        <span class="nav-sublabel text-[10px] font-mono text-secondary font-normal block">Aulas & Especialistas</span>
                     </div>
                 </div>
-                <svg class="w-5 h-5 flex-shrink-0"><use href="#nirvana-icon"></use></svg>
+                <svg class="nirvana-nav-svg w-5 h-5 flex-shrink-0"><use href="#nirvana-icon"></use></svg>
             </button>
 
-            <!-- 6. BÓVEDA ADMIN (Exclusivo para cuentas maestras) -->
+            <!-- 7. BÓVEDA ADMIN (Exclusivo para cuentas maestras) -->
             <button type="button"
                     id="admin-nav-btn"
-                    class="hidden nav-btn w-full flex items-center justify-between px-4 py-3 text-sm font-extrabold text-warning bg-warning/10 hover:bg-warning/20 rounded-xl transition-all mt-3 border border-warning/40"
+                    title="BÓVEDA ADMIN (Master)"
+                    class="hidden nav-btn w-full flex items-center justify-between px-3.5 py-3 text-sm font-extrabold text-warning bg-warning/10 hover:bg-warning/20 rounded-xl transition-all mt-2 border border-warning/40"
                     data-target="view-admin">
                 <div class="flex items-center gap-2.5">
-                    <span class="material-symbols-outlined text-lg">bolt</span>
-                    <span>BÓVEDA ADMIN</span>
+                    <span class="material-symbols-outlined text-lg nav-icon">bolt</span>
+                    <span class="nav-label">BÓVEDA ADMIN</span>
                 </div>
-                <span class="text-[9px] font-mono font-extrabold px-1.5 py-0.5 rounded bg-warning text-surface">
+                <span class="nav-badge text-[9px] font-mono font-extrabold px-1.5 py-0.5 rounded bg-warning text-surface">
                     MASTER
                 </span>
             </button>
         </nav>
 
         <!-- PIE DEL SIDEBAR: LATENCIA + PERFIL CLICKEABLE + CERRAR SESIÓN -->
-        <div class="p-3.5 border-t border-surface-high space-y-2.5 bg-surface/60">
-            <div class="bg-surface-container border border-surface-high rounded-xl px-3 py-2 text-[10px] font-mono flex items-center justify-between">
+        <div class="p-3 border-t border-surface-high space-y-2 bg-surface/60">
+            <div class="bg-surface-container border border-surface-high rounded-xl px-3 py-1.5 text-[10px] font-mono flex items-center justify-between sidebar-hide-on-collapse">
                 <span class="text-secondary font-bold flex items-center gap-1.5">
                     <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
                     LATENCIA RED: 14 ms
@@ -254,23 +317,26 @@
                 <span class="px-1.5 py-0.5 rounded bg-secondary/15 text-secondary font-bold text-[9px]">SINCRO OK</span>
             </div>
 
-            <!-- Tarjeta de Usuario (Clickeable hacia Configuraciones de Perfil) -->
-            <div onclick="window.MakaiDashboardUI.openView('view-profile')"
+            <!-- Tarjeta de Usuario -->
+            <div id="user-profile-card"
+                 onclick="window.MakaiDashboardUI.openView('view-profile')"
                  title="Configuraciones de Perfil"
-                 class="flex items-center justify-between p-2.5 rounded-xl bg-surface-container border border-surface-high hover:border-primary/60 cursor-pointer transition-all group">
-                <div class="flex items-center gap-3 overflow-hidden">
+                 class="flex items-center justify-between p-2 rounded-xl bg-surface-container border border-surface-high hover:border-primary/60 cursor-pointer transition-all group">
+                <div class="flex items-center gap-2.5 overflow-hidden">
                     <div class="w-9 h-9 rounded-full bg-surface-high border border-primary/50 flex items-center justify-center text-primary font-extrabold flex-shrink-0" id="user-avatar">A</div>
-                    <div class="overflow-hidden">
+                    <div class="overflow-hidden sidebar-hide-on-collapse">
                         <p class="text-xs font-extrabold text-white truncate group-hover:text-primary transition-colors" id="user-name">Cargando...</p>
                         <p class="text-[10px] text-secondary font-mono font-bold truncate" id="user-plan">Plan ---</p>
                     </div>
                 </div>
-                <span class="material-symbols-outlined text-gray-500 group-hover:text-primary text-sm">settings</span>
+                <span class="material-symbols-outlined text-gray-500 group-hover:text-primary text-sm sidebar-hide-on-collapse">settings</span>
             </div>
 
-            <button id="btn-logout" class="w-full py-2 text-xs font-bold text-danger border border-danger/30 hover:bg-danger/10 rounded-xl transition-colors flex items-center justify-center gap-2">
+            <button id="btn-logout"
+                    title="Cerrar Sesión Clínica"
+                    class="w-full py-2 text-xs font-bold text-danger border border-danger/30 hover:bg-danger/10 rounded-xl transition-colors flex items-center justify-center gap-2">
                 <span class="material-symbols-outlined text-sm">logout</span>
-                <span>Cerrar Sesión Clínica</span>
+                <span class="sidebar-hide-on-collapse">Cerrar Sesión Clínica</span>
             </button>
         </div>
     </aside>
@@ -288,7 +354,7 @@
                 <input type="text"
                        id="global-clinical-search"
                        class="w-full bg-surface border border-surface-high rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors"
-                       placeholder="Buscar materia, diagnóstico CIE-11 o guía MSP...">
+                       placeholder="Buscar materia, diagnóstico CIE-11, idioma B2 o guía MSP...">
             </div>
 
             <!-- Reproductor de Audio Estudio CC0 -->
@@ -349,7 +415,7 @@
         <div class="flex-1 overflow-y-auto p-6 lg:p-8 relative" id="views-container">
 
             <!-- =========================================================== -->
-            <!-- VISTA 1: CARRERA (11 CARRERAS • 3 PANTALLAS ENCADENADAS)    -->
+            <!-- VISTA 1: CARRERA (11 CARRERAS • NIVELES + TESIS/COMPLEXIVO) -->
             <!-- =========================================================== -->
             <div id="view-launcher" class="tab-content active max-w-6xl mx-auto">
 
@@ -363,7 +429,7 @@
                             Carreras de Ciencias de la Salud
                         </h2>
                         <p id="carrera-main-subtitle" class="text-xs sm:text-sm text-gray-400 mt-1">
-                            Selecciona tu carrera para acceder a Preuniversitario, Nivelación y todos los semestres académicos.
+                            Selecciona tu carrera para acceder a Preuniversitario, Nivelación, Semestres y Titulación (Tesis 1 a 1 o Examen Complexivo).
                         </p>
                     </div>
 
@@ -384,7 +450,7 @@
                     </div>
                 </div>
 
-                <!-- Contenedor Dinámico de las 3 Pantallas de CARRERA -->
+                <!-- Contenedor Dinámico de las 3 Pantallas de CARRERA + TITULACIÓN -->
                 <div id="carrera-flow-container" class="space-y-6 pb-10"></div>
             </div>
 
@@ -393,7 +459,6 @@
             <!-- =========================================================== -->
             <div id="view-caces" class="tab-content hidden max-w-6xl mx-auto">
 
-                <!-- Cabecera de CACES -->
                 <div class="flex flex-wrap items-start justify-between gap-4 pb-5 border-b border-surface-high mb-6">
                     <div>
                         <span id="caces-step-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/15 border border-primary/30 text-primary text-[10px] font-mono font-extrabold uppercase tracking-wider">
@@ -423,7 +488,6 @@
                     </div>
                 </div>
 
-                <!-- Contenedor Dinámico del Flujo CACES -->
                 <div id="caces-flow-container" class="space-y-6 pb-10"></div>
             </div>
 
@@ -431,7 +495,6 @@
             <!-- VISTA 3: MATERIALES DE ESTUDIO Y BIBLIOTECA CLÍNICA 1D      -->
             <!-- =========================================================== -->
             <div id="view-materials" class="tab-content hidden max-w-6xl mx-auto">
-                <!-- Cabecera con Botones Fijos a la Derecha -->
                 <div class="flex flex-wrap items-start justify-between gap-4 pb-5 border-b border-surface-high mb-6">
                     <div>
                         <span id="materials-context-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning/15 border border-warning/40 text-warning text-[10px] font-mono font-extrabold uppercase tracking-wider">
@@ -461,7 +524,6 @@
                     </div>
                 </div>
 
-                <!-- Contenedor Dinámico de Materiales de Estudio -->
                 <div id="study-materials-view-root" class="space-y-6 pb-12"></div>
             </div>
 
@@ -534,7 +596,45 @@
             </div>
 
             <!-- =========================================================== -->
-            <!-- VISTA 5: HUB DE SIMULADORES (1D • 2D • 3D)                  -->
+            <!-- VISTA 5: PROFESIONALES, POSGRADO & EJERCE EN EL EXTRANJERO  -->
+            <!-- =========================================================== -->
+            <div id="view-professionals" class="tab-content hidden max-w-6xl mx-auto">
+                <!-- Cabecera de Profesionales Graduados -->
+                <div class="flex flex-wrap items-start justify-between gap-4 pb-5 border-b border-surface-high mb-6">
+                    <div>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/15 border border-primary/30 text-primary text-[10px] font-mono font-extrabold uppercase tracking-wider">
+                            ● DIVISIÓN POST-RURAL & GRADUADOS EN CIENCIAS DE LA SALUD
+                        </span>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-2">
+                            Centro de Profesionales, Posgrado & Ejerce en el Extranjero
+                        </h2>
+                        <p class="text-xs sm:text-sm text-gray-400 mt-1">
+                            Modelos de Pruebas Psicométricas Hospitalarias, Guías de Alta Especialidad y Academia de Idiomas Médicos hasta Nivel B2 (Inglés, Alemán e Italiano).
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <button type="button"
+                                onclick="window.MakaiDashboardUI.openView('view-classrooms')"
+                                class="px-4 py-2.5 rounded-xl bg-surface-container border border-primary/40 hover:border-primary text-primary text-xs font-extrabold font-mono flex items-center gap-2 transition-all">
+                            <span class="material-symbols-outlined text-base text-danger">videocam</span>
+                            <span>Aulas Virtuales</span>
+                        </button>
+                        <button type="button"
+                                onclick="window.MakaiDashboardUI.openView('view-metrics')"
+                                class="px-4 py-2.5 rounded-xl bg-surface-container border border-secondary/40 hover:border-secondary text-secondary text-xs font-extrabold font-mono flex items-center gap-2 transition-all">
+                            <span class="material-symbols-outlined text-base">bar_chart</span>
+                            <span>Mis Métricas</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contenedor Dinámico del Hub de Profesionales -->
+                <div id="professionals-flow-container" class="space-y-6 pb-12"></div>
+            </div>
+
+            <!-- =========================================================== -->
+            <!-- VISTA 6: HUB DE SIMULADORES (1D • 2D • 3D)                  -->
             <!-- =========================================================== -->
             <div id="view-simulators" class="tab-content hidden max-w-6xl mx-auto">
                 <div class="pb-5 border-b border-surface-high mb-6">
@@ -596,7 +696,7 @@
             </div>
 
             <!-- =========================================================== -->
-            <!-- VISTA 6: MOTOR 1D (REPETICIÓN SINÁPTICA v4.4)               -->
+            <!-- VISTA 7: MOTOR 1D (REPETICIÓN SINÁPTICA v4.4)               -->
             <!-- =========================================================== -->
             <div id="view-spaced" class="tab-content hidden max-w-4xl mx-auto h-full flex flex-col">
                 <div class="mb-6 flex flex-wrap justify-between items-end gap-4">
@@ -657,22 +757,22 @@
             </div>
 
             <!-- =========================================================== -->
-            <!-- VISTA 7: SIMULADOR 2D (CONTROLADO POR sim2d.controller.js)  -->
+            <!-- VISTA 8: SIMULADOR 2D (CONTROLADO POR sim2d.controller.js)  -->
             <!-- =========================================================== -->
             <div id="view-sim2d" class="tab-content hidden max-w-6xl mx-auto"></div>
 
             <!-- =========================================================== -->
-            <!-- VISTA 8: SIMULADOR 3D (CONTROLADO POR sim3d.controller.js)  -->
+            <!-- VISTA 9: SIMULADOR 3D (CONTROLADO POR sim3d.controller.js)  -->
             <!-- =========================================================== -->
             <div id="view-sim3d" class="tab-content hidden max-w-6xl mx-auto"></div>
 
             <!-- =========================================================== -->
-            <!-- VISTA 9: MENTORÍA VIP / AULAS (classroom.controller.js)     -->
+            <!-- VISTA 10: MENTORÍA VIP / AULAS (classroom.controller.js)    -->
             <!-- =========================================================== -->
             <div id="view-classrooms" class="tab-content hidden max-w-6xl mx-auto"></div>
 
             <!-- =========================================================== -->
-            <!-- VISTA 10: SIMULADOR DE EXAMEN ACTIVO (#view-simulator)      -->
+            <!-- VISTA 11: SIMULADOR DE EXAMEN ACTIVO (#view-simulator)      -->
             <!-- =========================================================== -->
             <div id="view-simulator" class="tab-content hidden h-full flex flex-col max-w-6xl mx-auto">
                 <div class="flex flex-wrap justify-between items-center bg-surface-container p-4 rounded-2xl border border-surface-high mb-6 gap-4">
@@ -701,7 +801,7 @@
 
                         <div id="q-rational" class="hidden mt-8 p-5 bg-surface border-l-4 border-secondary rounded-r-xl">
                             <h5 class="text-sm font-bold text-secondary flex items-center gap-2 mb-2">
-                                <span class="material-symbols-outlined text-sm">psychiatry</span> Racional Clínico CACES / GPC
+                                <span class="material-symbols-outlined text-sm">psychiatry</span> Racional Clínico / Explicación Oficial
                             </h5>
                             <p class="text-xs sm:text-sm text-gray-300 leading-relaxed" id="q-rational-text"></p>
                             <button id="btn-next-tutor" type="button" class="mt-4 bg-secondary text-surface text-xs font-extrabold px-6 py-2.5 rounded-lg hover:bg-opacity-90">
@@ -728,7 +828,7 @@
             </div>
 
             <!-- =========================================================== -->
-            <!-- VISTA 11: MIS MÉTRICAS Y DESEMPEÑO (#view-metrics)          -->
+            <!-- VISTA 12: MIS MÉTRICAS Y DESEMPEÑO (#view-metrics)          -->
             <!-- =========================================================== -->
             <div id="view-metrics" class="tab-content hidden max-w-5xl mx-auto">
                 <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
@@ -779,7 +879,7 @@
             </div>
 
             <!-- =========================================================== -->
-            <!-- VISTA 12: CONFIGURACIONES DE PERFIL (#view-profile)         -->
+            <!-- VISTA 13: CONFIGURACIONES DE PERFIL (#view-profile)         -->
             <!-- =========================================================== -->
             <div id="view-profile" class="tab-content hidden max-w-4xl mx-auto">
                 <div class="mb-8 border-b border-surface-high pb-4 flex items-center justify-between">
@@ -797,7 +897,7 @@
             </div>
 
             <!-- =========================================================== -->
-            <!-- VISTA 13: BÓVEDA DE ADMINISTRACIÓN MAESTRA (#view-admin)    -->
+            <!-- VISTA 14: BÓVEDA DE ADMINISTRACIÓN MAESTRA (#view-admin)    -->
             <!-- =========================================================== -->
             <div id="view-admin" class="tab-content hidden max-w-6xl mx-auto"></div>
 
@@ -812,32 +912,72 @@
             </div>
         </div>
 
+        <!-- Modal de Solicitud de Tutor 1 a 1 para Trabajo de Titulación ($10 USD Plataforma) -->
+        <div id="thesis-booking-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+            <div class="bg-surface-container border-2 border-warning rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+                <div class="flex items-start justify-between gap-3 border-b border-surface-high pb-3">
+                    <div>
+                        <span class="text-[10px] font-mono text-warning uppercase font-extrabold">VINCULACIÓN OFICIAL 1 A 1 • MAKAI ACADEMY</span>
+                        <h3 class="text-lg font-extrabold text-white mt-0.5" id="modal-thesis-tutor-name">Solicitud de Tutor de Tesis Aprobado</h3>
+                    </div>
+                    <button type="button" onclick="window.MakaiDashboardUI.closeThesisModal()" class="text-gray-400 hover:text-white text-sm font-bold">✕</button>
+                </div>
+
+                <div class="bg-surface border border-surface-high rounded-xl p-4 space-y-2 text-xs text-gray-300">
+                    <p><strong class="text-warning">¿Cómo funciona el convenio 1 a 1?</strong></p>
+                    <p>1. Todos los tutores del directorio han sido verificados y aprobados directamente por la Dirección Académica de Makai Academy.</p>
+                    <p>2. El valor total del acompañamiento de tesis lo acuerdas libremente con tu tutor según el alcance de tu tema.</p>
+                    <p>3. <strong class="text-primary">Tasa de Vinculación Makai Academy ($10.00 USD):</strong> Garantiza la asignación de tu tutor verificado, apertura de canal directo 1 a 1 y respaldo académico.</p>
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-[11px] font-mono text-gray-400 uppercase mb-1">Tema tentativo o Línea de Investigación:</label>
+                        <input type="text" id="thesis-topic-input" placeholder="Ej: Factores de riesgo asociados a preeclampsia en Hospital..." class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-warning focus:outline-none">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-mono text-gray-400 uppercase mb-1">Universidad:</label>
+                            <input type="text" id="thesis-univ-input" placeholder="Ej: UNACH / UCE / UG / ESPOCH" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-warning focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-mono text-gray-400 uppercase mb-1">Tu WhatsApp de contacto:</label>
+                            <input type="text" id="thesis-whatsapp-input" placeholder="Ej: 0999999999" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-warning focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-surface-high flex items-center justify-end gap-3">
+                    <button type="button" onclick="window.MakaiDashboardUI.closeThesisModal()" class="px-4 py-2.5 rounded-xl bg-surface border border-surface-high text-xs font-bold text-gray-300">
+                        Cancelar
+                    </button>
+                    <button type="button" onclick="window.MakaiDashboardUI.submitThesisRequest()" class="px-5 py-2.5 rounded-xl bg-warning text-surface font-extrabold text-xs uppercase tracking-wider hover:bg-opacity-90">
+                        Confirmar Vinculación 1 a 1 ($10 USD)
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Modal Freemium -->
         <div id="freemium-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50"></div>
     </main>
 
     <!-- =================================================================== -->
-    <!-- MOTOR INTERACTIVO PARA CARRERA (11), CACES (4) Y MATERIALES 1D      -->
+    <!-- MOTOR INTERACTIVO COMPLETO: SIDEBAR + CARRERA + TITULACIÓN + PRO    -->
     <!-- =================================================================== -->
     <script>
         (function () {
             // =================================================================
-            // 0. DETECTOR Y GUARDADO PERMANENTE DEL LOGO OFICIAL MAKAI ACADEMY
+            // 0. CONTROL DE CONTRAÍDO DEL SIDEBAR (3 LÍNEAS) Y LOGO OFICIAL
             // =================================================================
             const LOGO_CANDIDATE_PATHS = [
                 "assets/1-branding/logos/logo.png",
                 "assets/1-branding/logos/Logo.png",
                 "assets/1-branding/logos/logo.jpg",
-                "assets/1-branding/logos/logo.jpeg",
-                "assets/1-branding/logos/logo.webp",
                 "assets/1-branding/logos/Fondo MAKAI Academy 2.png",
                 "assets/1-branding/logos/Fondo MAKAI Academy 2.jpg",
-                "assets/1-branding/logo.png",
                 "logo.png",
-                "Logo.png",
-                "logo.jpg",
                 "Fondo MAKAI Academy 2.png",
-                "Fondo MAKAI Academy 2.jpg",
                 "logo1.png"
             ];
 
@@ -849,7 +989,6 @@
 
                 if (!imgEl) return;
 
-                // 1. Verificar si ya se guardó el logo en localStorage
                 const savedLogoBase64 = localStorage.getItem("makai_official_logo_base64");
                 if (savedLogoBase64) {
                     imgEl.src = savedLogoBase64;
@@ -857,7 +996,6 @@
                     svgFallback?.classList.add("hidden");
                     if (faviconEl) faviconEl.href = savedLogoBase64;
                 } else {
-                    // 2. Probar secuencialmente todas las rutas posibles en GitHub
                     let pathIdx = 0;
                     imgEl.onerror = function () {
                         pathIdx++;
@@ -870,7 +1008,6 @@
                     };
                 }
 
-                // 3. Permitir al Admin subir "Fondo MAKAI Academy 2" con un clic y guardarlo permanentemente
                 fileInput?.addEventListener("change", (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
@@ -900,25 +1037,47 @@
                 });
             }
 
+            function toggleSidebar() {
+                const sidebar = document.getElementById("main-sidebar");
+                const icon = document.getElementById("icon-toggle-sidebar");
+                if (!sidebar) return;
+
+                sidebar.classList.toggle("sidebar-collapsed");
+                const isCollapsed = sidebar.classList.contains("sidebar-collapsed");
+                if (icon) {
+                    icon.textContent = isCollapsed ? "menu_open" : "menu";
+                }
+                localStorage.setItem("makai_sidebar_collapsed", isCollapsed ? "1" : "0");
+            }
+
+            function restoreSidebarPreference() {
+                if (localStorage.getItem("makai_sidebar_collapsed") === "1") {
+                    const sidebar = document.getElementById("main-sidebar");
+                    const icon = document.getElementById("icon-toggle-sidebar");
+                    sidebar?.classList.add("sidebar-collapsed");
+                    if (icon) icon.textContent = "menu_open";
+                }
+            }
+
             // =================================================================
-            // 1. CATÁLOGO DE LAS 11 CARRERAS DE CIENCIAS DE LA SALUD
+            // 1. CATÁLOGO DE LAS 11 CARRERAS (CON INDICADOR EXACTO DE INTERNADO)
             // =================================================================
             const UNIVERSITY_CAREERS = [
-                { id: "medicina", num: "01", nombre: "Medicina Humana", icon: "stethoscope", semestres: 12, desc: "Preuniversitario, Nivelación, 1° a 10° Semestre e Internado Rotativo." },
-                { id: "enfermeria", num: "02", nombre: "Enfermería", icon: "medical_information", semestres: 9, desc: "Proceso de Atención de Enfermería (PAE), Clínico-Quirúrgica, Materno-Infantil y Críticos." },
-                { id: "odontologia", num: "03", nombre: "Odontología", icon: "dentistry", semestres: 10, desc: "Anatomía Dental, Endodoncia, Periodoncia, Cirugía Maxilofacial y Rehabilitación Oral." },
-                { id: "obstetricia", num: "04", nombre: "Obstetricia y Puericultura", icon: "pregnant_woman", semestres: 9, desc: "Control Prenatal, Claves Obstétricas MSP, Parto Humanizado y Perinatología." },
-                { id: "nutricion", num: "05", nombre: "Nutrición y Dietética", icon: "nutrition", semestres: 8, desc: "Evaluación Nutricional ABCD, Dietoterapia Clínica y Soporte Enteral/Parenteral." },
-                { id: "fisioterapia", num: "06", nombre: "Fisioterapia y Rehabilitación", icon: "physical_therapy", semestres: 8, desc: "Biomecánica, Kinesiología, Rehabilitación Neurológica, Musculoesquelética y Cardiorrespiratoria." },
-                { id: "laboratorio", num: "07", nombre: "Laboratorio Clínico", icon: "biotech", semestres: 8, desc: "Hematología, Bioquímica Clínica, Microbiología Diagnóstica, Inmunología y Biología Molecular." },
-                { id: "imagenologia", num: "08", nombre: "Imagenología y Radiología", icon: "radiology", semestres: 8, desc: "Anatomía Radiológica, Rayos X, Tomografía (TC), Resonancia Magnética (RMN) y Ecografía." },
-                { id: "farmacia", num: "09", nombre: "Bioquímica y Farmacia", icon: "science", semestres: 10, desc: "Química Farmacéutica, Farmacología Clínica, Toxicología Analítica y Farmacia Hospitalaria." },
-                { id: "psicologia_clinica", num: "10", nombre: "Psicología Clínica", icon: "psychology", semestres: 8, desc: "Psicopatología DSM-5/CIE-11, Neuropsicología, Psicodiagnóstico e Intervención en Crisis." },
-                { id: "paramedicina", num: "11", nombre: "Atención Prehospitalaria y Emergencias", icon: "ambulance", semestres: 8, desc: "Soporte Vital BLS/ACLS, Trauma Prehospitalario (PHTLS), Triaje START y Emergencias." }
+                { id: "medicina", num: "01", nombre: "Medicina Humana", icon: "stethoscope", semestres: 10, tieneInternado: true, desc: "Preuniversitario, Nivelación, 1° a 10° Semestre, Internado Rotativo y Titulación." },
+                { id: "enfermeria", num: "02", nombre: "Enfermería", icon: "medical_information", semestres: 7, tieneInternado: true, desc: "Proceso de Atención de Enfermería (PAE), Semestres Clínicos, Internado Rotativo y Titulación." },
+                { id: "odontologia", num: "03", nombre: "Odontología", icon: "dentistry", semestres: 10, tieneInternado: false, desc: "Anatomía Dental, Endodoncia, Periodoncia, Cirugía Oral, Clínicas Integrales y Titulación." },
+                { id: "obstetricia", num: "04", nombre: "Obstetricia y Puericultura", icon: "pregnant_woman", semestres: 7, tieneInternado: true, desc: "Control Prenatal, Claves Obstétricas MSP, Internado Rotativo Materno y Titulación." },
+                { id: "nutricion", num: "05", nombre: "Nutrición y Dietética", icon: "nutrition", semestres: 8, tieneInternado: true, desc: "Evaluación Nutricional ABCD, Dietoterapia, Internado Rotativo y Titulación." },
+                { id: "fisioterapia", num: "06", nombre: "Fisioterapia y Rehabilitación", icon: "physical_therapy", semestres: 8, tieneInternado: false, desc: "Biomecánica, Kinesiología, Rehabilitación Neurológica/Musculoesquelética y Titulación." },
+                { id: "laboratorio", num: "07", nombre: "Laboratorio Clínico", icon: "biotech", semestres: 8, tieneInternado: false, desc: "Hematología, Bioquímica Clínica, Microbiología Diagnóstica, Biología Molecular y Titulación." },
+                { id: "imagenologia", num: "08", nombre: "Imagenología y Radiología", icon: "radiology", semestres: 8, tieneInternado: false, desc: "Anatomía Radiológica, Rayos X, Tomografía (TC), Resonancia (RMN) y Titulación." },
+                { id: "farmacia", num: "09", nombre: "Bioquímica y Farmacia", icon: "science", semestres: 9, tieneInternado: false, desc: "Química Farmacéutica, Farmacología Clínica, Toxicología Analítica, Farmacia Hospitalaria y Titulación." },
+                { id: "psicologia_clinica", num: "10", nombre: "Psicología Clínica", icon: "psychology", semestres: 8, tieneInternado: false, desc: "Psicopatología DSM-5/CIE-11, Neuropsicología, Psicodiagnóstico, Intervención y Titulación." },
+                { id: "paramedicina", num: "11", nombre: "Atención Prehospitalaria y Emergencias", icon: "ambulance", semestres: 8, tieneInternado: false, desc: "Soporte Vital BLS/ACLS, Trauma Prehospitalario (PHTLS), Triaje START y Titulación." }
             ];
 
             // =================================================================
-            // 2. MATERIAS UNIVERSALES POR NIVEL / SEMESTRE
+            // 2. MATERIAS UNIVERSALES POR NIVEL Y MODALIDADES DE TITULACIÓN
             // =================================================================
             const SUBJECTS_BY_LEVEL = {
                 preuniversitario: [
@@ -944,9 +1103,41 @@
                 sem_7: ["Cirugía General y Abdomen Agudo", "Traumatología y Ortopedia", "Anestesiología y Reanimación", "Otorrinolaringología y Oftalmología", "Urología Clínica"],
                 sem_8: ["Ginecología y Salud Reproductiva", "Obstetricia y Claves Obstétricas MSP", "Pediatría Clínica", "Neonatología y Reanimación Neonatal", "AIEPI Clínico y Vacunación MSP"],
                 sem_9: ["Urgencias Médicas y Cuidados Críticos (UCI)", "Toxicología Clínica", "Geriatría y Cuidados Paliativos", "Medicina Legal y Deontología", "Administración y Gerencia Hospitalaria"],
-                sem_10: ["Integración Clínica y Razonamiento CACES", "Casos Clínicos Complejos Multidisciplinarios", "Auditoría en Salud y Bioética", "Trabajo de Titulación e Investigación"],
-                internado: ["Rotación de Medicina Interna", "Rotación de Pediatría", "Rotación de Ginecología y Obstetricia", "Rotación de Cirugía y Emergencias", "Rotación Comunitaria y Rural MSP"]
+                sem_10: ["Integración Clínica Avanzada", "Casos Clínicos Complejos Multidisciplinarios", "Auditoría en Salud y Bioética", "Diseño de Protocolos de Investigación"],
+                internado: ["Rotación de Medicina Interna", "Rotación de Pediatría", "Rotación de Ginecología y Obstetricia", "Rotación de Cirugía y Emergencias", "Rotación Comunitaria y Atención Primaria MSP"],
+                titulacion_complexivo: [
+                    "Eje 1 Complexivo: Ciencias Básicas y Preclínicas Integradas",
+                    "Eje 2 Complexivo: Diagnóstico Clínico y Razonamiento Sindrómico",
+                    "Eje 3 Complexivo: Terapéutica, Urgencias y Protocolos GPC-MSP",
+                    "Eje 4 Complexivo: Salud Pública, Epidemiología, Bioética y Gestión",
+                    "Eje 5 Complexivo: Resolución de Casos Prácticos de Fin de Carrera"
+                ]
             };
+
+            // Tutores Verificados por el Administrador para Trabajo de Titulación (Tesis 1 a 1)
+            const VERIFIED_THESIS_TUTORS = [
+                {
+                    id: "tut-01",
+                    nombre: "Dr. Especialista Aprobado • Línea Clínica & Epidemiológica",
+                    especialidad: "Metodología de Investigación, Estudios Observacionales y Casos Clínicos",
+                    herramientas: "SPSS • R Studio • Normas Vancouver • PRISMA",
+                    valoracion: "4.9 ★ (Verificado por Admin Makai)"
+                },
+                {
+                    id: "tut-02",
+                    nombre: "MSc. Especialista Aprobado • Revisión Sistemática & Metaanálisis",
+                    especialidad: "Búsqueda en PubMed/Scopus, Criterios PRISMA y Redacción Científica",
+                    herramientas: "Mendeley • Zotero • RevMan • Antiplagio Turnitin",
+                    valoracion: "5.0 ★ (Verificado por Admin Makai)"
+                },
+                {
+                    id: "tut-03",
+                    nombre: "Dr. Especialista Aprobado • Salud Pública, Materno-Infantil & Clínicas",
+                    especialidad: "Proyectos de Titulación Hospitalarios, Comunitarios y Pregrado",
+                    herramientas: "Diseño de Instrumentos • Chi-cuadrado / Odds Ratio • Defensa Oral",
+                    valoracion: "4.9 ★ (Verificado por Admin Makai)"
+                }
+            ];
 
             // =================================================================
             // 3. CATÁLOGO DE LAS 4 CARRERAS OFICIALES CACES
@@ -1024,13 +1215,17 @@
                 activeMaterialSubject: "Morfofisiología Básica I",
                 activeMaterialCategoryFilter: "all",
                 openReaderDoc: null,
-                readerNightMode: false
+                readerNightMode: false,
+                profActiveTab: "extranjero", // "extranjero" | "psicometricas" | "especialidad" | "homologacion"
+                selectedLang: "ingles",
+                selectedThesisTutor: null
             };
 
+            // Construye los niveles dinámicos según la carrera + Internado (si aplica) + Las 2 Opciones Finales de Graduación
             function getLevelsForCareer(careerObj) {
                 const levels = [
-                    { id: "preuniversitario", tag: "Admisión", nombre: "Preuniversitario", desc: "Biología, Química, Anatomía preliminar y Razonamiento." },
-                    { id: "nivelacion", tag: "Semestre 0", nombre: "Nivelación Académica", desc: "Morfofisiología, Bioquímica básica y bases universitarias." }
+                    { id: "preuniversitario", tag: "Admisión", nombre: "Preuniversitario", tipo: "standard", desc: "Biología, Química, Anatomía preliminar y Razonamiento." },
+                    { id: "nivelacion", tag: "Semestre 0", nombre: "Nivelación Académica", tipo: "standard", desc: "Morfofisiología, Bioquímica básica y bases universitarias." }
                 ];
                 const maxSem = Math.min(careerObj.semestres || 8, 10);
                 for (let i = 1; i <= maxSem; i++) {
@@ -1038,22 +1233,39 @@
                         id: "sem_" + i,
                         tag: "Nivel " + i,
                         nombre: i + "° Semestre",
+                        tipo: "standard",
                         desc: "Asignaturas universales y troncales de " + i + "° semestre."
                     });
                 }
-                if ((careerObj.semestres || 8) >= 9) {
+                if (careerObj.tieneInternado) {
                     levels.push({
                         id: "internado",
                         tag: "Etapa Hospitalaria",
                         nombre: "Internado Rotativo",
+                        tipo: "internado",
                         desc: "Rotaciones clínicas hospitalarias e integración profesional."
                     });
                 }
+                // OPCIONES UNIVERSALES DE FIN DE CARRERA (PRESENTES EN LAS 11 CARRERAS)
+                levels.push({
+                    id: "titulacion_tesis",
+                    tag: "Opción de Graduación 1",
+                    nombre: "Trabajo de Titulación (Tesis 1 a 1)",
+                    tipo: "tesis",
+                    desc: "Asesoría personalizada 1 a 1 con un tutor verificado para tu proyecto de investigación o tesis."
+                });
+                levels.push({
+                    id: "titulacion_complexivo",
+                    tag: "Opción de Graduación 2",
+                    nombre: "Examen Complexivo (Súper Intensivo)",
+                    tipo: "complexivo",
+                    desc: "Entrenamiento intensivo de fin de carrera con simulacros integradores para aprobar el examen complexivo."
+                });
                 return levels;
             }
 
             // =================================================================
-            // RENDERIZADO ENCADENADO DE LA SECCIÓN: CARRERA (3 PANTALLAS)
+            // RENDERIZADO ENCADENADO DE LA SECCIÓN: CARRERA (3 PANTALLAS + TESIS/COMPLEXIVO)
             // =================================================================
             function renderCarreraFlow() {
                 const root = document.getElementById("carrera-flow-container");
@@ -1062,14 +1274,13 @@
                 const subtitle = document.getElementById("carrera-main-subtitle");
                 if (!root) return;
 
-                // Limpiar cualquier inyección duplicada externa
                 document.getElementById("makai-carrera-dynamic-root")?.remove();
 
                 // PANTALLA 1: LAS 11 CARRERAS DE SALUD
                 if (uiState.carreraStep === 1 || !uiState.selectedUnivCareer) {
                     if (badge) badge.textContent = "● MÓDULO UNIVERSITARIO • PASO 1 DE 3";
                     if (title) title.textContent = "Carreras de Ciencias de la Salud";
-                    if (subtitle) subtitle.textContent = "Selecciona tu carrera para acceder a Preuniversitario, Nivelación y todos los semestres académicos.";
+                    if (subtitle) subtitle.textContent = "Selecciona tu carrera para acceder a Preuniversitario, Nivelación, Semestres y Modalidades de Graduación (Tesis 1 a 1 o Examen Complexivo).";
 
                     root.innerHTML = `
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1081,8 +1292,8 @@
                                             <span class="px-2.5 py-1 rounded-lg bg-surface border border-primary/40 text-primary font-mono text-xs font-extrabold">
                                                 ÁREA ${c.num}
                                             </span>
-                                            <span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform">
-                                                arrow_forward
+                                            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-secondary/15 text-secondary font-bold">
+                                                ${c.tieneInternado ? "Con Internado + Titulación" : "Malla Completa + Titulación"}
                                             </span>
                                         </div>
                                         <h3 class="text-lg font-extrabold text-white group-hover:text-primary transition-colors">
@@ -1093,7 +1304,7 @@
                                         </p>
                                     </div>
                                     <div class="mt-4 pt-3 border-t border-surface-high flex items-center justify-between text-[11px] font-mono">
-                                        <span class="text-secondary font-bold">Preuniv • Nivelación • ${c.semestres} Semestres</span>
+                                        <span class="text-secondary font-bold">${c.semestres} Semestres • Tesis / Complexivo</span>
                                         <span class="text-primary font-extrabold">Abrir →</span>
                                     </div>
                                 </div>
@@ -1106,14 +1317,17 @@
                 const careerObj = UNIVERSITY_CAREERS.find(c => c.id === uiState.selectedUnivCareer) || UNIVERSITY_CAREERS[0];
                 const levels = getLevelsForCareer(careerObj);
 
-                // PANTALLA 2: PREUNIVERSITARIO, NIVELACIÓN Y SEMESTRES DE LA CARRERA ELEGIDA
+                // PANTALLA 2: NIVELES ACADÉMICOS + MODALIDADES FINALES DE TITULACIÓN
                 if (uiState.carreraStep === 2 || !uiState.selectedUnivLevel) {
                     if (badge) badge.textContent = `● MÓDULO UNIVERSITARIO • PASO 2 DE 3 • ${careerObj.nombre.toUpperCase()}`;
-                    if (title) title.textContent = `${careerObj.nombre} — Selecciona tu Nivel`;
-                    if (subtitle) subtitle.textContent = "Elige Preuniversitario, Nivelación o el Semestre académico para desplegar todas sus materias.";
+                    if (title) title.textContent = `${careerObj.nombre} — Selecciona tu Nivel o Modalidad de Graduación`;
+                    if (subtitle) subtitle.textContent = "Elige tu semestre actual o ve al final para seleccionar tu modalidad de graduación: Trabajo de Titulación (Tesis 1 a 1) o Examen Complexivo.";
+
+                    const academicLevels = levels.filter(l => l.tipo === "standard" || l.tipo === "internado");
+                    const graduationLevels = levels.filter(l => l.tipo === "tesis" || l.tipo === "complexivo");
 
                     root.innerHTML = `
-                        <div class="flex items-center justify-between bg-surface-container border border-surface-high rounded-2xl p-4">
+                        <div class="flex flex-wrap items-center justify-between gap-3 bg-surface-container border border-surface-high rounded-2xl p-4">
                             <button type="button"
                                     onclick="window.MakaiDashboardUI.resetCarreraStep(1)"
                                     class="px-4 py-2 rounded-xl bg-surface border border-surface-high hover:border-primary text-xs font-extrabold text-gray-200 flex items-center gap-2 transition-all">
@@ -1125,12 +1339,13 @@
                             </span>
                         </div>
 
+                        <!-- MALLA DE NIVELES Y SEMESTRES -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                            ${levels.map(lvl => `
+                            ${academicLevels.map(lvl => `
                                 <div onclick="window.MakaiDashboardUI.selectUnivLevel('${lvl.id}')"
-                                     class="group bg-surface-container border border-surface-high hover:border-primary rounded-2xl p-5 cursor-pointer transition-all hover:shadow-[0_0_20px_rgba(0,229,255,0.14)] flex flex-col justify-between">
+                                     class="group bg-surface-container border ${lvl.tipo === 'internado' ? 'border-secondary/50' : 'border-surface-high'} hover:border-primary rounded-2xl p-5 cursor-pointer transition-all hover:shadow-[0_0_20px_rgba(0,229,255,0.14)] flex flex-col justify-between">
                                     <div>
-                                        <span class="px-2.5 py-0.5 rounded bg-primary/15 text-primary font-mono text-[10px] font-extrabold uppercase">
+                                        <span class="px-2.5 py-0.5 rounded ${lvl.tipo === 'internado' ? 'bg-secondary/15 text-secondary' : 'bg-primary/15 text-primary'} font-mono text-[10px] font-extrabold uppercase">
                                             ${lvl.tag}
                                         </span>
                                         <h4 class="text-base font-extrabold text-white mt-2.5 group-hover:text-primary transition-colors">
@@ -1147,20 +1362,189 @@
                                 </div>
                             `).join("")}
                         </div>
+
+                        <!-- SECCIÓN DESTACADA AL FINAL DE TODOS LOS NIVELES: TITULACIÓN Y GRADUACIÓN -->
+                        <div class="pt-4 border-t border-surface-high space-y-4">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div>
+                                    <span class="text-[10px] font-mono text-warning uppercase font-extrabold tracking-widest">
+                                        🎓 ETAPA CULMINANTE DE FIN DE CARRERA • ${careerObj.nombre.toUpperCase()}
+                                    </span>
+                                    <h3 class="text-lg font-extrabold text-white mt-0.5">
+                                        Modalidades Oficiales de Titulación y Graduación Universitaria
+                                    </h3>
+                                </div>
+                                <span class="text-xs font-mono text-gray-400">
+                                    Elige si te gradúas por Tesis (Tutoría 1 a 1) o por Examen Complexivo Intensivo
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <!-- OPCIÓN A: TRABAJO DE TITULACIÓN / TESIS 1 A 1 -->
+                                <div onclick="window.MakaiDashboardUI.selectUnivLevel('titulacion_tesis')"
+                                     class="group bg-surface-container border-2 border-warning/60 hover:border-warning rounded-2xl p-6 cursor-pointer transition-all hover:shadow-[0_0_25px_rgba(255,190,11,0.18)] flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex items-center justify-between gap-2 mb-3">
+                                            <span class="px-3 py-1 rounded-lg bg-warning/15 border border-warning/40 text-warning font-mono text-xs font-extrabold uppercase">
+                                                OPCIÓN 1 • MENTORÍA 1 A 1 DE TESIS
+                                            </span>
+                                            <span class="text-xs font-mono text-secondary font-extrabold">Vinculación: $10 USD</span>
+                                        </div>
+                                        <h4 class="text-xl font-extrabold text-white group-hover:text-warning transition-colors">
+                                            Trabajo de Titulación / Tesis (1 a 1)
+                                        </h4>
+                                        <p class="text-xs text-gray-300 mt-2 leading-relaxed">
+                                            Conéctate en privado (1 a 1) con un Tutor de Tesis verificado y aprobado por Makai Academy. Acuerda directamente con el tutor el presupuesto de tu investigación; la plataforma únicamente cobra $10 USD por derecho de vinculación y garantía académica.
+                                        </p>
+                                    </div>
+                                    <div class="mt-5 pt-3 border-t border-surface-high flex items-center justify-between text-xs font-mono">
+                                        <span class="text-warning font-bold">Elegir Tutor Aprobado + Herramientas de Tesis</span>
+                                        <span class="text-white font-extrabold">Ingresar →</span>
+                                    </div>
+                                </div>
+
+                                <!-- OPCIÓN B: EXAMEN COMPLEXIVO SÚPER INTENSIVO -->
+                                <div onclick="window.MakaiDashboardUI.selectUnivLevel('titulacion_complexivo')"
+                                     class="group bg-surface-container border-2 border-primary/60 hover:border-primary rounded-2xl p-6 cursor-pointer transition-all hover:shadow-[0_0_25px_rgba(0,229,255,0.18)] flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex items-center justify-between gap-2 mb-3">
+                                            <span class="px-3 py-1 rounded-lg bg-primary/15 border border-primary/40 text-primary font-mono text-xs font-extrabold uppercase">
+                                                OPCIÓN 2 • BOOTCAMP SÚPER INTENSIVO
+                                            </span>
+                                            <span class="text-xs font-mono text-primary font-extrabold">Aprobación Garantizada</span>
+                                        </div>
+                                        <h4 class="text-xl font-extrabold text-white group-hover:text-primary transition-colors">
+                                            Examen Complexivo (Nivel Súper Intensivo)
+                                        </h4>
+                                        <p class="text-xs text-gray-300 mt-2 leading-relaxed">
+                                            Programa de alto rendimiento que condensa todos los semestres de ${careerObj.nombre} en ejes integradores: Simulacros Complexivos cronometrados, Repetición Sináptica acelerada y resolución de casos prácticos de graduación.
+                                        </p>
+                                    </div>
+                                    <div class="mt-5 pt-3 border-t border-surface-high flex items-center justify-between text-xs font-mono">
+                                        <span class="text-primary font-bold">Abrir Ejes Troncales + Simulacro Complexivo</span>
+                                        <span class="text-white font-extrabold">Ingresar →</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     `;
                     return;
                 }
 
-                // PANTALLA 3: TODAS LAS MATERIAS DEL NIVEL SELECCIONADO (CON LAS 3 OPCIONES)
+                // PANTALLA 3 ESPECIAL A: TRABAJO DE TITULACIÓN / TESIS 1 A 1
+                if (uiState.selectedUnivLevel === "titulacion_tesis") {
+                    if (badge) badge.textContent = `● TITULACIÓN UNIVERSITARIA • TESIS 1 A 1 • ${careerObj.nombre.toUpperCase()}`;
+                    if (title) title.textContent = `Trabajo de Titulación / Tesis 1 a 1 • ${careerObj.nombre}`;
+                    if (subtitle) subtitle.textContent = "Conéctate con un Tutor de Tesis verificado por Makai Academy y accede a las guías metodológicas y estadísticas.";
+
+                    root.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-3 bg-surface-container border border-surface-high rounded-2xl p-4">
+                            <button type="button"
+                                    onclick="window.MakaiDashboardUI.resetCarreraStep(2)"
+                                    class="px-4 py-2 rounded-xl bg-surface border border-surface-high hover:border-warning text-xs font-extrabold text-gray-200 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-sm">arrow_back</span>
+                                <span>← Volver a Niveles de ${careerObj.nombre}</span>
+                            </button>
+                            <span class="px-3 py-1 rounded-lg bg-warning/15 border border-warning/40 text-warning text-xs font-mono font-bold">
+                                Tasa única de vinculación en plataforma: $10.00 USD (Acuerdo libre con el Tutor)
+                            </span>
+                        </div>
+
+                        <!-- DIRECTORIO DE TUTORES VERIFICADOS 1 A 1 -->
+                        <div class="bg-surface-container border border-warning/40 rounded-2xl p-6 space-y-4">
+                            <div>
+                                <span class="text-[10px] font-mono text-warning uppercase font-extrabold">PASO 1 • DIRECTORIO DE ESPECIALISTAS EN INVESTIGACIÓN APROBADOS</span>
+                                <h3 class="text-lg font-extrabold text-white mt-0.5">Selecciona tu Tutor Verificado para Vinculación 1 a 1 (${careerObj.nombre})</h3>
+                                <p class="text-xs text-gray-400 mt-1">
+                                    Cada tutor ha sido evaluado por el Administrador Maestro. Una vez vinculado ($10 USD), coordinas directamente con él las entregas y el valor de la asesoría.
+                                </p>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                ${VERIFIED_THESIS_TUTORS.map(t => `
+                                    <div class="bg-surface border border-surface-high hover:border-warning rounded-2xl p-5 flex flex-col justify-between gap-4 transition-all">
+                                        <div>
+                                            <span class="px-2.5 py-0.5 rounded bg-secondary/15 text-secondary font-mono text-[10px] font-bold">
+                                                ${t.valoracion}
+                                            </span>
+                                            <h4 class="text-sm font-extrabold text-white mt-2">${t.nombre}</h4>
+                                            <p class="text-xs text-gray-400 mt-1.5 leading-relaxed">${t.especialidad}</p>
+                                            <p class="text-[11px] font-mono text-primary mt-2">${t.herramientas}</p>
+                                        </div>
+                                        <button type="button"
+                                                onclick="window.MakaiDashboardUI.openThesisModal('${t.nombre}')"
+                                                class="w-full py-2.5 px-3 rounded-xl bg-warning text-surface font-extrabold text-xs uppercase tracking-wider hover:bg-opacity-90 transition-all">
+                                            Contactar 1 a 1 ($10 USD)
+                                        </button>
+                                    </div>
+                                `).join("")}
+                            </div>
+                        </div>
+
+                        <!-- PLUS: KIT DE RECURSOS DE METODOLOGÍA Y BIOESTADÍSTICA PARA EL TESISTA -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-surface-container border border-surface-high rounded-2xl p-5 flex flex-col justify-between">
+                                <div>
+                                    <span class="text-[10px] font-mono text-primary uppercase font-bold">RECURSO DE TESIS 01</span>
+                                    <h4 class="text-base font-extrabold text-white mt-1">Plantillas de Anteproyecto & Matriz de Consistencia</h4>
+                                    <p class="text-xs text-gray-400 mt-1">Planteamiento del problema, pregunta PICO, objetivos e hipótesis listas para adaptar.</p>
+                                </div>
+                                <button type="button"
+                                        onclick="window.MakaiDashboardUI.openMaterialsForSubject('${careerObj.id}', 'Trabajo de Titulación', 'Plantillas PICO y Anteproyecto de Tesis')"
+                                        class="mt-4 py-2.5 rounded-xl bg-surface border border-primary/50 text-primary hover:bg-primary hover:text-surface font-extrabold text-xs">
+                                    Abrir Materiales de Tesis
+                                </button>
+                            </div>
+
+                            <div class="bg-surface-container border border-surface-high rounded-2xl p-5 flex flex-col justify-between">
+                                <div>
+                                    <span class="text-[10px] font-mono text-secondary uppercase font-bold">RECURSO DE TESIS 02</span>
+                                    <h4 class="text-base font-extrabold text-white mt-1">Guía Práctica de Bioestadística (SPSS / R / Excel)</h4>
+                                    <p class="text-xs text-gray-400 mt-1">Cálculo de tamaño muestral, Chi-cuadrado, t de Student, Odds Ratio e interpretación de valor p.</p>
+                                </div>
+                                <button type="button"
+                                        onclick="window.MakaiDashboardUI.openMaterialsForSubject('${careerObj.id}', 'Trabajo de Titulación', 'Bioestadística Aplicada en SPSS y R')"
+                                        class="mt-4 py-2.5 rounded-xl bg-surface border border-secondary/50 text-secondary hover:bg-secondary hover:text-surface font-extrabold text-xs">
+                                    Abrir Guía Estadística
+                                </button>
+                            </div>
+
+                            <div class="bg-surface-container border border-surface-high rounded-2xl p-5 flex flex-col justify-between">
+                                <div>
+                                    <span class="text-[10px] font-mono text-warning uppercase font-bold">RECURSO DE TESIS 03</span>
+                                    <h4 class="text-base font-extrabold text-white mt-1">Normas Vancouver, PRISMA & Defensa ante Tribunal</h4>
+                                    <p class="text-xs text-gray-400 mt-1">Estructura de diapositivas para sustentación oral y preguntas frecuentes del tribunal calificador.</p>
+                                </div>
+                                <button type="button"
+                                        onclick="window.MakaiDashboardUI.openMaterialsForSubject('${careerObj.id}', 'Trabajo de Titulación', 'Normas Vancouver y Defensa Oral de Tesis')"
+                                        class="mt-4 py-2.5 rounded-xl bg-surface border border-warning/50 text-warning hover:bg-warning hover:text-surface font-extrabold text-xs">
+                                    Ver Guía de Sustentación
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // PANTALLA 3 ESTÁNDAR O EXAMEN COMPLEXIVO SÚPER INTENSIVO
                 const levelObj = levels.find(l => l.id === uiState.selectedUnivLevel) || levels[0];
+                const isComplexivo = levelObj.id === "titulacion_complexivo";
                 const subjects = SUBJECTS_BY_LEVEL[levelObj.id] || SUBJECTS_BY_LEVEL.sem_1;
 
-                if (badge) badge.textContent = `● MÓDULO UNIVERSITARIO • PASO 3 DE 3 • ${careerObj.nombre.toUpperCase()}`;
+                if (badge) {
+                    badge.textContent = isComplexivo
+                        ? `● BOOTCAMP SÚPER INTENSIVO • EXAMEN COMPLEXIVO • ${careerObj.nombre.toUpperCase()}`
+                        : `● MÓDULO UNIVERSITARIO • PASO 3 DE 3 • ${careerObj.nombre.toUpperCase()}`;
+                }
                 if (title) title.textContent = `${levelObj.nombre} • ${careerObj.nombre}`;
-                if (subtitle) subtitle.textContent = "Selecciona la materia para practicar en el Simulador Clínico, repasar en Sináptico v4.4 o abrir Materiales de Estudio.";
+                if (subtitle) {
+                    subtitle.textContent = isComplexivo
+                        ? "Entrenamiento intensivo por ejes integradores para aprobar el Examen Complexivo de grado a la primera."
+                        : "Selecciona la materia para practicar en el Simulador Clínico, repasar en Sináptico v4.4 o abrir Materiales de Estudio.";
+                }
 
                 root.innerHTML = `
-                    <div class="flex flex-wrap items-center justify-between gap-3 bg-surface-container border border-surface-high rounded-2xl p-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3 bg-surface-container border ${isComplexivo ? 'border-primary' : 'border-surface-high'} rounded-2xl p-4">
                         <div class="flex flex-wrap items-center gap-2">
                             <button type="button"
                                     onclick="window.MakaiDashboardUI.resetCarreraStep(1)"
@@ -1184,9 +1568,9 @@
                             </button>
 
                             <button type="button"
-                                    onclick="window.MakaiDashboardUI.startSubjectExam('${careerObj.id}', 'Todas las Materias de ${levelObj.nombre}', 'tutor')"
+                                    onclick="window.MakaiDashboardUI.startSubjectExam('${careerObj.id}', '${isComplexivo ? "Simulacro Oficial Examen Complexivo (100 Preg.)" : "Todas las Materias de " + levelObj.nombre}', '${isComplexivo ? "estandar" : "tutor"}')"
                                     class="px-5 py-2.5 rounded-xl bg-primary text-surface font-extrabold text-xs uppercase tracking-wider hover:bg-opacity-90 transition-all shadow-[0_0_15px_rgba(0,229,255,0.3)]">
-                                ⚡ Simulacro Global de ${levelObj.nombre}
+                                ⚡ ${isComplexivo ? "Lanzar Simulacro Complexivo Intensivo (100 Preg.)" : "Simulacro Global de " + levelObj.nombre}
                             </button>
                         </div>
                     </div>
@@ -1197,17 +1581,17 @@
                                 <div class="flex items-start justify-between gap-3">
                                     <div>
                                         <span class="text-[10px] font-mono text-primary uppercase font-bold">
-                                            ASIGNATURA 0${idx + 1} • MALLA UNIVERSAL
+                                            ${isComplexivo ? "EJE INTEGRADOR COMPLEXIVO 0" + (idx + 1) : "ASIGNATURA 0" + (idx + 1) + " • MALLA UNIVERSAL"}
                                         </span>
                                         <h4 class="text-base font-extrabold text-white mt-1">${subj}</h4>
                                         <p class="text-xs text-gray-400 mt-1">
-                                            Banco de reactivos por semestre, tarjetas de memorización y materiales de estudio (PDFs, GPC e infografías).
+                                            Banco de reactivos, tarjetas de memorización y materiales de estudio (PDFs, GPC e infografías).
                                         </p>
                                     </div>
                                     <span class="material-symbols-outlined text-primary">clinical_notes</span>
                                 </div>
 
-                                <!-- 3 OPCIONES POR ASIGNATURA: SIMULADOR + SINÁPTICO + MATERIALES DE ESTUDIO -->
+                                <!-- 3 OPCIONES POR ASIGNATURA -->
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3 border-t border-surface-high">
                                     <button type="button"
                                             onclick="window.MakaiDashboardUI.startSubjectExam('${careerObj.id}', '${subj}', 'tutor')"
@@ -1237,6 +1621,259 @@
             }
 
             // =================================================================
+            // 4. NUEVA SECCIÓN: PROFESIONALES, PSICOMÉTRICAS Y EXTRANJERO B2
+            // =================================================================
+            function renderProfessionalsFlow() {
+                const root = document.getElementById("professionals-flow-container");
+                if (!root) return;
+
+                const tabs = [
+                    { id: "extranjero", icon: "public", label: "🌍 Ejerce en el Extranjero (Idiomas B2 Médico)" },
+                    { id: "psicometricas", icon: "psychology_alt", label: "🧠 Pruebas Psicométricas & Concursos" },
+                    { id: "especialidad", icon: "medical_services", label: "🔬 Guías Clínicas Ampliadas (Posgrado)" },
+                    { id: "homologacion", icon: "workspace_premium", label: "✨ PLUS: Homologación & Residencias (MIR/USMLE)" }
+                ];
+
+                let contentHTML = "";
+
+                // SUB-PESTAÑA 1: EJERCE EN EL EXTRANJERO (INGLÉS B2, ALEMÁN B2, ITALIANO B2)
+                if (uiState.profActiveTab === "extranjero") {
+                    const langCatalog = {
+                        ingles: {
+                            nombre: "Inglés Médico Clínico (Rumbo a B2 / OET / USMLE)",
+                            bandera: "🇺🇸 🇬🇧",
+                            certificacion: "Objetivo: Nivel B2 Clínico • OET Medicine / Nursing",
+                            modulos: [
+                                { nivel: "A1 - A2 Médico", titulo: "Terminología Hospitalaria, Signos Vitales y Anatomía en Inglés", desc: "Vocabulario diario de sala de emergencias, abreviaturas anglosajonas e instrucciones al paciente." },
+                                { nivel: "B1 Médico", titulo: "History Taking (Anamnesis), Examen Físico y Presentación en Pase de Visita", desc: "Diálogos clínicos estructurados para interrogar dolor (SOCRATES), antecedentes y evolución." },
+                                { nivel: "B2 Médico • OET", titulo: "Lectura Crítica de Papers (NEJM/Lancet), Referral Letters y Comunicación de Malas Noticias", desc: "Dominio avanzado B2 para entrevistas de residencia internacional, OET y guardias en el extranjero." }
+                            ]
+                        },
+                        aleman: {
+                            nombre: "Alemán Médico Clínico (Rumbo a B2 / FSP - Fachsprachprüfung)",
+                            bandera: "🇩🇪 🇦🇹 🇨🇭",
+                            certificacion: "Objetivo: Nivel B2 + FSP (Approbation en Alemania, Austria y Suiza)",
+                            modulos: [
+                                { nivel: "A1 - A2 Médico", titulo: "Bases del Alemán Sanitario, Instrumental y Rutina en el Krankenhaus", desc: "Estructura gramatical aplicada al entorno hospitalario alemán y nomenclatura anatómica." },
+                                { nivel: "B1 Médico", titulo: "Arzt-Patienten-Gespräch (Entrevista Clínica) y Anamnesis en Alemán", desc: "Simulación de consulta médica con pacientes germanohablantes y explicación de procedimientos." },
+                                { nivel: "B2 Médico • FSP", titulo: "Redacción de Arztbrief (Epicrisis) y Presentación ante la Cámara de Médicos (Ärztekammer)", desc: "Entrenamiento específico para aprobar el examen oficial FSP y ejercer como médico/enfermero en Alemania." }
+                            ]
+                        },
+                        italiano: {
+                            nombre: "Italiano Médico Clínico (Rumbo a B2 / Homologación Italia & UE)",
+                            bandera: "🇮🇹 🇪🇺",
+                            certificacion: "Objetivo: Nivel B2 Clínico • Ejercicio Profesional y Concurso SSM Italia",
+                            modulos: [
+                                { nivel: "A1 - A2 Médico", titulo: "Fonética, Terminología Clínica Italiana y Triaje en Pronto Soccorso", desc: "Comprensión rápida para hispanohablantes enfocada en falsos amigos médicos y vocabulario hospitalario." },
+                                { nivel: "B1 Médico", titulo: "Cartella Clinica, Anamnesis y Manejo de Guardias Médicas (Guardia Medica)", desc: "Redacción de evoluciones clínicas, recetas médicas y trato con el paciente en el Servizio Sanitario Nazionale." },
+                                { nivel: "B2 Médico • SSM", titulo: "Italiano Médico Avanzado B2, Deontología y Casos Clínicos Tipo Concurso SSM", desc: "Dominio completo del idioma técnico para homologación de título y acceso a especialidades en Italia." }
+                            ]
+                        }
+                    };
+
+                    const activeLang = langCatalog[uiState.selectedLang] || langCatalog.ingles;
+
+                    contentHTML = `
+                        <div class="bg-surface-container border border-primary/40 rounded-2xl p-6 space-y-5">
+                            <div class="flex flex-wrap items-center justify-between gap-4 border-b border-surface-high pb-4">
+                                <div>
+                                    <span class="text-[10px] font-mono text-primary uppercase font-extrabold">ACADEMIA INTERNACIONAL DE IDIOMAS SANITARIOS • RUTA A1 → B2 MÉDICO</span>
+                                    <h3 class="text-xl font-extrabold text-white mt-0.5">${activeLang.bandera} ${activeLang.nombre}</h3>
+                                    <p class="text-xs font-mono text-secondary mt-1">${activeLang.certificacion}</p>
+                                </div>
+
+                                <!-- Selector de Idioma Médico -->
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <button type="button" onclick="window.MakaiDashboardUI.selectMedicalLanguage('ingles')" class="px-4 py-2 rounded-xl text-xs font-extrabold border transition-all ${uiState.selectedLang === 'ingles' ? 'bg-primary text-surface border-primary' : 'bg-surface border-surface-high text-gray-300 hover:border-primary'}">
+                                        🇺🇸 Inglés Médico (B2 / OET)
+                                    </button>
+                                    <button type="button" onclick="window.MakaiDashboardUI.selectMedicalLanguage('aleman')" class="px-4 py-2 rounded-xl text-xs font-extrabold border transition-all ${uiState.selectedLang === 'aleman' ? 'bg-primary text-surface border-primary' : 'bg-surface border-surface-high text-gray-300 hover:border-primary'}">
+                                        🇩🇪 Alemán Médico (B2 / FSP)
+                                    </button>
+                                    <button type="button" onclick="window.MakaiDashboardUI.selectMedicalLanguage('italiano')" class="px-4 py-2 rounded-xl text-xs font-extrabold border transition-all ${uiState.selectedLang === 'italiano' ? 'bg-primary text-surface border-primary' : 'bg-surface border-surface-high text-gray-300 hover:border-primary'}">
+                                        🇮🇹 Italiano Médico (B2 / UE)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                ${activeLang.modulos.map(m => `
+                                    <div class="bg-surface border border-surface-high hover:border-primary rounded-2xl p-5 flex flex-col justify-between gap-4 transition-all">
+                                        <div>
+                                            <span class="px-2.5 py-0.5 rounded bg-primary/15 text-primary font-mono text-[10px] font-extrabold uppercase">
+                                                ${m.nivel}
+                                            </span>
+                                            <h4 class="text-base font-extrabold text-white mt-2.5">${m.titulo}</h4>
+                                            <p class="text-xs text-gray-400 mt-1.5 leading-relaxed">${m.desc}</p>
+                                        </div>
+
+                                        <div class="space-y-2 pt-3 border-t border-surface-high">
+                                            <button type="button"
+                                                    onclick="window.MakaiDashboardUI.startSubjectExam('profesional', '${activeLang.nombre} • ${m.nivel}', 'tutor')"
+                                                    class="w-full py-2.5 rounded-xl bg-primary text-surface font-extrabold text-xs flex items-center justify-center gap-1.5">
+                                                <span class="material-symbols-outlined text-sm">quiz</span>
+                                                <span>Simulador Clínico (${m.nivel})</span>
+                                            </button>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <button type="button"
+                                                        onclick="window.MakaiDashboardUI.openSinapticoForSubject('Idioma Médico', '${activeLang.nombre} (${m.nivel})')"
+                                                        class="py-2 px-2 rounded-xl bg-surface-container border border-secondary/50 text-secondary hover:bg-secondary hover:text-surface font-extrabold text-[11px]">
+                                                    🧠 Vocabulario B2
+                                                </button>
+                                                <button type="button"
+                                                        onclick="window.MakaiDashboardUI.openMaterialsForSubject('medicina', '${activeLang.nombre}', 'Manual & Diálogos Clínicos ${m.nivel}')"
+                                                        class="py-2 px-2 rounded-xl bg-surface-container border border-warning/50 text-warning hover:bg-warning hover:text-surface font-extrabold text-[11px]">
+                                                    📚 Guías B2
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join("")}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // SUB-PESTAÑA 2: MODELOS DE PRUEBAS PSICOMÉTRICAS Y CONCURSOS HOSPITALARIOS
+                else if (uiState.profActiveTab === "psicometricas") {
+                    const psychometricDecks = [
+                        { titulo: "Razonamiento Abstracto, Espacial y Matrices Lógicas", codigo: "PSICO-01", desc: "Series visuales, analogías de figuras y matrices tipo Raven evaluadas en concursos del MSP, IESS y admisión a posgrados." },
+                        { titulo: "Razonamiento Numérico, Bioestadístico y Resolución de Problemas", codigo: "PSICO-02", desc: "Cálculo rápido de diluciones, tasas epidemiológicas, proporciones y series numéricas bajo presión de cronómetro." },
+                        { titulo: "Razonamiento Verbal, Comprensión Crítica y Analogías Médicas", codigo: "PSICO-03", desc: "Sinónimos, antónimos, inferencia lógica de textos científicos y precisión semántica." },
+                        { titulo: "Test de Personalidad Clínica, Ética y Toma de Decisiones bajo Estrés", codigo: "PSICO-04", desc: "Modelos de evaluación conductual, liderazgo en guardia, empatía clínica y manejo de conflictos hospitalarios." }
+                    ];
+
+                    contentHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            ${psychometricDecks.map(p => `
+                                <div class="bg-surface-container border border-surface-high hover:border-secondary rounded-2xl p-6 flex flex-col justify-between gap-4 transition-all">
+                                    <div>
+                                        <span class="px-2.5 py-1 rounded bg-secondary/15 text-secondary font-mono text-[10px] font-extrabold uppercase">
+                                            ${p.codigo} • EVALUACIÓN PSICOMÉTRICA OFICIAL
+                                        </span>
+                                        <h4 class="text-lg font-extrabold text-white mt-2.5">${p.titulo}</h4>
+                                        <p class="text-xs text-gray-400 mt-1.5 leading-relaxed">${p.desc}</p>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-3 border-t border-surface-high">
+                                        <button type="button"
+                                                onclick="window.MakaiDashboardUI.startSubjectExam('profesional', '${p.titulo}', 'tutor')"
+                                                class="py-2.5 px-3 rounded-xl bg-secondary text-surface font-extrabold text-xs flex items-center justify-center gap-1.5">
+                                            <span class="material-symbols-outlined text-sm">timer</span>
+                                            <span>Iniciar Test Psicométrico</span>
+                                        </button>
+                                        <button type="button"
+                                                onclick="window.MakaiDashboardUI.openMaterialsForSubject('medicina', 'Pruebas Psicométricas Profesionales', 'Guía Resuelta: ${p.titulo}')"
+                                                class="py-2.5 px-3 rounded-xl bg-surface border border-warning/60 text-warning hover:bg-warning hover:text-surface font-extrabold text-xs flex items-center justify-center gap-1.5">
+                                            <span class="material-symbols-outlined text-sm">menu_book</span>
+                                            <span>Modelos Resueltos PDF</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join("")}
+                        </div>
+                    `;
+                }
+
+                // SUB-PESTAÑA 3: GUÍAS DE ESTUDIO AMPLIADAS Y ESPECÍFICAS (POSGRADO / RESIDENCIA)
+                else if (uiState.profActiveTab === "especialidad") {
+                    const deepTopics = [
+                        { area: "Cuidados Intensivos & Guardia Hospitalaria", titulo: "Ventilación Mecánica Avanzada, Gasometría Ácido-Base y Uso de Vasopresores", nivel: "Alta Complejidad" },
+                        { area: "Cardiología & Electrocardiografía", titulo: "Interpretación Avanzada de ECG, Arritmias Complejas y Síndrome Coronario Agudo", nivel: "Alta Complejidad" },
+                        { area: "Infectología & Antibioticoterapia", titulo: "Programas de Optimización de Antimicrobianos (PROA) y Sepsis/Choque Séptico", nivel: "Alta Complejidad" },
+                        { area: "Emergencias Obstétricas & Perinatología", titulo: "Manejo Quirúrgico y Farmacológico de Hemorragia Postparto y Preeclampsia Grave", nivel: "Alta Complejidad" },
+                        { area: "Cirugía & Trauma Avanzado", titulo: "Manejo Integral del Politraumatizado (ATLS), Abdomen Agudo y Líquidos Perioperatorios", nivel: "Alta Complejidad" },
+                        { area: "Pediatría & Neonatología Hospitalaria", titulo: "Reanimación Neonatal Avanzada, Sepsis Neonatal y Emergencias Respiratorias", nivel: "Alta Complejidad" }
+                    ];
+
+                    contentHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${deepTopics.map(t => `
+                                <div class="bg-surface-container border border-surface-high hover:border-warning rounded-2xl p-5 flex flex-col justify-between gap-4 transition-all">
+                                    <div>
+                                        <span class="text-[10px] font-mono text-warning uppercase font-extrabold">${t.area}</span>
+                                        <h4 class="text-base font-extrabold text-white mt-1.5">${t.titulo}</h4>
+                                        <span class="inline-block mt-2 px-2 py-0.5 rounded bg-surface border border-surface-high text-[10px] font-mono text-primary">${t.nivel} • Tratado Ampliado</span>
+                                    </div>
+                                    <div class="space-y-2 pt-3 border-t border-surface-high">
+                                        <button type="button"
+                                                onclick="window.MakaiDashboardUI.openMaterialsForSubject('medicina', 'Posgrado y Alta Especialidad', '${t.titulo}')"
+                                                class="w-full py-2.5 rounded-xl bg-warning text-surface font-extrabold text-xs flex items-center justify-center gap-1.5">
+                                            <span class="material-symbols-outlined text-sm">menu_book</span>
+                                            <span>Abrir Tratado Ampliado 1D</span>
+                                        </button>
+                                        <button type="button"
+                                                onclick="window.MakaiDashboardUI.startSubjectExam('medicina', '${t.titulo}', 'critico')"
+                                                class="w-full py-2 rounded-xl bg-surface border border-primary/50 text-primary hover:bg-primary hover:text-surface font-extrabold text-xs">
+                                            Practicar Casos de Posgrado
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join("")}
+                        </div>
+                    `;
+                }
+
+                // SUB-PESTAÑA 4 (PLUS): HOMOLOGACIÓN DE TÍTULOS Y EXÁMENES INTERNACIONALES
+                else {
+                    const intlRoutes = [
+                        { pais: "🇪🇸 España (Examen MIR / Homologación Ministerio)", req: "Apostilla de La Haya, Equivalencia de Grado e Inscripción al Examen MIR.", idioma: "Español (Nativo)" },
+                        { pais: "🇩🇪 Alemania (Approbation / Fachsprachprüfung FSP)", req: "Certificado Alemán B2 + FSP Médico + Kenntnisprüfung (Equivalencia).", idioma: "Alemán B2 + FSP" },
+                        { pais: "🇺🇸 Estados Unidos (ECFMG / USMLE Step 1 & Step 2 CK)", req: "Certificación ECFMG, USMLE Step 1, Step 2 CK y OET Medicine (Inglés B2).", idioma: "Inglés Médico OET" },
+                        { pais: "🇮🇹 Italia & Unión Europea (Reconocimiento Ministero della Salute)", req: "Italiano Médico B2, Declaración de Valor y Concurso Nacional SSM.", idioma: "Italiano Médico B2" },
+                        { pais: "🇨🇱 Chile & Latinoamérica (Examen EUNACOM)", req: "Sección Teórica (ST-EUNACOM) y Sección Práctica para ejercicio médico en Chile.", idioma: "Español" }
+                    ];
+
+                    contentHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            ${intlRoutes.map(r => `
+                                <div class="bg-surface-container border border-primary/40 rounded-2xl p-5 flex flex-col justify-between gap-4">
+                                    <div>
+                                        <div class="flex items-center justify-between gap-2 mb-2">
+                                            <h4 class="text-base font-extrabold text-white">${r.pais}</h4>
+                                            <span class="px-2.5 py-0.5 rounded bg-primary/15 text-primary font-mono text-[10px] font-bold">${r.idioma}</span>
+                                        </div>
+                                        <p class="text-xs text-gray-300 leading-relaxed">${r.req}</p>
+                                    </div>
+                                    <div class="flex items-center gap-2.5 pt-3 border-t border-surface-high">
+                                        <button type="button"
+                                                onclick="window.MakaiDashboardUI.openMaterialsForSubject('medicina', 'Homologación Internacional', 'Guía Paso a Paso: ${r.pais}')"
+                                                class="flex-1 py-2.5 rounded-xl bg-primary text-surface font-extrabold text-xs">
+                                            Ver Requisitos y Apostillas
+                                        </button>
+                                        <button type="button"
+                                                onclick="window.MakaiDashboardUI.startSubjectExam('profesional', 'Simulacro Internacional: ${r.pais}', 'tutor')"
+                                                class="flex-1 py-2.5 rounded-xl bg-surface border border-secondary text-secondary hover:bg-secondary hover:text-surface font-extrabold text-xs">
+                                            Simulador Internacional
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join("")}
+                        </div>
+                    `;
+                }
+
+                root.innerHTML = `
+                    <!-- Barra de Pestañas Internas del Centro de Profesionales -->
+                    <div class="flex flex-wrap items-center gap-2.5 bg-surface-container border border-surface-high rounded-2xl p-3">
+                        ${tabs.map(t => `
+                            <button type="button"
+                                    onclick="window.MakaiDashboardUI.setProfessionalsTab('${t.id}')"
+                                    class="px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 border ${
+                                        uiState.profActiveTab === t.id
+                                            ? "bg-primary text-surface border-primary shadow-[0_0_15px_rgba(0,229,255,0.25)]"
+                                            : "bg-surface border-surface-high text-gray-300 hover:border-primary/50"
+                                    }">
+                                <span class="material-symbols-outlined text-base">${t.icon}</span>
+                                <span>${t.label}</span>
+                            </button>
+                        `).join("")}
+                    </div>
+
+                    ${contentHTML}
+                `;
+            }
+
+            // =================================================================
             // RENDERIZADO ENCADENADO DE LA SECCIÓN: CACES (4 CARRERAS OFICIALES)
             // =================================================================
             function renderCacesFlow() {
@@ -1247,7 +1884,6 @@
 
                 document.getElementById("makai-caces-dynamic-root")?.remove();
 
-                // PANTALLA 1 CACES: LAS 4 CARRERAS CONVOCADAS AL CACES
                 if (uiState.cacesStep === 1 || !uiState.selectedCacesCareer) {
                     if (title) title.textContent = "Examen Oficial CACES";
                     if (subtitle) subtitle.textContent = "Exclusivo para las 4 carreras convocadas al Examen de Habilitación para el Ejercicio Profesional.";
@@ -1282,7 +1918,6 @@
                     return;
                 }
 
-                // PANTALLA 2 CACES: MATERIAS (SIMULADOR + SINÁPTICO + MATERIALES DE ESTUDIO) + 4 NIVELES
                 const cacesObj = CACES_OFFICIAL_CAREERS.find(c => c.id === uiState.selectedCacesCareer) || CACES_OFFICIAL_CAREERS[0];
                 if (title) title.textContent = `CACES • ${cacesObj.nombre}`;
                 if (subtitle) subtitle.textContent = "Selecciona cualquier materia para desplegar su Simulador, Repetición Sináptica o Materiales de Estudio.";
@@ -1320,7 +1955,6 @@
                         </div>
                     </div>
 
-                    <!-- Desplegable de los 4 Niveles de Dificultad -->
                     <div class="${uiState.showCacesDifficultyLevels ? "block" : "hidden"} bg-surface-container border-2 border-primary/50 rounded-2xl p-5 space-y-4">
                         <div class="flex items-center justify-between">
                             <div>
@@ -1353,7 +1987,6 @@
                         </div>
                     </div>
 
-                    <!-- Lista de Materias Oficiales CACES (Despliegan las 3 Opciones) -->
                     <div class="space-y-3">
                         <h3 class="text-xs font-mono uppercase tracking-wider text-gray-400 font-bold">
                             Componentes Oficiales de ${cacesObj.nombre} (Haz clic en una materia para desplegar sus 3 opciones):
@@ -1374,7 +2007,6 @@
                                             </span>
                                         </div>
 
-                                        <!-- 3 Opciones Desplegables: Simulador + Sináptico + Materiales de Estudio -->
                                         <div class="${isExpanded ? "grid" : "hidden"} grid-cols-1 sm:grid-cols-3 gap-2.5 mt-4 pt-4 border-t border-surface-high">
                                             <button type="button"
                                                     onclick="window.MakaiDashboardUI.startSubjectExam('${cacesObj.id}', '${mat}', 'tutor')"
@@ -1404,7 +2036,7 @@
             }
 
             // =================================================================
-            // 4. CENTRO DE MATERIALES DE ESTUDIO Y VISOR CLÍNICO 1D POR MATERIA
+            // 5. CENTRO DE MATERIALES DE ESTUDIO Y VISOR CLÍNICO 1D
             // =================================================================
             function buildMaterialsCatalogForSubject(careerId, levelName, subjectName) {
                 return [
@@ -1418,9 +2050,9 @@
                         plan: "Básico",
                         resumen: `Compendio estructurado de ${subjectName} (${levelName}) con definiciones clave, tablas diagnósticas, criterios de severidad y perlas de examen.`,
                         contenidoLectura: [
-                            `1. OBJETIVO CLÍNICO DE ${subjectName.toUpperCase()}: Dominar los fundamentos morfofuncionales, diagnósticos y terapéuticos evaluados tanto en los exámenes universitarios de ${levelName} como en los estándares nacionales de habilitación profesional.`,
-                            `2. PUNTOS DE ALTA RENTABILIDAD: Todo caso clínico de ${subjectName} debe analizarse identificando primero signos de alarma, constantes vitales y el estándar de oro (Gold Standard) diagnóstico antes de elegir la conducta terapéutica.`,
-                            `3. PROTOCOLO DE ESTUDIO MAKAI ACADEMY: Revisa los esquemas diagnósticos de este documento, subraya las dosis o valores de referencia normales y posteriormente realiza 20 preguntas en el Simulador de Materia para consolidar tu memoria a largo plazo.`
+                            `1. OBJETIVO CLÍNICO DE ${subjectName.toUpperCase()}: Dominar los fundamentos morfofuncionales, diagnósticos y terapéuticos evaluados tanto en los exámenes de ${levelName} como en los estándares nacionales e internacionales.`,
+                            `2. PUNTOS DE ALTA RENTABILIDAD: Todo caso de ${subjectName} debe analizarse identificando primero signos de alarma, constantes vitales y el estándar de oro (Gold Standard) diagnóstico antes de elegir la conducta terapéutica.`,
+                            `3. PROTOCOLO DE ESTUDIO MAKAI ACADEMY: Revisa los esquemas diagnósticos de este documento, registra tus apuntes abajo y posteriormente realiza 20 preguntas en el Simulador para consolidar tu retención.`
                         ]
                     },
                     {
@@ -1433,8 +2065,7 @@
                         plan: "Básico",
                         resumen: `Árboles de decisión rápida, clasificación por escalas y esquemas visuales de alta retención para ${subjectName}.`,
                         contenidoLectura: [
-                            `ALGORITMO 1 — RUTA DE DECISIÓN EN ${subjectName.toUpperCase()}: Paso A: Identificación sindrómica e interrogatorio dirigido -> Paso B: Clasificación de riesgo y pruebas confirmatorias -> Paso C: Intervención escalonada según guías vigentes.`,
-                            `ALGORITMO 2 — DIAGNÓSTICO DIFERENCIAL: Comparación directa entre las patologías y conceptos más preguntados en ${levelName}, destacando los distractores clásicos de examen.`
+                            `ALGORITMO 1 — RUTA DE DECISIÓN EN ${subjectName.toUpperCase()}: Paso A: Identificación sindrómica e interrogatorio dirigido -> Paso B: Clasificación de riesgo y pruebas confirmatorias -> Paso C: Intervención escalonada según guías vigentes.`
                         ]
                     },
                     {
@@ -1447,8 +2078,7 @@
                         plan: "PRO",
                         resumen: `Explicación paso a paso de los mecanismos esenciales y resolución comentada de reactivos representativos de ${subjectName}.`,
                         contenidoLectura: [
-                            `SÍNTESIS MAGISTRAL DE LA CÁTEDRA: En esta cápsula de estudio revisamos los 10 conceptos indispensables de ${subjectName} que representan el 80% de las preguntas de evaluación en ${levelName}.`,
-                            `CONSEJO DEL ESPECIALISTA: Combina este resumen con el mazo de Repetición Espaciada Sináptico v4.4 para retener los valores de laboratorio y clasificaciones sin fatiga visual.`
+                            `SÍNTESIS MAGISTRAL DE LA CÁTEDRA: En esta cápsula de estudio revisamos los 10 conceptos indispensables de ${subjectName} que representan el 80% de las preguntas de evaluación en ${levelName}.`
                         ]
                     },
                     {
@@ -1506,7 +2136,6 @@
                     : null;
 
                 root.innerHTML = `
-                    <!-- BARRA DE NAVEGACIÓN Y ACCIONES RÁPIDAS DE LA MATERIA -->
                     <div class="bg-surface-container border border-surface-high rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
                         <div class="flex flex-wrap items-center gap-2">
                             <button type="button"
@@ -1539,7 +2168,6 @@
                         </button>
                     </div>
 
-                    <!-- PÍLDORAS DE FILTRO POR FORMATO MULTIMEDIA 1D -->
                     <div class="flex flex-wrap items-center gap-2">
                         ${[
                             { id: "all", label: "📚 Todos los Materiales" },
@@ -1560,7 +2188,6 @@
                         `).join("")}
                     </div>
 
-                    <!-- VISOR CLÍNICO 1D EN MODO OSCURO (SI HAY UN DOCUMENTO ABIERTO) -->
                     ${activeDoc ? `
                         <div class="bg-surface-container border-2 border-primary rounded-2xl p-6 space-y-5 shadow-[0_0_30px_rgba(0,229,255,0.12)]">
                             <div class="flex flex-wrap items-center justify-between gap-3 border-b border-surface-high pb-4">
@@ -1607,7 +2234,6 @@
                         </div>
                     ` : ""}
 
-                    <!-- TARJETAS DE MATERIALES DE LA ASIGNATURA -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         ${filteredItems.map(item => `
                             <div class="bg-surface-container border border-surface-high hover:border-warning/60 rounded-2xl p-5 flex flex-col justify-between gap-4 transition-all">
@@ -1655,6 +2281,10 @@
                     target.classList.add("active");
                 }
 
+                if (viewId === "view-professionals") {
+                    renderProfessionalsFlow();
+                }
+
                 const navHighlightTarget = viewId === "view-materials" ? "view-launcher" : viewId;
 
                 document.querySelectorAll(".nav-btn").forEach(btn => {
@@ -1671,7 +2301,7 @@
             }
 
             // =================================================================
-            // BANCO CLÍNICO LOCAL INMEDIATO PARA EL SIMULADOR DE MATERIAS
+            // BANCO DE REACTIVOS (CLÍNICOS, PSICOMÉTRICOS E IDIOMAS B2)
             // =================================================================
             function startSubjectExam(careerId, subjectName, mode = "tutor") {
                 openView("view-simulator");
@@ -1680,22 +2310,59 @@
                     contextEl.textContent = `${careerId.toUpperCase()} • ${subjectName} • Modo ${mode.toUpperCase()}`;
                 }
 
-                const casesPool = (window.makaiData && Array.isArray(window.makaiData.semillaCasos) && window.makaiData.semillaCasos.length > 0)
-                    ? window.makaiData.semillaCasos
-                    : [
+                const isPsychometric = subjectName.toLowerCase().includes("psicom") || subjectName.toLowerCase().includes("razonamiento") || subjectName.toLowerCase().includes("personalidad");
+                const isLanguage = subjectName.toLowerCase().includes("inglés") || subjectName.toLowerCase().includes("alemán") || subjectName.toLowerCase().includes("italiano");
+
+                let casesPool = [];
+
+                if (isPsychometric) {
+                    casesPool = [
                         {
-                            enunciado: `Paciente acude a evaluación clínica correspondiente al área de ${subjectName}. Presenta signos vitales con TA 162/108 mmHg, FC 104 lpm y clínica aguda. Según las Guías de Práctica Clínica (GPC-MSP), ¿cuál es la conducta diagnóstica y terapéutica prioritaria?`,
-                            dificultad: "Media",
+                            enunciado: `[PRUEBA PSICOMÉTRICA HOSPITALARIA • ${subjectName}] En una guardia de urgencias ingresan 4 pacientes simultáneamente y una solución debe diluirse en proporción 1:4 a partir de una ampolla de 200 mg en 10 ml. Si la serie lógica de triaje asigna prioridad exponencial (2, 6, 18, 54...), ¿cuál es el siguiente valor de la secuencia y cuántos mg hay por cada ml tras diluir?`,
+                            dificultad: "Alta",
                             opciones: {
-                                A: "Estabilización hemodinámica inicial, monitorización multiparámetro y aplicación del protocolo GPC-MSP específico",
-                                B: "Alta domiciliaria con control por consulta externa en 7 días",
-                                C: "Conducta expectante sin solicitar exámenes complementarios",
-                                D: "Uso de antibioticoterapia empírica sin foco infeccioso demostrado"
+                                A: "Siguiente valor: 162 • Concentración diluida: 5 mg/ml",
+                                B: "Siguiente valor: 108 • Concentración diluida: 10 mg/ml",
+                                C: "Siguiente valor: 162 • Concentración diluida: 20 mg/ml",
+                                D: "Siguiente valor: 144 • Concentración diluida: 4 mg/ml"
                             },
                             respuestaCorrecta: "A",
-                            racional: "Los protocolos del MSP y la matriz de evaluación CACES priorizan siempre la estabilización inicial y la aplicación secuencial de la Guía de Práctica Clínica vigente."
+                            racional: "La serie geométrica multiplica por 3 cada término (54 × 3 = 162). Al diluir 200 mg en un volumen total de 40 ml (proporción 1:4), quedan 200 mg / 40 ml = 5 mg/ml."
                         }
                     ];
+                } else if (isLanguage) {
+                    casesPool = [
+                        {
+                            enunciado: `[MEDICAL LANGUAGE B2 • ${subjectName}] During the clinical history taking (Anamnesis / Arzt-Patienten-Gespräch), a 58-year-old patient reports sudden shortness of breath (Dyspnea / Atemnot / Dispnea) and crushing chest pain radiating to the left arm. Which of the following expressions is the most accurate B2-level clinical communication to ask about pain onset and precipitating factors?`,
+                            dificultad: "Nivel B2",
+                            opciones: {
+                                A: "When exactly did the pain start, and were you exerting yourself when it came on? / Wann genau haben die Schmerzen angefangen?",
+                                B: "Why you have pain in chest now?",
+                                C: "Take this pill and go home tomorrow.",
+                                D: "Your heart is broken since yesterday."
+                            },
+                            respuestaCorrecta: "A",
+                            racional: "En las certificaciones médicas B2 (OET, FSP Alemania y SSM Italia), se evalúa el uso de preguntas abiertas y precisas con registro formal-empático (indagando inicio exacto y desencadenantes al esfuerzo)."
+                        }
+                    ];
+                } else {
+                    casesPool = (window.makaiData && Array.isArray(window.makaiData.semillaCasos) && window.makaiData.semillaCasos.length > 0)
+                        ? window.makaiData.semillaCasos
+                        : [
+                            {
+                                enunciado: `Paciente acude a evaluación clínica correspondiente al área de ${subjectName}. Presenta signos vitales con TA 162/108 mmHg, FC 104 lpm y clínica aguda. Según las Guías de Práctica Clínica (GPC-MSP), ¿cuál es la conducta diagnóstica y terapéutica prioritaria?`,
+                                dificultad: "Media",
+                                opciones: {
+                                    A: "Estabilización hemodinámica inicial, monitorización multiparámetro y aplicación del protocolo GPC-MSP específico",
+                                    B: "Alta domiciliaria con control por consulta externa en 7 días",
+                                    C: "Conducta expectante sin solicitar exámenes complementarios",
+                                    D: "Uso de antibioticoterapia empírica sin foco infeccioso demostrado"
+                                },
+                                respuestaCorrecta: "A",
+                                racional: "Los protocolos del MSP y la matriz de evaluación CACES priorizan siempre la estabilización inicial y la aplicación secuencial de la Guía de Práctica Clínica vigente."
+                            }
+                        ];
+                }
 
                 let currentIndex = 0;
 
@@ -1751,7 +2418,7 @@
             }
 
             // =================================================================
-            // REPRODUCTOR GENERATIVO DE AUDIO CC0 (WEB AUDIO API + MP3 LOCAL)
+            // REPRODUCTOR GENERATIVO DE AUDIO CC0
             // =================================================================
             let audioCtx = null;
             let oscNode = null;
@@ -1803,6 +2470,7 @@
             // Exponer funciones de interfaz en window.MakaiDashboardUI
             window.MakaiDashboardUI = {
                 openView,
+                toggleSidebar,
                 selectUnivCareer(id) {
                     uiState.selectedUnivCareer = id;
                     uiState.carreraStep = 2;
@@ -1843,6 +2511,38 @@
                     uiState.showCacesDifficultyLevels = !uiState.showCacesDifficultyLevels;
                     renderCacesFlow();
                 },
+                setProfessionalsTab(tabId) {
+                    uiState.profActiveTab = tabId;
+                    renderProfessionalsFlow();
+                },
+                selectMedicalLanguage(langId) {
+                    uiState.selectedLang = langId;
+                    renderProfessionalsFlow();
+                },
+                openThesisModal(tutorName) {
+                    uiState.selectedThesisTutor = tutorName;
+                    const titleEl = document.getElementById("modal-thesis-tutor-name");
+                    if (titleEl) titleEl.textContent = tutorName;
+                    const modal = document.getElementById("thesis-booking-modal");
+                    modal?.classList.remove("hidden");
+                    modal?.classList.add("flex");
+                },
+                closeThesisModal() {
+                    const modal = document.getElementById("thesis-booking-modal");
+                    modal?.classList.add("hidden");
+                    modal?.classList.remove("flex");
+                },
+                submitThesisRequest() {
+                    const topic = document.getElementById("thesis-topic-input")?.value || "Por definir con el tutor";
+                    const univ = document.getElementById("thesis-univ-input")?.value || "Universidad";
+                    const wsp = document.getElementById("thesis-whatsapp-input")?.value || "";
+                    if (!wsp.trim()) {
+                        alert("Por favor ingresa tu número de WhatsApp para coordinar la sesión 1 a 1 con el tutor.");
+                        return;
+                    }
+                    window.MakaiDashboardUI.closeThesisModal();
+                    alert(`✅ Solicitud de Tesis 1 a 1 registrada.\n\nTutor: ${uiState.selectedThesisTutor}\nTema: ${topic}\nUniversidad: ${univ}\nTasa de vinculación Makai Academy: $10.00 USD.\n\nEl Administrador Maestro habilitará tu contacto directo 1 a 1.`);
+                },
                 startSubjectExam,
                 openSinapticoForSubject,
                 openMaterialsForSubject,
@@ -1876,8 +2576,10 @@
 
             document.addEventListener("DOMContentLoaded", () => {
                 initBrandLogoResolver();
+                restoreSidebarPreference();
                 renderCarreraFlow();
                 renderCacesFlow();
+                renderProfessionalsFlow();
 
                 document.querySelectorAll(".nav-btn").forEach(btn => {
                     btn.addEventListener("click", () => {
