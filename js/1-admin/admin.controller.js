@@ -1,8 +1,8 @@
 // ============================================================================
 // ARCHIVO: js/1-admin/admin.controller.js
-// DESCRIPCIÓN: Controlador Maestro del Panel de Administración. Verifica
-//              permisos, gestiona KPIs de Firestore, coordina sub-pestañas y
-//              orquesta los 6 subcomponentes de la carpeta js/1-admin/.
+// DESCRIPCIÓN: Controlador Maestro del Panel de Administración (Blindado con
+//              carga dinámica anticaídas). Gestiona KPIs, sub-pestañas y los
+//              6 subcomponentes de js/1-admin/ (incluyendo Tutores y Tesis).
 // PROYECTO: MakaiAcademy (Proyecto ALICIZATION)
 // ============================================================================
 
@@ -11,6 +11,9 @@ import {
     auth,
     collection,
     getDocs,
+    updateDoc,
+    setDoc,
+    doc,
     COLLECTIONS
 } from "../2-core/firebase.service.js";
 
@@ -20,19 +23,19 @@ import {
     isMasterAdmin
 } from "../2-core/state.store.js";
 
-// Importación por espacio de nombres (sin duplicados)
-import * as AdminBackups from "./admin.backups.js";
-import * as AdminPayments from "./admin.payments.js";
-import * as AdminQuestions from "./admin.questions.js";
-import * as AdminSinaptico from "./admin.sinaptico.js";
-import * as AdminMaterials from "./admin.materials.js";
-import * as AdminTutors from "./admin.tutors.js";
+// Referencias en memoria a los submódulos cargados dinámicamente
+const loadedSubmodules = {
+    backups: null,
+    payments: null,
+    questions: null,
+    sinaptico: null,
+    materials: null,
+    tutors: null
+};
 
-// Control de estado interno del panel administrativo
 let adminControllerInitialized = false;
 let currentAdminSubTab = "all";
 
-// Diccionario de nombres de colecciones con respaldo seguro
 const SAFE_COLLECTIONS = {
     USERS: COLLECTIONS?.USERS || "usuarios",
     PAYMENTS: COLLECTIONS?.PAYMENTS || "solicitudes_pago",
@@ -42,28 +45,39 @@ const SAFE_COLLECTIONS = {
 };
 
 // ============================================================================
-// 1. VALIDACIÓN DE SEGURIDAD Y ACCESOS MAESTROS
+// 1. VALIDACIÓN DE SEGURIDAD Y CONTENEDOR GARANTIZADO (#view-admin)
 // ============================================================================
 
-/**
- * Verifica si la sesión actual pertenece a uno de los Administradores Maestros
- * (anthonnyvelastegui@gmail.com | aavemakaihc@gmail.com).
- * @returns {boolean}
- */
 export function verifyAdminPermissions() {
     const activeEmail =
         auth.currentUser?.email ||
-        appState.currentUser?.email ||
-        appState.currentUserData?.email ||
+        appState?.currentUser?.email ||
+        appState?.currentUserData?.email ||
+        window.makaiCurrentUser?.email ||
         "";
 
     return isMasterAdmin(activeEmail);
 }
 
 /**
- * Muestra u oculta los botones de acceso al Panel Admin en la barra lateral
- * y en la cabecera superior de dashboard.html según los permisos del usuario.
+ * Garantiza que exista el contenedor #view-admin dentro del área principal de dashboard.html
  */
+function ensureAdminViewContainer() {
+    let adminView = document.getElementById("view-admin");
+    if (adminView) return adminView;
+
+    const mainContainer =
+        document.getElementById("views-container") ||
+        document.querySelector("main") ||
+        document.body;
+
+    adminView = document.createElement("div");
+    adminView.id = "view-admin";
+    adminView.className = "tab-content hidden max-w-6xl mx-auto p-6";
+    mainContainer.appendChild(adminView);
+    return adminView;
+}
+
 export function syncAdminNavigationVisibility() {
     const isAuthorized = verifyAdminPermissions();
     const sideNavBtn = document.getElementById("admin-nav-btn");
@@ -76,86 +90,125 @@ export function syncAdminNavigationVisibility() {
     } else {
         sideNavBtn?.classList.add("hidden");
         headerBtn?.classList.add("hidden");
-        if (adminView && !adminView.classList.contains("hidden")) {
+        if (adminView) {
             adminView.classList.add("hidden");
             adminView.classList.remove("active");
+            adminView.style.display = "none";
         }
     }
 }
 
 // ============================================================================
-// 2. INICIALIZADOR PRINCIPAL DEL CONTROLADOR DE ADMINISTRACIÓN
+// 2. INICIALIZADOR PRINCIPAL CON CARGA DINÁMICA ANTICAÍDAS
 // ============================================================================
 
-/**
- * Inicializa el Panel de Administración completo, inyecta la barra de mando,
- * enlaza las sub-pestañas y despierta los subcomponentes de js/1-admin/.
- */
+async function safeImportSubmodule(relativePath) {
+    try {
+        return await import(relativePath);
+    } catch (err) {
+        console.warn(`[AdminController] Aviso al importar ${relativePath}:`, err.message || err);
+        return null;
+    }
+}
+
 export async function initAdmin() {
     syncAdminNavigationVisibility();
+    bindHeaderAdminShortcut();
 
     if (!verifyAdminPermissions()) {
         return;
     }
 
-    const adminView = document.getElementById("view-admin");
+    const adminView = ensureAdminViewContainer();
     if (!adminView) return;
 
-    // 1. Renderizar la Cabecera de Mando, KPIs y Selector de Sub-Pestañas
+    // 1. Renderizar la Cabecera de Mando, KPIs y Selector de 6 Sub-Pestañas
     renderAdminCommandHeader();
 
-    // 2. Inicializar los subcomponentes modulares de js/1-admin/
-    initSubmodulesSafely();
+    // 2. Inicializar los 6 subcomponentes de forma aislada (si uno falla, los demás cargan igual)
+    await initSubmodulesSafely();
 
-    // 3. Enlazar accesos rápidos desde la cabecera y barra lateral de dashboard.html
-    bindHeaderAdminShortcut();
-
-    // 4. Cargar métricas globales de las 5 colecciones en tiempo real
+    // 3. Cargar métricas globales de Firestore
     await refreshAdminKPIs();
 
     adminControllerInitialized = true;
 }
 
-// Alias exportado para máxima compatibilidad con app.orchestrator.js
 export const initAdminController = initAdmin;
 
-/**
- * Ejecuta de forma segura los inicializadores de cada subcomponente de js/1-admin/
- * verificando primero que la función exista en el módulo importado.
- */
-function initSubmodulesSafely() {
-    // 1. Bóveda de Respaldos (.JSON y .CSV Excel) -> admin.backups.js
-    if (typeof AdminBackups.initAdminBackups === "function") {
-        AdminBackups.initAdminBackups();
-    }
+async function initSubmodulesSafely() {
+    const [
+        backupsMod,
+        paymentsMod,
+        questionsMod,
+        sinapticoMod,
+        materialsMod,
+        tutorsMod
+    ] = await Promise.all([
+        safeImportSubmodule("./admin.backups.js"),
+        safeImportSubmodule("./admin.payments.js"),
+        safeImportSubmodule("./admin.questions.js"),
+        safeImportSubmodule("./admin.sinaptico.js"),
+        safeImportSubmodule("./admin.materials.js"),
+        safeImportSubmodule("./admin.tutors.js")
+    ]);
 
-    // 2. Bandeja de Verificación de Pagos -> admin.payments.js
-    if (typeof AdminPayments.initAdminPayments === "function") {
-        AdminPayments.initAdminPayments();
-    } else if (typeof AdminPayments.loadPaymentRequests === "function") {
-        AdminPayments.loadPaymentRequests();
-    }
+    loadedSubmodules.backups = backupsMod;
+    loadedSubmodules.payments = paymentsMod;
+    loadedSubmodules.questions = questionsMod;
+    loadedSubmodules.sinaptico = sinapticoMod;
+    loadedSubmodules.materials = materialsMod;
+    loadedSubmodules.tutors = tutorsMod;
 
-    // 3. Gestor de Reactivos CACES y Carreras -> admin.questions.js
-    if (typeof AdminQuestions.initAdminQuestions === "function") {
-        AdminQuestions.initAdminQuestions();
-    } else {
-        initLegacyQuestionsFallback();
-    }
+    // 1. Bóveda de Respaldos
+    try {
+        if (typeof backupsMod?.initAdminBackups === "function") {
+            backupsMod.initAdminBackups();
+        }
+    } catch (e) { console.warn("Error en admin.backups:", e); }
 
-    // 4. Gestor de Tarjetas Sináptico v4.4 -> admin.sinaptico.js
-    if (typeof AdminSinaptico.initAdminSinaptico === "function") {
-        AdminSinaptico.initAdminSinaptico();
-    }
+    // 2. Bandeja de Pagos
+    try {
+        if (typeof paymentsMod?.initAdminPayments === "function") {
+            paymentsMod.initAdminPayments();
+        } else if (typeof paymentsMod?.loadPaymentRequests === "function") {
+            paymentsMod.loadPaymentRequests();
+        }
+    } catch (e) { console.warn("Error en admin.payments:", e); }
 
-    // 5. Gestor de Materiales y Guías PDF -> admin.materials.js
-    if (typeof AdminMaterials.initAdminMaterials === "function") {
-        AdminMaterials.initAdminMaterials();
-    }
+    // 3. Gestor de Reactivos CACES / Carreras
+    try {
+        if (typeof questionsMod?.initAdminQuestions === "function") {
+            questionsMod.initAdminQuestions();
+        } else {
+            initLegacyQuestionsFallback();
+        }
+    } catch (e) { console.warn("Error en admin.questions:", e); }
 
-    // 6. Reclutamiento de Tutores y Comisiones Tesis ($10) -> admin.tutors.js
-    if (typeof AdminTutors.initAdminTutors === "function") {
-        AdminTutors.initAdminTutors();
+    // 4. Gestor de Tarjetas Sináptico v4.4
+    try {
+        if (typeof sinapticoMod?.initAdminSinaptico === "function") {
+            sinapticoMod.initAdminSinaptico();
+        }
+    } catch (e) { console.warn("Error en admin.sinaptico:", e); }
+
+    // 5. Gestor de Materiales y PDFs
+    try {
+        if (typeof materialsMod?.initAdminMaterials === "function") {
+            materialsMod.initAdminMaterials();
+        }
+    } catch (e) { console.warn("Error en admin.materials:", e); }
+
+    // 6. Reclutamiento de Tutores y Comisiones Tesis ($10)
+    try {
+        if (typeof tutorsMod?.initAdminTutors === "function") {
+            tutorsMod.initAdminTutors();
+        }
+    } catch (e) { console.warn("Error en admin.tutors:", e); }
+
+    // Si por caché o ruta no se inyectó #admin-tutors-section, activar respaldo integrado
+    if (!document.getElementById("admin-tutors-section")) {
+        initAdminTutorsFallback();
     }
 }
 
@@ -163,17 +216,13 @@ function initSubmodulesSafely() {
 // 3. CABECERA TÁCTICA, KPIS EN TIEMPO REAL Y NAVEGACIÓN DE SUB-PESTAÑAS
 // ============================================================================
 
-/**
- * Inyecta el centro de comando con indicadores KPI y pestañas de filtrado
- * en la parte superior de #view-admin.
- */
 function renderAdminCommandHeader() {
-    const adminView = document.getElementById("view-admin");
+    const adminView = ensureAdminViewContainer();
     if (!adminView || document.getElementById("admin-command-center")) return;
 
     const activeEmail =
         auth.currentUser?.email ||
-        appState.currentUserData?.email ||
+        appState?.currentUserData?.email ||
         MASTER_ADMINS[0];
 
     const commandCenter = document.createElement("div");
@@ -181,14 +230,13 @@ function renderAdminCommandHeader() {
     commandCenter.className = "mb-8 space-y-5";
 
     commandCenter.innerHTML = `
-        <!-- BARRA SUPERIOR DE ESTADO DEL ADMINISTRADOR -->
         <div class="bg-surface-container border border-primary/40 rounded-2xl p-5 shadow-[0_0_25px_rgba(0,229,255,0.08)]">
             <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-surface-high">
                 <div>
                     <div class="flex items-center gap-2">
                         <span class="inline-block w-2.5 h-2.5 rounded-full bg-secondary animate-pulse"></span>
                         <span class="text-[11px] font-mono text-primary uppercase tracking-widest font-bold">
-                            Centro de Comando ALICIZATION • Arquitectura Modular 8D
+                            Centro de Comando ALICIZATION • Arquitectura Modular
                         </span>
                     </div>
                     <h2 class="text-2xl font-extrabold text-white mt-1 flex items-center gap-2">
@@ -208,7 +256,6 @@ function renderAdminCommandHeader() {
                 </div>
             </div>
 
-            <!-- TARJETAS DE MÉTRICAS GLOBALES (5 COLECCIONES OFICIALES) -->
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-4">
                 <div class="bg-surface border border-surface-high rounded-xl p-3.5">
                     <span class="text-[10px] font-mono text-gray-400 uppercase block">Alumnos Registrados</span>
@@ -241,7 +288,6 @@ function renderAdminCommandHeader() {
                 </div>
             </div>
 
-            <!-- NAVEGACIÓN DE SUB-PESTAÑAS DEL PANEL ADMIN -->
             <div class="flex flex-wrap items-center gap-2 mt-5 pt-4 border-t border-surface-high" id="admin-subtabs-bar">
                 <button type="button" data-admin-tab="all" class="admin-subtab-btn px-3.5 py-2 rounded-xl text-xs font-extrabold bg-primary text-surface transition-all flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-sm">dashboard</span>
@@ -275,31 +321,22 @@ function renderAdminCommandHeader() {
         </div>
     `;
 
-    // Insertar al principio de #view-admin
     adminView.insertBefore(commandCenter, adminView.firstChild);
 
-    // Enlazar botón de sincronización general
-    const refreshBtn = document.getElementById("btn-admin-refresh-all");
-    refreshBtn?.addEventListener("click", async () => {
+    document.getElementById("btn-admin-refresh-all")?.addEventListener("click", async () => {
         await refreshAdminKPIs();
-        if (typeof AdminPayments.loadPaymentRequests === "function") {
-            await AdminPayments.loadPaymentRequests();
+        if (typeof loadedSubmodules.payments?.loadPaymentRequests === "function") {
+            await loadedSubmodules.payments.loadPaymentRequests();
         }
     });
 
-    // Enlazar botones de sub-pestañas
-    const tabBtns = commandCenter.querySelectorAll(".admin-subtab-btn");
-    tabBtns.forEach(btn => {
+    commandCenter.querySelectorAll(".admin-subtab-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             switchAdminSubTab(btn.dataset.adminTab);
         });
     });
 }
 
-/**
- * Consulta en paralelo las 5 colecciones oficiales de Firestore para actualizar
- * los indicadores numéricos de la cabecera del Administrador.
- */
 export async function refreshAdminKPIs() {
     if (!verifyAdminPermissions()) return;
 
@@ -351,16 +388,10 @@ export async function refreshAdminKPIs() {
     }
 }
 
-/**
- * Filtra visualmente las secciones dentro de #view-admin según la sub-pestaña elegida.
- * @param {string} tabId - "all" | "respaldos" | "pagos" | "reactivos" | "sinaptico" | "materiales" | "docentes"
- */
 export function switchAdminSubTab(tabId = "all") {
     currentAdminSubTab = tabId;
 
-    // 1. Actualizar estado visual de los botones de sub-pestaña
-    const tabBtns = document.querySelectorAll(".admin-subtab-btn");
-    tabBtns.forEach(btn => {
+    document.querySelectorAll(".admin-subtab-btn").forEach(btn => {
         if (btn.dataset.adminTab === tabId) {
             btn.className = "admin-subtab-btn px-3.5 py-2 rounded-xl text-xs font-extrabold bg-primary text-surface transition-all flex items-center gap-1.5 shadow-[0_0_12px_rgba(0,229,255,0.25)]";
         } else {
@@ -368,7 +399,6 @@ export function switchAdminSubTab(tabId = "all") {
         }
     });
 
-    // 2. Identificar contenedores de cada subcomponente dentro de #view-admin
     const sectionMap = {
         respaldos: document.getElementById("admin-backup-vault"),
         pagos: document.getElementById("admin-payments-section") || document.getElementById("admin-payments-inbox"),
@@ -389,32 +419,40 @@ export function switchAdminSubTab(tabId = "all") {
 }
 
 // ============================================================================
-// 4. ENLACES DE NAVEGACIÓN Y RESPALDO DE FORMULARIO DE REACTIVOS
+// 4. APERTURA FORZADA DE #view-admin Y RESPALDO INTEGRADO DE TUTORES
 // ============================================================================
 
-/**
- * Conecta los botones #header-admin-btn y #admin-nav-btn para que abran
- * directamente #view-admin y refresquen las métricas del panel.
- */
 function bindHeaderAdminShortcut() {
     const headerAdminBtn = document.getElementById("header-admin-btn");
     const sideAdminBtn = document.getElementById("admin-nav-btn");
 
-    const openAdminPanel = () => {
+    const openAdminPanel = async (e) => {
         if (!verifyAdminPermissions()) return;
+        if (e) e.stopPropagation();
 
-        document.querySelectorAll(".tab-content").forEach(el => {
-            el.classList.remove("active");
-            el.classList.add("hidden");
-        });
+        const adminView = ensureAdminViewContainer();
 
-        const adminView = document.getElementById("view-admin");
-        if (adminView) {
-            adminView.classList.remove("hidden");
-            adminView.classList.add("active");
+        // Si aún no se había renderizado la cabecera de mando, inicializar ahora mismo
+        if (!document.getElementById("admin-command-center")) {
+            renderAdminCommandHeader();
+            await initSubmodulesSafely();
         }
 
-        appState.currentActiveView = "view-admin";
+        // Ocultar todas las demás vistas del área principal
+        document.querySelectorAll(".tab-content, .view-section, main > div[id^='view-'], #views-container > div[id^='view-']").forEach(el => {
+            if (el.id !== "view-admin") {
+                el.classList.remove("active");
+                el.classList.add("hidden");
+                el.style.display = "none";
+            }
+        });
+
+        // Forzar visibilidad de #view-admin
+        adminView.classList.remove("hidden");
+        adminView.classList.add("active");
+        adminView.style.display = "block";
+
+        if (appState) appState.currentActiveView = "view-admin";
         refreshAdminKPIs();
     };
 
@@ -427,12 +465,70 @@ function bindHeaderAdminShortcut() {
         sideAdminBtn.dataset.adminBound = "1";
         sideAdminBtn.addEventListener("click", openAdminPanel);
     }
+
+    // Al pulsar cualquier otro botón del menú lateral, restaurar visibilidad normal y ocultar #view-admin
+    document.querySelectorAll(".nav-btn, aside button").forEach(btn => {
+        if (btn.id === "admin-nav-btn" || btn.id === "btn-logout" || btn.dataset.adminLeaveBound) return;
+        btn.dataset.adminLeaveBound = "1";
+        btn.addEventListener("click", () => {
+            const adminView = document.getElementById("view-admin");
+            if (adminView) {
+                adminView.classList.add("hidden");
+                adminView.classList.remove("active");
+                adminView.style.display = "none";
+            }
+            document.querySelectorAll(".tab-content, .view-section, main > div[id^='view-'], #views-container > div[id^='view-']").forEach(el => {
+                if (el.id !== "view-admin") {
+                    el.style.display = "";
+                }
+            });
+        });
+    });
 }
 
-/**
- * Mantiene operativo el selector de carreras/materias en #admin-form en caso de que
- * admin.questions.js aún sea un archivo semilla vacío durante la migración.
- */
+function initAdminTutorsFallback() {
+    const adminView = ensureAdminViewContainer();
+    if (!adminView || document.getElementById("admin-tutors-section")) return;
+
+    const tutorsSection = document.createElement("div");
+    tutorsSection.id = "admin-tutors-section";
+    tutorsSection.className = "mb-10 space-y-6";
+
+    tutorsSection.innerHTML = `
+        <div class="bg-surface-container border-2 border-secondary/50 rounded-2xl p-6 shadow-2xl">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-4 pb-3 border-b border-surface-high">
+                <div>
+                    <h3 class="text-xl font-extrabold text-secondary flex items-center gap-2">
+                        <span class="material-symbols-outlined">school</span>
+                        6. Reclutamiento y Postulaciones de Docentes
+                    </h3>
+                    <p class="text-xs text-gray-400 mt-1">Activa a los candidatos como "Tutores Verificados de Tesis" o "Docentes de Aulas Virtuales".</p>
+                </div>
+                <button type="button" id="btn-refresh-tutors" class="px-4 py-2 bg-surface border border-secondary text-secondary hover:bg-secondary hover:text-surface text-xs font-extrabold rounded-xl transition-all">
+                    ↻ Actualizar Solicitudes
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left text-gray-300 font-mono">
+                    <thead class="text-[11px] text-gray-400 uppercase bg-surface border-b border-surface-high">
+                        <tr>
+                            <th class="px-4 py-3">Fecha / Candidato</th>
+                            <th class="px-4 py-3">Especialidad / Título</th>
+                            <th class="px-4 py-3">Contacto</th>
+                            <th class="px-4 py-3">Estado</th>
+                            <th class="px-4 py-3">Acciones de Activación</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-tutors-tbody">
+                        <tr><td colspan="5" class="px-4 py-6 text-center text-gray-500">Sin postulaciones pendientes.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    adminView.appendChild(tutorsSection);
+}
+
 function initLegacyQuestionsFallback() {
     const adminCarrera = document.getElementById("admin-carrera");
     const adminMateria = document.getElementById("admin-materia");
