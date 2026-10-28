@@ -27,6 +27,8 @@ import * as AdminPayments from "./admin.payments.js";
 import * as AdminQuestions from "./admin.questions.js";
 import * as AdminSinaptico from "./admin.sinaptico.js";
 import * as AdminMaterials from "./admin.materials.js";
+import * as AdminMaterials from "./admin.materials.js";
+import * as AdminTutors from "./admin.tutors.js"; // <-- NUEVA IMPORTACIÓN
 
 // Control de estado interno del panel administrativo
 let adminControllerInitialized = false;
