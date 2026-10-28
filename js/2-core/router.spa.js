@@ -2,8 +2,8 @@
 // ARCHIVO: js/2-core/router.spa.js
 // PROYECTO: MakaiAcademy (Proyecto ALICIZATION)
 // RESPONSABILIDAD: Subcomponente de Navegación SPA, Conmutador de Vistas
-//                  (switchView) y Despliegue Curricular Encadenado para las
-//                  vistas independientes de CARRERA (11 Áreas) y CACES (4 Oficiales).
+//                  (switchView), Control de Historial (Botón Atrás sin salir
+//                  de dashboard.html) y Despliegue Curricular Encadenado.
 // ============================================================================
 
 import * as StateStore from "./state.store.js";
@@ -418,6 +418,9 @@ const EXAM_MODES = [
 
 // Estado reactivo interno del Router SPA
 let routerInitialized = false;
+let isHandlingPopState = false;
+let lastDetectedDomStep = 1;
+
 let routerState = {
     activeView: SPA_VIEWS.CARRERA,
     academicTrack: "carrera", // "carrera" (11 áreas) | "caces" (4 oficiales)
@@ -431,6 +434,274 @@ let routerState = {
     selectedMode: "tutor",
     viewHistory: []
 };
+
+// ============================================================================
+// CONTROLADOR DEL HISTORIAL DEL NAVEGADOR (EVITA SALIR A INDEX.HTML)
+// ============================================================================
+
+/**
+ * Detecta en qué paso (1, 2 o 3) se encuentra actualmente la interfaz de CARRERA
+ * leyendo los botones de retroceso o el encabezado "PASO X DE 3" en el DOM.
+ */
+function detectCurrentDomStep() {
+    const container = findCarreraViewContainer();
+    if (!container || container.classList.contains("hidden")) {
+        return routerState.carreraStep || 1;
+    }
+
+    // Buscar botones visibles de retroceso en el DOM de dashboard.html
+    const buttons = container.querySelectorAll("button, a");
+    for (const btn of buttons) {
+        if (btn.offsetParent === null) continue; // Ignorar elementos ocultos
+        const txt = (btn.textContent || "").trim();
+        if (txt.includes("Cambiar Nivel")) return 3;
+    }
+    for (const btn of buttons) {
+        if (btn.offsetParent === null) continue;
+        const txt = (btn.textContent || "").trim();
+        if (txt.includes("Cambiar de Carrera")) return 2;
+    }
+
+    // Respaldo: leer el badge "PASO X DE 3"
+    const textContent = container.textContent || "";
+    if (textContent.includes("PASO 3 DE 3")) return 3;
+    if (textContent.includes("PASO 2 DE 3")) return 2;
+    if (textContent.includes("PASO 1 DE 3")) return 1;
+
+    return routerState.carreraStep || 1;
+}
+
+/**
+ * Busca y hace clic automáticamente en el botón interno de retroceso de Carrera
+ * ("← Cambiar Nivel" cuando está en Paso 3, o "← Cambiar de Carrera" en Paso 2).
+ */
+function triggerInternalStepBack(targetStep) {
+    const container = findCarreraViewContainer();
+    if (!container) return false;
+
+    const buttons = Array.from(container.querySelectorAll("button, a")).filter(
+        el => el.offsetParent !== null
+    );
+
+    if (targetStep === 2) {
+        const backToLevelBtn = buttons.find(el =>
+            (el.textContent || "").includes("Cambiar Nivel")
+        );
+        if (backToLevelBtn) {
+            backToLevelBtn.click();
+            return true;
+        }
+    }
+
+    if (targetStep === 1) {
+        const backToCareerBtn = buttons.find(el =>
+            (el.textContent || "").includes("Cambiar de Carrera")
+        );
+        if (backToCareerBtn) {
+            backToCareerBtn.click();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Registra un nuevo estado en el historial del navegador (pushState)
+ * para que la flecha "Atrás" retroceda un paso a la vez sin salir de dashboard.html.
+ */
+export function pushSpaHistoryState(customData = {}) {
+    if (isHandlingPopState || !window.history?.pushState) return;
+
+    const currentState = window.history.state || {};
+    const nextState = {
+        makaiSpa: true,
+        makaiRootGuard: false,
+        viewId: customData.viewId || routerState.activeView || SPA_VIEWS.CARRERA,
+        carreraStep: customData.carreraStep || routerState.carreraStep || 1,
+        career: customData.career || routerState.selectedCareer,
+        stage: customData.stage || routerState.selectedStage
+    };
+
+    // Evitar empujar dos estados idénticos seguidos
+    if (
+        currentState.viewId === nextState.viewId &&
+        currentState.carreraStep === nextState.carreraStep &&
+        currentState.career === nextState.career &&
+        currentState.stage === nextState.stage &&
+        !currentState.makaiRootGuard
+    ) {
+        return;
+    }
+
+    const cleanViewName = nextState.viewId.replace(/^view-/, "");
+    const stepSuffix =
+        cleanViewName === "launcher" || cleanViewName === "carrera"
+            ? `-paso-${nextState.carreraStep}`
+            : "";
+    const hash = `#${cleanViewName}${stepSuffix}`;
+
+    window.history.pushState(nextState, "", hash);
+}
+
+/**
+ * Instala el escudo inicial en el historial del navegador apenas carga dashboard.html
+ * y observa cambios de Paso (1 -> 2 -> 3) para apilarlos automáticamente.
+ */
+function initBrowserHistoryGuard() {
+    if (!window.history?.pushState) return;
+
+    const initialStep = detectCurrentDomStep();
+    routerState.carreraStep = initialStep;
+    lastDetectedDomStep = initialStep;
+
+    // 1. Entrada raíz (colchón de seguridad para no regresar a index.html)
+    window.history.replaceState(
+        {
+            makaiSpa: true,
+            makaiRootGuard: true,
+            viewId: routerState.activeView,
+            carreraStep: 1,
+            career: routerState.selectedCareer,
+            stage: routerState.selectedStage
+        },
+        "",
+        "#launcher"
+    );
+
+    // 2. Entrada activa sobre el colchón
+    window.history.pushState(
+        {
+            makaiSpa: true,
+            makaiRootGuard: false,
+            viewId: routerState.activeView,
+            carreraStep: initialStep,
+            career: routerState.selectedCareer,
+            stage: routerState.selectedStage
+        },
+        "",
+        `#launcher-paso-${initialStep}`
+    );
+
+    // 3. Observar el contenedor principal para detectar cuando el usuario avanza
+    //    del Paso 1 al Paso 2, o del Paso 2 al Paso 3 en dashboard.html
+    const carreraContainer = findCarreraViewContainer();
+    if (carreraContainer && typeof MutationObserver !== "undefined") {
+        const observer = new MutationObserver(() => {
+            if (isHandlingPopState) return;
+
+            const currentDomStep = detectCurrentDomStep();
+            if (currentDomStep !== lastDetectedDomStep) {
+                const previousStep = lastDetectedDomStep;
+                lastDetectedDomStep = currentDomStep;
+                routerState.carreraStep = currentDomStep;
+
+                // Si avanzó de paso (ej. 1 -> 2 o 2 -> 3), guardar en el historial del navegador
+                if (currentDomStep > previousStep) {
+                    pushSpaHistoryState({
+                        viewId: routerState.activeView,
+                        carreraStep: currentDomStep
+                    });
+                }
+            }
+        });
+
+        observer.observe(carreraContainer, {
+            childList: true,
+            subtree: true,
+            characterData: true
+        });
+    }
+
+    // 4. Interceptar el botón "Atrás" del navegador (evento popstate)
+    window.addEventListener("popstate", (event) => {
+        isHandlingPopState = true;
+
+        try {
+            const currentDomStep = detectCurrentDomStep();
+
+            // CASO A: El usuario está en el Paso 3 (Asignaturas) -> regresar al Paso 2 (Niveles)
+            if (currentDomStep === 3) {
+                routerState.carreraStep = 2;
+                lastDetectedDomStep = 2;
+                const clickedNative = triggerInternalStepBack(2);
+                if (!clickedNative) {
+                    renderCarreraUniversityView();
+                }
+                // Re-asegurar estado en historial para permitir otro clic en Atrás hacia el Paso 1
+                window.history.pushState(
+                    {
+                        makaiSpa: true,
+                        makaiRootGuard: false,
+                        viewId: routerState.activeView,
+                        carreraStep: 2,
+                        career: routerState.selectedCareer,
+                        stage: routerState.selectedStage
+                    },
+                    "",
+                    "#launcher-paso-2"
+                );
+                return;
+            }
+
+            // CASO B: El usuario está en el Paso 2 (Niveles) -> regresar al Paso 1 (11 Carreras)
+            if (currentDomStep === 2) {
+                routerState.carreraStep = 1;
+                lastDetectedDomStep = 1;
+                const clickedNative = triggerInternalStepBack(1);
+                if (!clickedNative) {
+                    renderCarreraUniversityView();
+                }
+                // Re-armar el escudo para que el siguiente clic en Atrás tampoco salga a index.html
+                window.history.pushState(
+                    {
+                        makaiSpa: true,
+                        makaiRootGuard: false,
+                        viewId: routerState.activeView,
+                        carreraStep: 1,
+                        career: routerState.selectedCareer,
+                        stage: routerState.selectedStage
+                    },
+                    "",
+                    "#launcher-paso-1"
+                );
+                return;
+            }
+
+            // CASO C: El usuario estaba en otra pestaña lateral (CACES, Rural, Mentoría, Admin...)
+            const targetView = event.state?.viewId;
+            if (targetView && targetView !== routerState.activeView && document.getElementById(targetView)) {
+                switchView(targetView, { force: false, updateHash: false });
+            } else if (routerState.viewHistory.length > 1) {
+                routerState.viewHistory.pop();
+                const prevView = routerState.viewHistory[routerState.viewHistory.length - 1];
+                if (prevView && prevView !== routerState.activeView) {
+                    switchView(prevView, { force: false, updateHash: false });
+                }
+            }
+
+            // CASO D: El usuario ya está en el tope (Paso 1) -> bloquear salida a index.html
+            if (!event.state || event.state.makaiRootGuard) {
+                window.history.pushState(
+                    {
+                        makaiSpa: true,
+                        makaiRootGuard: false,
+                        viewId: routerState.activeView,
+                        carreraStep: 1,
+                        career: routerState.selectedCareer,
+                        stage: routerState.selectedStage
+                    },
+                    "",
+                    "#launcher-paso-1"
+                );
+            }
+        } finally {
+            setTimeout(() => {
+                isHandlingPopState = false;
+            }, 60);
+        }
+    });
+}
 
 /**
  * Verifica si un correo corresponde a un Administrador Maestro autorizado.
@@ -584,7 +855,6 @@ function triggerStartSimulation(trackType = "carrera") {
     routerState.academicTrack = trackType;
     syncRouterWithStore();
 
-    // Intentar invocar el controlador de exámenes si expone startExam en window o en un botón oculto
     if (typeof window.MakaiExamController?.startExam === "function") {
         window.MakaiExamController.startExam({
             track: routerState.academicTrack,
@@ -602,7 +872,6 @@ function triggerStartSimulation(trackType = "carrera") {
         return;
     }
 
-    // Cambiar directamente a la vista del simulador y emitir evento de inicio
     const switched = switchView(SPA_VIEWS.SIMULATOR);
     window.dispatchEvent(
         new CustomEvent("makai:startExamRequested", {
@@ -641,6 +910,18 @@ export function renderCarreraUniversityView() {
         }
     });
 
+    // Si dashboard.html ya cuenta con sus propias tarjetas nativas de Carrera/Nivel,
+    // sincronizar sin duplicar una segunda rejilla debajo.
+    const hasNativeStepCards = Array.from(container.querySelectorAll("div, span, button")).some(
+        el => !el.closest("#makai-carrera-dynamic-root") &&
+              ((el.textContent || "").includes("ÁREA 01") ||
+               (el.textContent || "").includes("Cambiar de Carrera") ||
+               (el.textContent || "").includes("Cambiar Nivel"))
+    );
+    if (hasNativeStepCards) {
+        return;
+    }
+
     // Crear o recuperar el lienzo dinámico debajo de la cabecera
     let dynamicRoot = document.getElementById("makai-carrera-dynamic-root");
     if (!dynamicRoot) {
@@ -654,7 +935,6 @@ export function renderCarreraUniversityView() {
     const activeCareerObj = DEFAULT_UNIVERSITY_CAREERS.find(c => c.id === routerState.selectedCareer) || DEFAULT_UNIVERSITY_CAREERS[0];
     const activeStageObj = ACADEMIC_STAGES.find(s => s.id === routerState.selectedStage) || ACADEMIC_STAGES[0];
 
-    // Combinar las materias del semestre/etapa con las materias troncales de la carrera elegida
     const combinedSubjects = [
         ...activeStageObj.materias,
         ...(activeCareerObj.materiasEspeciales || [])
@@ -697,16 +977,20 @@ export function renderCarreraUniversityView() {
             </div>
 
             <div class="flex items-center gap-2">
-                <span class="px-3 py-1 rounded-lg bg-secondary/15 border border-secondary/40 text-secondary text-[11px] font-mono font-bold">
-                    11 Carreras Activas
-                </span>
+                ${
+                    routerState.carreraStep > 1
+                        ? `<button type="button" id="btn-carrera-step-back" class="px-3.5 py-1.5 rounded-xl bg-surface border border-primary/50 text-primary hover:bg-primary/15 text-xs font-mono font-bold transition-all">
+                            ← ${routerState.carreraStep === 3 ? `Cambiar Nivel (${activeStageObj.nombre})` : "Cambiar de Carrera (11 Áreas)"}
+                           </button>`
+                        : `<span class="px-3 py-1 rounded-lg bg-secondary/15 border border-secondary/40 text-secondary text-[11px] font-mono font-bold">
+                            11 Carreras Activas
+                           </span>`
+                }
             </div>
         </div>
 
-        <!-- =============================================================== -->
-        <!-- PASO 1: SELECCIÓN DE LAS 11 CARRERAS DE CIENCIAS DE LA SALUD    -->
-        <!-- =============================================================== -->
-        <div class="bg-surface-container border border-surface-high rounded-2xl p-5 space-y-4">
+        <!-- PASO 1: SELECCIÓN DE LAS 11 CARRERAS DE CIENCIAS DE LA SALUD -->
+        <div class="${routerState.carreraStep === 1 ? "block" : "hidden"} bg-surface-container border border-surface-high rounded-2xl p-5 space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-surface-high pb-3">
                 <div>
                     <span class="text-[10px] font-mono text-primary uppercase tracking-widest font-bold">
@@ -767,12 +1051,8 @@ export function renderCarreraUniversityView() {
             </div>
         </div>
 
-        <!-- =============================================================== -->
-        <!-- PASO 2: ETAPA FORMATIVA (PREUNIVERSITARIO, NIVELACIÓN, SEMESTRES)-->
-        <!-- =============================================================== -->
-        <div id="carrera-step2-box" class="bg-surface-container border ${
-            routerState.carreraStep >= 2 ? "border-primary/50 shadow-[0_0_25px_rgba(0,229,255,0.08)]" : "border-surface-high"
-        } rounded-2xl p-5 space-y-4 transition-all">
+        <!-- PASO 2: ETAPA FORMATIVA (PREUNIVERSITARIO, NIVELACIÓN, SEMESTRES) -->
+        <div id="carrera-step2-box" class="${routerState.carreraStep === 2 ? "block" : "hidden"} bg-surface-container border border-primary/50 shadow-[0_0_25px_rgba(0,229,255,0.08)] rounded-2xl p-5 space-y-4 transition-all">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-surface-high pb-3">
                 <div>
                     <span class="text-[10px] font-mono text-secondary uppercase tracking-widest font-bold">
@@ -817,12 +1097,8 @@ export function renderCarreraUniversityView() {
             </div>
         </div>
 
-        <!-- =============================================================== -->
-        <!-- PASO 3: MATERIAS DEL SEMESTRE Y LANZADOR DE EVALUACIÓN / 1D     -->
-        <!-- =============================================================== -->
-        <div id="carrera-step3-box" class="bg-surface-container border ${
-            routerState.carreraStep === 3 ? "border-primary shadow-[0_0_25px_rgba(0,229,255,0.12)]" : "border-surface-high"
-        } rounded-2xl p-5 space-y-6 transition-all">
+        <!-- PASO 3: MATERIAS DEL SEMESTRE Y LANZADOR DE EVALUACIÓN / 1D -->
+        <div id="carrera-step3-box" class="${routerState.carreraStep === 3 ? "block" : "hidden"} bg-surface-container border border-primary shadow-[0_0_25px_rgba(0,229,255,0.12)] rounded-2xl p-5 space-y-6 transition-all">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-surface-high pb-3">
                 <div>
                     <span class="text-[10px] font-mono text-primary uppercase tracking-widest font-bold">
@@ -904,7 +1180,7 @@ export function renderCarreraUniversityView() {
         </div>
     `;
 
-    // Enlazar eventos de las tarjetas de las 11 carreras (Paso 1)
+    // Enlazar eventos de las tarjetas de las 11 carreras (Paso 1 -> Paso 2)
     dynamicRoot.querySelectorAll(".univ-career-card").forEach(card => {
         card.addEventListener("click", () => {
             const careerId = card.dataset.univCareer;
@@ -912,13 +1188,14 @@ export function renderCarreraUniversityView() {
             routerState.selectedCareer = careerId;
             routerState.selectedSubject = "Todas las Materias";
             routerState.carreraStep = 2;
+            lastDetectedDomStep = 2;
+            pushSpaHistoryState({ viewId: routerState.activeView, carreraStep: 2, career: careerId });
             renderCarreraUniversityView();
             syncRouterWithStore();
-            document.getElementById("carrera-step2-box")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
         });
     });
 
-    // Enlazar eventos de Etapas / Semestres (Paso 2)
+    // Enlazar eventos de Etapas / Semestres (Paso 2 -> Paso 3)
     dynamicRoot.querySelectorAll(".univ-stage-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             const stageId = btn.dataset.univStage;
@@ -926,9 +1203,10 @@ export function renderCarreraUniversityView() {
             routerState.selectedStage = stageId;
             routerState.selectedSubject = "Todas las Materias";
             routerState.carreraStep = 3;
+            lastDetectedDomStep = 3;
+            pushSpaHistoryState({ viewId: routerState.activeView, carreraStep: 3, stage: stageId });
             renderCarreraUniversityView();
             syncRouterWithStore();
-            document.getElementById("carrera-step3-box")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
         });
     });
 
@@ -955,9 +1233,20 @@ export function renderCarreraUniversityView() {
     // Enlazar píldoras superiores de navegación de pasos (1, 2, 3)
     dynamicRoot.querySelectorAll(".carrera-step-pill").forEach(stepBtn => {
         stepBtn.addEventListener("click", () => {
-            routerState.carreraStep = Number(stepBtn.dataset.gotoStep) || 1;
+            const nextStep = Number(stepBtn.dataset.gotoStep) || 1;
+            routerState.carreraStep = nextStep;
+            lastDetectedDomStep = nextStep;
+            pushSpaHistoryState({ viewId: routerState.activeView, carreraStep: nextStep });
             renderCarreraUniversityView();
         });
+    });
+
+    // Botón interno de retroceso ("← Cambiar Nivel" o "← Cambiar de Carrera")
+    document.getElementById("btn-carrera-step-back")?.addEventListener("click", () => {
+        routerState.carreraStep = Math.max(1, routerState.carreraStep - 1);
+        lastDetectedDomStep = routerState.carreraStep;
+        renderCarreraUniversityView();
+        syncRouterWithStore();
     });
 
     // Botón para ir a Sináptico 1D / Guías PDF con el filtro actual
@@ -1344,7 +1633,7 @@ export function switchView(viewId, options = { force: false, updateHash: true })
         renderCarreraUniversityView();
     }
 
-    // 7. Registrar historial interno y sincronizar con state.store.js
+    // 7. Registrar historial interno y agregar entrada con pushState (no replaceState)
     routerState.activeView = resolvedId;
     if (routerState.viewHistory[routerState.viewHistory.length - 1] !== resolvedId) {
         routerState.viewHistory.push(resolvedId);
@@ -1353,9 +1642,11 @@ export function switchView(viewId, options = { force: false, updateHash: true })
         }
     }
 
-    if (options.updateHash && window.history?.replaceState) {
-        const cleanHash = `#${resolvedId.replace(/^view-/, "")}`;
-        window.history.replaceState({ viewId: resolvedId }, "", cleanHash);
+    if (options.updateHash && !isHandlingPopState) {
+        pushSpaHistoryState({
+            viewId: resolvedId,
+            carreraStep: routerState.carreraStep
+        });
     }
 
     const viewsContainer = document.getElementById("views-container");
@@ -1375,9 +1666,20 @@ export function switchView(viewId, options = { force: false, updateHash: true })
 }
 
 /**
- * Permite regresar a la vista inmediatamente anterior dentro de la sesión SPA.
+ * Permite regresar a la vista o paso inmediatamente anterior dentro de la sesión SPA.
  */
 export function goBackView() {
+    const currentStep = detectCurrentDomStep();
+    if (currentStep > 1) {
+        const nextStep = currentStep - 1;
+        routerState.carreraStep = nextStep;
+        lastDetectedDomStep = nextStep;
+        if (!triggerInternalStepBack(nextStep)) {
+            renderCarreraUniversityView();
+        }
+        return;
+    }
+
     if (routerState.viewHistory.length > 1) {
         routerState.viewHistory.pop();
         const previousView = routerState.viewHistory[routerState.viewHistory.length - 1];
@@ -1459,7 +1761,7 @@ function bindHeaderQuickButtons() {
 
 /**
  * Inicializa el Router SPA, enlaza el menú lateral, inyecta los selectores
- * encadenados en las vistas de CARRERA y CACES, y activa los accesos rápidos.
+ * encadenados en las vistas de CARRERA y CACES, y activa el escudo del botón Atrás.
  */
 export function initRouterSPA(user = null, userData = null) {
     if (userData?.carrera) {
@@ -1486,7 +1788,6 @@ export function initRouterSPA(user = null, userData = null) {
                 return;
             }
 
-            // Respaldo inteligente por texto del botón si no tuviera data-target
             const label = (btn.textContent || "").toLowerCase();
             if (label.includes("carrera")) switchView(SPA_VIEWS.CARRERA);
             else if (label.includes("caces")) switchView(SPA_VIEWS.CACES);
@@ -1521,28 +1822,14 @@ export function initRouterSPA(user = null, userData = null) {
         window.MakaiOrchestrator.switchView = switchView;
     }
 
-    // 7. Sincronizar hash inicial y eventos de navegación del navegador
+    // 7. Inicializar el escudo de historial del navegador (evita volver a index.html)
     if (!routerInitialized) {
         routerInitialized = true;
-
-        const initialHash = window.location.hash.replace("#", "").trim();
-        if (initialHash) {
-            const candidateViewId = initialHash.startsWith("view-") ? initialHash : `view-${initialHash}`;
-            if (document.getElementById(candidateViewId) && candidateViewId !== SPA_VIEWS.SIMULATOR) {
-                switchView(candidateViewId, { force: true, updateHash: false });
-            }
-        }
-
-        window.addEventListener("popstate", (event) => {
-            const targetFromState = event.state?.viewId;
-            if (targetFromState && document.getElementById(targetFromState)) {
-                switchView(targetFromState, { force: false, updateHash: false });
-            }
-        });
+        initBrowserHistoryGuard();
     }
 
     syncRouterWithStore();
-    console.info("[MakaiRouterSPA] Vistas CARRERA (11 Áreas) y CACES (4 Oficiales) renderizadas y activas.");
+    console.info("[MakaiRouterSPA] Navegación SPA y retroceso paso a paso activos.");
 }
 
 // Alias de compatibilidad invocados por app.orchestrator.js
@@ -1555,6 +1842,7 @@ window.MakaiRouter = {
     initRouterSPA,
     switchView,
     goBackView,
+    pushSpaHistoryState,
     selectAcademicTrack,
     selectCareerAndStage,
     renderCascadingSelectors,
