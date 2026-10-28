@@ -155,6 +155,11 @@ function initSubmodulesSafely() {
     if (typeof AdminMaterials.initAdminMaterials === "function") {
         AdminMaterials.initAdminMaterials();
     }
+
+    // 6. Reclutamiento de Tutores y Comisiones Tesis ($10) -> admin.tutors.js
+    if (typeof AdminTutors.initAdminTutors === "function") {
+        AdminTutors.initAdminTutors();
+    }
 }
 
 // ============================================================================
@@ -265,6 +270,10 @@ function renderAdminCommandHeader() {
                     <span class="material-symbols-outlined text-sm">picture_as_pdf</span>
                     <span>5. Materiales y PDFs</span>
                 </button>
+                <button type="button" data-admin-tab="docentes" class="admin-subtab-btn px-3.5 py-2 rounded-xl text-xs font-extrabold bg-surface text-gray-300 hover:text-white border border-surface-high transition-all flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm">school</span>
+                    <span>6. Tutores y Tesis</span>
+                 </button>
             </div>
         </div>
     `;
