@@ -2,7 +2,7 @@
 // ARCHIVO: js/1-admin/admin.controller.js
 // DESCRIPCIÓN: Controlador Maestro del Panel de Administración. Verifica
 //              permisos, gestiona KPIs de Firestore, coordina sub-pestañas y
-//              orquesta los 5 subcomponentes de la carpeta js/1-admin/.
+//              orquesta los 6 subcomponentes de la carpeta js/1-admin/.
 // PROYECTO: MakaiAcademy (Proyecto ALICIZATION)
 // ============================================================================
 
@@ -20,15 +20,13 @@ import {
     isMasterAdmin
 } from "../2-core/state.store.js";
 
-// Importación por espacio de nombres para soportar tanto módulos completados
-// como archivos semilla en proceso de desarrollo sin bloquear el navegador.
+// Importación por espacio de nombres (sin duplicados)
 import * as AdminBackups from "./admin.backups.js";
 import * as AdminPayments from "./admin.payments.js";
 import * as AdminQuestions from "./admin.questions.js";
 import * as AdminSinaptico from "./admin.sinaptico.js";
 import * as AdminMaterials from "./admin.materials.js";
-import * as AdminMaterials from "./admin.materials.js";
-import * as AdminTutors from "./admin.tutors.js"; // <-- NUEVA IMPORTACIÓN
+import * as AdminTutors from "./admin.tutors.js";
 
 // Control de estado interno del panel administrativo
 let adminControllerInitialized = false;
@@ -91,7 +89,7 @@ export function syncAdminNavigationVisibility() {
 
 /**
  * Inicializa el Panel de Administración completo, inyecta la barra de mando,
- * enlaza las sub-pestañas y despierta los 5 subcomponentes de js/1-admin/.
+ * enlaza las sub-pestañas y despierta los subcomponentes de js/1-admin/.
  */
 export async function initAdmin() {
     syncAdminNavigationVisibility();
@@ -106,10 +104,10 @@ export async function initAdmin() {
     // 1. Renderizar la Cabecera de Mando, KPIs y Selector de Sub-Pestañas
     renderAdminCommandHeader();
 
-    // 2. Inicializar los 5 subcomponentes modulares de js/1-admin/
+    // 2. Inicializar los subcomponentes modulares de js/1-admin/
     initSubmodulesSafely();
 
-    // 3. Enlazar accesos rápidos desde la cabecera de dashboard.html
+    // 3. Enlazar accesos rápidos desde la cabecera y barra lateral de dashboard.html
     bindHeaderAdminShortcut();
 
     // 4. Cargar métricas globales de las 5 colecciones en tiempo real
@@ -142,7 +140,6 @@ function initSubmodulesSafely() {
     if (typeof AdminQuestions.initAdminQuestions === "function") {
         AdminQuestions.initAdminQuestions();
     } else {
-        // Respaldo básico para el formulario #admin-form mientras se edita admin.questions.js
         initLegacyQuestionsFallback();
     }
 
@@ -273,7 +270,7 @@ function renderAdminCommandHeader() {
                 <button type="button" data-admin-tab="docentes" class="admin-subtab-btn px-3.5 py-2 rounded-xl text-xs font-extrabold bg-surface text-gray-300 hover:text-white border border-surface-high transition-all flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-sm">school</span>
                     <span>6. Tutores y Tesis</span>
-                 </button>
+                </button>
             </div>
         </div>
     `;
@@ -356,7 +353,7 @@ export async function refreshAdminKPIs() {
 
 /**
  * Filtra visualmente las secciones dentro de #view-admin según la sub-pestaña elegida.
- * @param {string} tabId - "all" | "respaldos" | "pagos" | "reactivos" | "sinaptico" | "materiales"
+ * @param {string} tabId - "all" | "respaldos" | "pagos" | "reactivos" | "sinaptico" | "materiales" | "docentes"
  */
 export function switchAdminSubTab(tabId = "all") {
     currentAdminSubTab = tabId;
@@ -378,7 +375,7 @@ export function switchAdminSubTab(tabId = "all") {
         reactivos: document.getElementById("admin-questions-section") || document.getElementById("admin-form")?.closest(".grid") || document.getElementById("admin-form")?.parentElement,
         sinaptico: document.getElementById("admin-sinaptico-section"),
         materiales: document.getElementById("admin-materials-section"),
-        docentes: document.getElementById("admin-tutors-section") // <-- NUEVO MAPEO
+        docentes: document.getElementById("admin-tutors-section")
     };
 
     Object.entries(sectionMap).forEach(([key, element]) => {
@@ -396,8 +393,8 @@ export function switchAdminSubTab(tabId = "all") {
 // ============================================================================
 
 /**
- * Conecta el botón superior #header-admin-btn para que abra directamente #view-admin
- * y refresque las métricas del panel.
+ * Conecta los botones #header-admin-btn y #admin-nav-btn para que abran
+ * directamente #view-admin y refresquen las métricas del panel.
  */
 function bindHeaderAdminShortcut() {
     const headerAdminBtn = document.getElementById("header-admin-btn");
@@ -428,9 +425,7 @@ function bindHeaderAdminShortcut() {
 
     if (sideAdminBtn && !sideAdminBtn.dataset.adminBound) {
         sideAdminBtn.dataset.adminBound = "1";
-        sideAdminBtn.addEventListener("click", () => {
-            refreshAdminKPIs();
-        });
+        sideAdminBtn.addEventListener("click", openAdminPanel);
     }
 }
 
