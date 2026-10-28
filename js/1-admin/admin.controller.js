@@ -377,7 +377,8 @@ export function switchAdminSubTab(tabId = "all") {
         pagos: document.getElementById("admin-payments-section") || document.getElementById("admin-payments-inbox"),
         reactivos: document.getElementById("admin-questions-section") || document.getElementById("admin-form")?.closest(".grid") || document.getElementById("admin-form")?.parentElement,
         sinaptico: document.getElementById("admin-sinaptico-section"),
-        materiales: document.getElementById("admin-materials-section")
+        materiales: document.getElementById("admin-materials-section"),
+        docentes: document.getElementById("admin-tutors-section") // <-- NUEVO MAPEO
     };
 
     Object.entries(sectionMap).forEach(([key, element]) => {
