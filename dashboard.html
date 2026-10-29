@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Makai Academy • Ecosistema Clínico & Simulador CACES</title>
-    <link id="dynamic-favicon" rel="icon" type="image/png" href="assets/1-branding/logos/logo.png">
+    <link id="dynamic-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230b1320' stroke='%2300e5ff' stroke-width='6'/><circle cx='50' cy='50' r='30' fill='none' stroke='%2394de2d' stroke-width='8'/></svg>">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -94,8 +94,13 @@
             padding-left: 0.5rem !important;
             padding-right: 0.5rem !important;
         }
+        /* Apila el logo y el botón de 3 líneas al contraer para que ninguno se corte */
         #main-sidebar.sidebar-collapsed #sidebar-brand-row {
+            flex-direction: column !important;
+            align-items: center !important;
             justify-content: center !important;
+            gap: 0.5rem !important;
+            margin-bottom: 0 !important;
         }
         #main-sidebar.sidebar-collapsed #user-profile-card {
             justify-content: center !important;
@@ -149,29 +154,29 @@
     <!-- =================================================================== -->
     <aside id="main-sidebar" class="w-72 bg-surface-container border-r border-surface-high flex flex-col h-full flex-shrink-0 select-none z-30">
 
-        <!-- CABECERA DEL SIDEBAR: LOGO + MAKAI ACADEMY + BOTÓN DE 3 LÍNEAS -->
+        <!-- CABECERA DEL SIDEBAR: LOGO BLINDADO + MAKAI ACADEMY + BOTÓN DE 3 LÍNEAS -->
         <div class="p-3.5 border-b border-surface-high">
             <div id="sidebar-brand-row" class="flex items-center justify-between gap-2 mb-3">
-                <div class="flex items-center gap-3 overflow-hidden">
-                    <!-- Contenedor del Logo -->
+                <div class="flex items-center gap-3 min-w-0">
+                    <!-- Contenedor del Logo (Sin atributo src inicial ni alt para evitar ícono roto) -->
                     <div id="brand-logo-box"
                          onclick="document.getElementById('brand-logo-file-input').click()"
-                         title="Haz clic para cargar o cambiar el logo de Makai Academy"
+                         title="Makai Academy (Haz clic para personalizar el logo)"
                          class="group relative w-11 h-11 rounded-xl bg-surface border border-primary/60 p-1 flex items-center justify-center shadow-[0_0_15px_rgba(0,229,255,0.22)] flex-shrink-0 overflow-hidden cursor-pointer hover:border-secondary transition-all">
                         <img id="sidebar-brand-logo"
-                             src="assets/1-branding/logos/logo.png"
-                             alt="Makai Academy"
-                             class="w-full h-full object-contain">
-                        <svg id="sidebar-svg-fallback" class="w-9 h-9 hidden"><use href="#makai-logo-fallback"></use></svg>
+                             alt=""
+                             draggable="false"
+                             class="hidden w-full h-full object-contain select-none">
+                        <svg id="sidebar-svg-fallback" class="w-9 h-9 block flex-shrink-0"><use href="#makai-logo-fallback"></use></svg>
                         <div class="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                             <span class="material-symbols-outlined text-primary text-sm">upload</span>
                         </div>
                         <input type="file" id="brand-logo-file-input" accept="image/*" class="hidden">
                     </div>
 
-                    <div class="leading-none sidebar-hide-on-collapse">
-                        <h1 class="text-lg font-extrabold text-white tracking-wider">MAKAI</h1>
-                        <p class="text-[10px] font-mono font-bold text-primary tracking-[0.22em] uppercase mt-1">ACADEMY</p>
+                    <div class="leading-none sidebar-hide-on-collapse min-w-0">
+                        <h1 class="text-lg font-extrabold text-white tracking-wider truncate">MAKAI</h1>
+                        <p class="text-[10px] font-mono font-bold text-primary tracking-[0.22em] uppercase mt-1 truncate">ACADEMY</p>
                     </div>
                 </div>
 
@@ -245,7 +250,7 @@
                 </span>
             </button>
 
-            <!-- 4. PROFESIONALES (NUEVO: GRADUADOS, PSICOMÉTRICAS, ESPECIALIDAD Y EXTRANJERO B2) -->
+            <!-- 4. PROFESIONALES (GRADUADOS, PSICOMÉTRICAS, ESPECIALIDAD Y EXTRANJERO B2) -->
             <button type="button"
                     title="PROFESIONALES (Psicométricas, Posgrado y Ejerce en el Extranjero B2)"
                     class="nav-btn w-full flex items-center justify-between px-3.5 py-3 text-sm font-extrabold rounded-xl text-gray-300 hover:text-white hover:bg-surface-high transition-all"
@@ -599,7 +604,6 @@
             <!-- VISTA 5: PROFESIONALES, POSGRADO & EJERCE EN EL EXTRANJERO  -->
             <!-- =========================================================== -->
             <div id="view-professionals" class="tab-content hidden max-w-6xl mx-auto">
-                <!-- Cabecera de Profesionales Graduados -->
                 <div class="flex flex-wrap items-start justify-between gap-4 pb-5 border-b border-surface-high mb-6">
                     <div>
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/15 border border-primary/30 text-primary text-[10px] font-mono font-extrabold uppercase tracking-wider">
@@ -968,7 +972,7 @@
     <script>
         (function () {
             // =================================================================
-            // 0. CONTROL DE CONTRAÍDO DEL SIDEBAR (3 LÍNEAS) Y LOGO OFICIAL
+            // 0. CONTROL DE CONTRAÍDO DEL SIDEBAR Y RESOLUCIÓN BLINDADA DE LOGO
             // =================================================================
             const LOGO_CANDIDATE_PATHS = [
                 "assets/1-branding/logos/logo.png",
@@ -987,27 +991,67 @@
                 const faviconEl = document.getElementById("dynamic-favicon");
                 const fileInput = document.getElementById("brand-logo-file-input");
 
-                if (!imgEl) return;
+                if (!imgEl || !svgFallback) return;
 
-                const savedLogoBase64 = localStorage.getItem("makai_official_logo_base64");
-                if (savedLogoBase64) {
-                    imgEl.src = savedLogoBase64;
-                    imgEl.style.display = "block";
-                    svgFallback?.classList.add("hidden");
-                    if (faviconEl) faviconEl.href = savedLogoBase64;
-                } else {
-                    let pathIdx = 0;
-                    imgEl.onerror = function () {
-                        pathIdx++;
-                        if (pathIdx < LOGO_CANDIDATE_PATHS.length) {
-                            imgEl.src = LOGO_CANDIDATE_PATHS[pathIdx];
-                        } else {
-                            imgEl.style.display = "none";
-                            svgFallback?.classList.remove("hidden");
-                        }
-                    };
+                function showVectorFallbackOnly() {
+                    imgEl.removeAttribute("src");
+                    imgEl.alt = "";
+                    imgEl.classList.add("hidden");
+                    imgEl.style.display = "none";
+                    svgFallback.classList.remove("hidden");
+                    svgFallback.style.display = "block";
                 }
 
+                function applyVerifiedLogo(validSrc) {
+                    imgEl.alt = "";
+                    imgEl.src = validSrc;
+                    imgEl.classList.remove("hidden");
+                    imgEl.style.display = "block";
+                    svgFallback.classList.add("hidden");
+                    svgFallback.style.display = "none";
+                    if (faviconEl) faviconEl.href = validSrc;
+                }
+
+                // 1. Iniciar siempre con el emblema vectorial limpio (cero íconos rotos)
+                showVectorFallbackOnly();
+
+                // 2. Construir lista de candidatos (localStorage + rutas del proyecto)
+                const savedLogoBase64 =
+                    localStorage.getItem("makai_official_logo_base64") ||
+                    localStorage.getItem("makai_custom_logo_v1");
+
+                const candidates = [
+                    ...(savedLogoBase64 ? [savedLogoBase64] : []),
+                    ...LOGO_CANDIDATE_PATHS
+                ];
+
+                // 3. Probar en segundo plano con new Image() antes de tocar el DOM
+                function tryCandidate(index) {
+                    if (index >= candidates.length) {
+                        showVectorFallbackOnly();
+                        return;
+                    }
+                    const candidateUrl = candidates[index];
+                    const probe = new Image();
+                    probe.onload = function () {
+                        if (probe.naturalWidth > 0) {
+                            applyVerifiedLogo(candidateUrl);
+                        } else {
+                            tryCandidate(index + 1);
+                        }
+                    };
+                    probe.onerror = function () {
+                        tryCandidate(index + 1);
+                    };
+                    probe.src = candidateUrl;
+                }
+
+                tryCandidate(0);
+
+                // Si por cualquier motivo externo falla la imagen en el DOM, volver de inmediato al SVG
+                imgEl.addEventListener("error", showVectorFallbackOnly);
+
+                // 4. Permitir cargar o actualizar el logo haciendo clic en el recuadro
                 fileInput?.addEventListener("change", (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
@@ -1024,12 +1068,12 @@
                             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                             const dataUrl = canvas.toDataURL("image/png");
 
-                            localStorage.setItem("makai_official_logo_base64", dataUrl);
-                            imgEl.onerror = null;
-                            imgEl.src = dataUrl;
-                            imgEl.style.display = "block";
-                            svgFallback?.classList.add("hidden");
-                            if (faviconEl) faviconEl.href = dataUrl;
+                            try {
+                                localStorage.setItem("makai_official_logo_base64", dataUrl);
+                                localStorage.setItem("makai_custom_logo_v1", dataUrl);
+                            } catch (err) {}
+
+                            applyVerifiedLogo(dataUrl);
                         };
                         img.src = ev.target.result;
                     };
@@ -1114,7 +1158,6 @@
                 ]
             };
 
-            // Tutores Verificados por el Administrador para Trabajo de Titulación (Tesis 1 a 1)
             const VERIFIED_THESIS_TUTORS = [
                 {
                     id: "tut-01",
@@ -1216,12 +1259,11 @@
                 activeMaterialCategoryFilter: "all",
                 openReaderDoc: null,
                 readerNightMode: false,
-                profActiveTab: "extranjero", // "extranjero" | "psicometricas" | "especialidad" | "homologacion"
+                profActiveTab: "extranjero",
                 selectedLang: "ingles",
                 selectedThesisTutor: null
             };
 
-            // Construye los niveles dinámicos según la carrera + Internado (si aplica) + Las 2 Opciones Finales de Graduación
             function getLevelsForCareer(careerObj) {
                 const levels = [
                     { id: "preuniversitario", tag: "Admisión", nombre: "Preuniversitario", tipo: "standard", desc: "Biología, Química, Anatomía preliminar y Razonamiento." },
@@ -1246,7 +1288,6 @@
                         desc: "Rotaciones clínicas hospitalarias e integración profesional."
                     });
                 }
-                // OPCIONES UNIVERSALES DE FIN DE CARRERA (PRESENTES EN LAS 11 CARRERAS)
                 levels.push({
                     id: "titulacion_tesis",
                     tag: "Opción de Graduación 1",
@@ -1265,7 +1306,7 @@
             }
 
             // =================================================================
-            // RENDERIZADO ENCADENADO DE LA SECCIÓN: CARRERA (3 PANTALLAS + TESIS/COMPLEXIVO)
+            // RENDERIZADO ENCADENADO DE LA SECCIÓN: CARRERA
             // =================================================================
             function renderCarreraFlow() {
                 const root = document.getElementById("carrera-flow-container");
@@ -1276,7 +1317,6 @@
 
                 document.getElementById("makai-carrera-dynamic-root")?.remove();
 
-                // PANTALLA 1: LAS 11 CARRERAS DE SALUD
                 if (uiState.carreraStep === 1 || !uiState.selectedUnivCareer) {
                     if (badge) badge.textContent = "● MÓDULO UNIVERSITARIO • PASO 1 DE 3";
                     if (title) title.textContent = "Carreras de Ciencias de la Salud";
@@ -1317,14 +1357,12 @@
                 const careerObj = UNIVERSITY_CAREERS.find(c => c.id === uiState.selectedUnivCareer) || UNIVERSITY_CAREERS[0];
                 const levels = getLevelsForCareer(careerObj);
 
-                // PANTALLA 2: NIVELES ACADÉMICOS + MODALIDADES FINALES DE TITULACIÓN
                 if (uiState.carreraStep === 2 || !uiState.selectedUnivLevel) {
                     if (badge) badge.textContent = `● MÓDULO UNIVERSITARIO • PASO 2 DE 3 • ${careerObj.nombre.toUpperCase()}`;
                     if (title) title.textContent = `${careerObj.nombre} — Selecciona tu Nivel o Modalidad de Graduación`;
                     if (subtitle) subtitle.textContent = "Elige tu semestre actual o ve al final para seleccionar tu modalidad de graduación: Trabajo de Titulación (Tesis 1 a 1) o Examen Complexivo.";
 
                     const academicLevels = levels.filter(l => l.tipo === "standard" || l.tipo === "internado");
-                    const graduationLevels = levels.filter(l => l.tipo === "tesis" || l.tipo === "complexivo");
 
                     root.innerHTML = `
                         <div class="flex flex-wrap items-center justify-between gap-3 bg-surface-container border border-surface-high rounded-2xl p-4">
@@ -1339,7 +1377,6 @@
                             </span>
                         </div>
 
-                        <!-- MALLA DE NIVELES Y SEMESTRES -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                             ${academicLevels.map(lvl => `
                                 <div onclick="window.MakaiDashboardUI.selectUnivLevel('${lvl.id}')"
@@ -1363,7 +1400,6 @@
                             `).join("")}
                         </div>
 
-                        <!-- SECCIÓN DESTACADA AL FINAL DE TODOS LOS NIVELES: TITULACIÓN Y GRADUACIÓN -->
                         <div class="pt-4 border-t border-surface-high space-y-4">
                             <div class="flex flex-wrap items-center justify-between gap-2">
                                 <div>
@@ -1380,7 +1416,6 @@
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <!-- OPCIÓN A: TRABAJO DE TITULACIÓN / TESIS 1 A 1 -->
                                 <div onclick="window.MakaiDashboardUI.selectUnivLevel('titulacion_tesis')"
                                      class="group bg-surface-container border-2 border-warning/60 hover:border-warning rounded-2xl p-6 cursor-pointer transition-all hover:shadow-[0_0_25px_rgba(255,190,11,0.18)] flex flex-col justify-between">
                                     <div>
@@ -1403,7 +1438,6 @@
                                     </div>
                                 </div>
 
-                                <!-- OPCIÓN B: EXAMEN COMPLEXIVO SÚPER INTENSIVO -->
                                 <div onclick="window.MakaiDashboardUI.selectUnivLevel('titulacion_complexivo')"
                                      class="group bg-surface-container border-2 border-primary/60 hover:border-primary rounded-2xl p-6 cursor-pointer transition-all hover:shadow-[0_0_25px_rgba(0,229,255,0.18)] flex flex-col justify-between">
                                     <div>
@@ -1431,7 +1465,6 @@
                     return;
                 }
 
-                // PANTALLA 3 ESPECIAL A: TRABAJO DE TITULACIÓN / TESIS 1 A 1
                 if (uiState.selectedUnivLevel === "titulacion_tesis") {
                     if (badge) badge.textContent = `● TITULACIÓN UNIVERSITARIA • TESIS 1 A 1 • ${careerObj.nombre.toUpperCase()}`;
                     if (title) title.textContent = `Trabajo de Titulación / Tesis 1 a 1 • ${careerObj.nombre}`;
@@ -1450,7 +1483,6 @@
                             </span>
                         </div>
 
-                        <!-- DIRECTORIO DE TUTORES VERIFICADOS 1 A 1 -->
                         <div class="bg-surface-container border border-warning/40 rounded-2xl p-6 space-y-4">
                             <div>
                                 <span class="text-[10px] font-mono text-warning uppercase font-extrabold">PASO 1 • DIRECTORIO DE ESPECIALISTAS EN INVESTIGACIÓN APROBADOS</span>
@@ -1481,7 +1513,6 @@
                             </div>
                         </div>
 
-                        <!-- PLUS: KIT DE RECURSOS DE METODOLOGÍA Y BIOESTADÍSTICA PARA EL TESISTA -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="bg-surface-container border border-surface-high rounded-2xl p-5 flex flex-col justify-between">
                                 <div>
@@ -1526,7 +1557,6 @@
                     return;
                 }
 
-                // PANTALLA 3 ESTÁNDAR O EXAMEN COMPLEXIVO SÚPER INTENSIVO
                 const levelObj = levels.find(l => l.id === uiState.selectedUnivLevel) || levels[0];
                 const isComplexivo = levelObj.id === "titulacion_complexivo";
                 const subjects = SUBJECTS_BY_LEVEL[levelObj.id] || SUBJECTS_BY_LEVEL.sem_1;
@@ -1591,7 +1621,6 @@
                                     <span class="material-symbols-outlined text-primary">clinical_notes</span>
                                 </div>
 
-                                <!-- 3 OPCIONES POR ASIGNATURA -->
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3 border-t border-surface-high">
                                     <button type="button"
                                             onclick="window.MakaiDashboardUI.startSubjectExam('${careerObj.id}', '${subj}', 'tutor')"
@@ -1621,7 +1650,7 @@
             }
 
             // =================================================================
-            // 4. NUEVA SECCIÓN: PROFESIONALES, PSICOMÉTRICAS Y EXTRANJERO B2
+            // 4. SECCIÓN: PROFESIONALES, PSICOMÉTRICAS Y EXTRANJERO B2
             // =================================================================
             function renderProfessionalsFlow() {
                 const root = document.getElementById("professionals-flow-container");
@@ -1636,7 +1665,6 @@
 
                 let contentHTML = "";
 
-                // SUB-PESTAÑA 1: EJERCE EN EL EXTRANJERO (INGLÉS B2, ALEMÁN B2, ITALIANO B2)
                 if (uiState.profActiveTab === "extranjero") {
                     const langCatalog = {
                         ingles: {
@@ -1682,7 +1710,6 @@
                                     <p class="text-xs font-mono text-secondary mt-1">${activeLang.certificacion}</p>
                                 </div>
 
-                                <!-- Selector de Idioma Médico -->
                                 <div class="flex flex-wrap items-center gap-2">
                                     <button type="button" onclick="window.MakaiDashboardUI.selectMedicalLanguage('ingles')" class="px-4 py-2 rounded-xl text-xs font-extrabold border transition-all ${uiState.selectedLang === 'ingles' ? 'bg-primary text-surface border-primary' : 'bg-surface border-surface-high text-gray-300 hover:border-primary'}">
                                         🇺🇸 Inglés Médico (B2 / OET)
@@ -1732,10 +1759,7 @@
                             </div>
                         </div>
                     `;
-                }
-
-                // SUB-PESTAÑA 2: MODELOS DE PRUEBAS PSICOMÉTRICAS Y CONCURSOS HOSPITALARIOS
-                else if (uiState.profActiveTab === "psicometricas") {
+                } else if (uiState.profActiveTab === "psicometricas") {
                     const psychometricDecks = [
                         { titulo: "Razonamiento Abstracto, Espacial y Matrices Lógicas", codigo: "PSICO-01", desc: "Series visuales, analogías de figuras y matrices tipo Raven evaluadas en concursos del MSP, IESS y admisión a posgrados." },
                         { titulo: "Razonamiento Numérico, Bioestadístico y Resolución de Problemas", codigo: "PSICO-02", desc: "Cálculo rápido de diluciones, tasas epidemiológicas, proporciones y series numéricas bajo presión de cronómetro." },
@@ -1772,10 +1796,7 @@
                             `).join("")}
                         </div>
                     `;
-                }
-
-                // SUB-PESTAÑA 3: GUÍAS DE ESTUDIO AMPLIADAS Y ESPECÍFICAS (POSGRADO / RESIDENCIA)
-                else if (uiState.profActiveTab === "especialidad") {
+                } else if (uiState.profActiveTab === "especialidad") {
                     const deepTopics = [
                         { area: "Cuidados Intensivos & Guardia Hospitalaria", titulo: "Ventilación Mecánica Avanzada, Gasometría Ácido-Base y Uso de Vasopresores", nivel: "Alta Complejidad" },
                         { area: "Cardiología & Electrocardiografía", titulo: "Interpretación Avanzada de ECG, Arritmias Complejas y Síndrome Coronario Agudo", nivel: "Alta Complejidad" },
@@ -1811,10 +1832,7 @@
                             `).join("")}
                         </div>
                     `;
-                }
-
-                // SUB-PESTAÑA 4 (PLUS): HOMOLOGACIÓN DE TÍTULOS Y EXÁMENES INTERNACIONALES
-                else {
+                } else {
                     const intlRoutes = [
                         { pais: "🇪🇸 España (Examen MIR / Homologación Ministerio)", req: "Apostilla de La Haya, Equivalencia de Grado e Inscripción al Examen MIR.", idioma: "Español (Nativo)" },
                         { pais: "🇩🇪 Alemania (Approbation / Fachsprachprüfung FSP)", req: "Certificado Alemán B2 + FSP Médico + Kenntnisprüfung (Equivalencia).", idioma: "Alemán B2 + FSP" },
@@ -1853,7 +1871,6 @@
                 }
 
                 root.innerHTML = `
-                    <!-- Barra de Pestañas Internas del Centro de Profesionales -->
                     <div class="flex flex-wrap items-center gap-2.5 bg-surface-container border border-surface-high rounded-2xl p-3">
                         ${tabs.map(t => `
                             <button type="button"
@@ -2573,6 +2590,9 @@
                     if (matTabBtn) matTabBtn.click();
                 }
             };
+
+            // Ejecutar el resolvedor del logo de inmediato y al cargar el DOM
+            initBrandLogoResolver();
 
             document.addEventListener("DOMContentLoaded", () => {
                 initBrandLogoResolver();
