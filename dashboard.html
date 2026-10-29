@@ -208,22 +208,24 @@
         <!-- MENÚ DE NAVEGACIÓN PRINCIPAL -->
         <nav class="flex-1 overflow-y-auto p-3 space-y-1.5">
 
-            <!-- 1. CARRERA (11 ÁREAS + TITULACIÓN: TESIS / COMPLEXIVO) -->
+            <!-- 1. MI CARRERA / PREUNIVERSITARIO (PERSONALIZADO SEGÚN EL REGISTRO DEL ALUMNO) -->
             <button type="button"
-                    title="CARRERA (11 Áreas + Titulación)"
+                    id="nav-btn-carrera"
+                    title="Mi Carrera / Preuniversitario"
                     class="nav-btn w-full flex items-center justify-between px-3.5 py-3 text-sm font-extrabold rounded-xl bg-primary text-surface-container transition-all"
                     data-target="view-launcher">
                 <div class="flex items-center gap-3">
-                    <span class="material-symbols-outlined text-lg nav-icon">school</span>
-                    <span class="nav-label tracking-wide">CARRERA</span>
+                    <span class="material-symbols-outlined text-lg nav-icon" id="nav-icon-carrera">school</span>
+                    <span class="nav-label tracking-wide" id="nav-label-carrera">MI CARRERA</span>
                 </div>
-                <span class="nav-badge text-[10px] font-mono font-extrabold px-2 py-0.5 rounded border border-surface/30 bg-surface/15">
-                    11 ÁREAS
+                <span id="nav-badge-carrera" class="nav-badge text-[10px] font-mono font-extrabold px-2 py-0.5 rounded border border-surface/30 bg-surface/15">
+                    ACTIVA
                 </span>
             </button>
 
             <!-- 2. CACES (OFICIAL) -->
             <button type="button"
+                    id="nav-btn-caces"
                     title="CACES (4 Carreras Oficiales)"
                     class="nav-btn w-full flex items-center justify-between px-3.5 py-3 text-sm font-extrabold rounded-xl text-gray-300 hover:text-white hover:bg-surface-high transition-all"
                     data-target="view-caces">
@@ -231,7 +233,7 @@
                     <span class="material-symbols-outlined text-lg nav-icon">verified</span>
                     <span class="nav-label tracking-wide">CACES</span>
                 </div>
-                <span class="nav-badge text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-primary/15 text-primary border border-primary/30">
+                <span id="nav-badge-caces" class="nav-badge text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-primary/15 text-primary border border-primary/30">
                     OFICIAL
                 </span>
             </button>
@@ -397,13 +399,21 @@
                 <audio id="cc0-html-audio" class="hidden"></audio>
             </div>
 
-            <!-- Estado y Acceso Rápido Admin -->
-            <div class="flex items-center gap-3">
+           <!-- Estado, Conmutador de Carreras Habilitadas y Acceso Rápido Admin -->
+            <div class="flex items-center gap-2.5">
+                <!-- Selector rápido (Solo se muestra si el Admin Maestro le activó más de 1 carrera al alumno) -->
+                <select id="header-career-switcher"
+                        onchange="window.MakaiDashboardUI.switchActiveAllowedCareer(this.value)"
+                        title="Cambiar entre tus carreras habilitadas por el Administrador"
+                        class="hidden bg-surface border border-primary/50 rounded-xl px-3 py-1.5 text-xs font-mono font-bold text-primary focus:outline-none cursor-pointer">
+                </select>
+
                 <button type="button"
                         onclick="window.MakaiDashboardUI.openView('view-profile')"
+                        title="Ver mi área activa o solicitar otra carrera al Administrador Maestro"
                         class="px-3 py-1.5 rounded-xl bg-surface border border-surface-high hover:border-primary/40 text-xs font-bold text-white flex items-center gap-2 transition-colors">
                     <span class="w-2 h-2 rounded-full bg-secondary"></span>
-                    <span>Médico</span>
+                    <span id="header-active-career-pill">Cargando área...</span>
                 </button>
 
                 <button id="header-admin-btn"
@@ -882,24 +892,93 @@
                 </div>
             </div>
 
-            <!-- =========================================================== -->
+           <!-- =========================================================== -->
             <!-- VISTA 13: CONFIGURACIONES DE PERFIL (#view-profile)         -->
             <!-- =========================================================== -->
-            <div id="view-profile" class="tab-content hidden max-w-4xl mx-auto">
-                <div class="mb-8 border-b border-surface-high pb-4 flex items-center justify-between">
+            <div id="view-profile" class="tab-content hidden max-w-4xl mx-auto space-y-6 pb-12">
+                <div class="border-b border-surface-high pb-4 flex items-center justify-between">
                     <div>
                         <span class="text-[10px] font-mono text-primary uppercase tracking-widest">Expediente de Usuario • Makai Academy</span>
-                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">Configuraciones de Perfil</h2>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">Configuraciones de Perfil y Carreras Habilitadas</h2>
                     </div>
                     <button type="button" onclick="window.MakaiDashboardUI.openView('view-launcher')" class="px-4 py-2 rounded-xl bg-surface-container border border-surface-high hover:border-primary text-xs font-bold text-gray-300">
-                        ← Volver
+                        ← Volver a Mi Panel
                     </button>
                 </div>
-                <div class="bg-surface-container border border-surface-high rounded-2xl p-8">
-                    <p class="text-sm text-gray-300">Desde este panel podrás gestionar tu carrera predeterminada, comprobantes de suscripción y preferencias de estudio.</p>
+
+                <!-- Resumen de Carrera Clasificada y Áreas Habilitadas -->
+                <div class="bg-surface-container border border-primary/40 rounded-2xl p-6 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <span class="text-[10px] font-mono text-secondary uppercase font-extrabold">ENTORNO PERSONALIZADO SIN RUIDO VISUAL</span>
+                            <h3 class="text-lg font-extrabold text-white mt-0.5" id="profile-current-career-title">Área Principal Activa: Cargando...</h3>
+                        </div>
+                        <span id="profile-level-badge" class="px-3 py-1 rounded-lg bg-primary/15 border border-primary/30 text-primary font-mono text-xs font-bold">
+                            Modalidad Clasificada
+                        </span>
+                    </div>
+
+                    <p class="text-xs text-gray-300 leading-relaxed">
+                        🔒 Para evitar saturar tu pantalla con menús innecesarios, tu cuenta despliega directamente los módulos de tu área registrada. Debajo puedes ver todas las áreas que tienes autorizadas actualmente:
+                    </p>
+
+                    <div id="profile-enabled-careers-list" class="flex flex-wrap gap-2 pt-1"></div>
+                </div>
+
+                <!-- Formulario para Solicitar al Administrador Maestro (Anthonny) otra Carrera o Cambio -->
+                <div class="bg-surface-container border border-warning/50 rounded-2xl p-6 space-y-4">
+                    <div>
+                        <span class="text-[10px] font-mono text-warning uppercase font-extrabold">SOLICITUD DIRECTA AL ADMINISTRADOR MAESTRO</span>
+                        <h3 class="text-lg font-extrabold text-white mt-0.5">¿Deseas habilitar una carrera adicional o cambiar tu área actual?</h3>
+                        <p class="text-xs text-gray-400 mt-1">
+                            Si eres estudiante de una carrera (ej. Enfermería) y deseas que el Administrador Maestro te active también el área de otra carrera (ej. Medicina o Preuniversitario), envíale tu solicitud aquí:
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-mono text-gray-300 font-bold mb-1.5">Tipo de Solicitud *</label>
+                            <select id="req-career-action-type" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-xs text-white font-bold focus:border-warning focus:outline-none">
+                                <option value="agregar_carrera_adicional">➕ Habilitar una carrera adicional (Conservar mi área actual + agregar otra)</option>
+                                <option value="cambiar_carrera_principal">🔄 Cambiar mi carrera/área principal por otra</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-mono text-gray-300 font-bold mb-1.5">Área o Carrera que solicitas activar *</label>
+                            <select id="req-target-career" class="w-full bg-surface border border-primary/50 rounded-xl px-3.5 py-2.5 text-xs text-white font-bold focus:border-primary focus:outline-none">
+                                <option value="preuniversitario_salud">🎓 Preuniversitario General de Salud (Todas las bases)</option>
+                                <option value="medicina">01 • Medicina Humana</option>
+                                <option value="enfermeria">02 • Enfermería</option>
+                                <option value="odontologia">03 • Odontología</option>
+                                <option value="obstetricia">04 • Obstetricia y Puericultura</option>
+                                <option value="nutricion">05 • Nutrición y Dietética</option>
+                                <option value="fisioterapia">06 • Fisioterapia y Rehabilitación</option>
+                                <option value="laboratorio">07 • Laboratorio Clínico</option>
+                                <option value="imagenologia">08 • Imagenología y Radiología</option>
+                                <option value="farmacia">09 • Bioquímica y Farmacia</option>
+                                <option value="psicologia_clinica">10 • Psicología Clínica</option>
+                                <option value="paramedicina">11 • Atención Prehospitalaria y Emergencias</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-mono text-gray-300 font-bold mb-1.5">Motivo breve para el Administrador Maestro *</label>
+                        <textarea id="req-career-reason" rows="2" placeholder="Ej: Hola Administrador, curso Enfermería pero también deseo repasar farmacología y semiología del área de Medicina..." class="w-full bg-surface border border-surface-high rounded-xl p-3 text-xs text-white focus:border-warning focus:outline-none"></textarea>
+                    </div>
+
+                    <div id="req-career-feedback" class="hidden p-3.5 rounded-xl border text-xs font-mono"></div>
+
+                    <div class="flex justify-end">
+                        <button type="button"
+                                onclick="window.MakaiDashboardUI.submitCareerAccessRequest()"
+                                class="px-5 py-2.5 rounded-xl bg-warning text-surface font-extrabold text-xs uppercase tracking-wider hover:bg-opacity-90 transition-all shadow-lg">
+                            Enviar Solicitud al Administrador Maestro →
+                        </button>
+                    </div>
                 </div>
             </div>
-
             <!-- =========================================================== -->
             <!-- VISTA 14: BÓVEDA DE ADMINISTRACIÓN MAESTRA (#view-admin)    -->
             <!-- =========================================================== -->
@@ -1244,16 +1323,84 @@
                 }
             ];
 
-            // Estado interactivo local
+           // Mapa de normalización entre los IDs de registro.html / index.html y el catálogo del Dashboard
+            const CAREER_ID_NORMALIZER = {
+                preuniversitario_salud: "preuniversitario_salud",
+                medicina: "medicina",
+                enfermeria: "enfermeria",
+                odontologia: "odontologia",
+                obstetricia: "obstetricia",
+                nutricion: "nutricion",
+                fisioterapia: "fisioterapia",
+                laboratorio_clinico: "laboratorio",
+                laboratorio: "laboratorio",
+                imagenologia: "imagenologia",
+                bioquimica_farmacia: "farmacia",
+                farmacia: "farmacia",
+                psicologia_clinica: "psicologia_clinica",
+                atencion_prehospitalaria: "paramedicina",
+                paramedicina: "paramedicina"
+            };
+
+            function normalizeCareerKey(rawKey) {
+                if (!rawKey) return "medicina";
+                const clean = String(rawKey).trim().toLowerCase();
+                return CAREER_ID_NORMALIZER[clean] || "medicina";
+            }
+
+            // Leer el perfil clasificado que guardamos al registrarse o iniciar sesión
+            function loadClassifiedUserConfig() {
+                try {
+                    const raw = localStorage.getItem("makai_classified_profile");
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        const primary = normalizeCareerKey(parsed.carrera || localStorage.getItem("makai_selected_career") || "medicina");
+                        const enabledRaw = Array.isArray(parsed.carrerasHabilitadas) && parsed.carrerasHabilitadas.length > 0
+                            ? parsed.carrerasHabilitadas
+                            : [primary];
+                        const enabled = Array.from(new Set(enabledRaw.map(normalizeCareerKey)));
+                        const isMaster = ["anthonnyvelastegui@gmail.com", "aavemakaihc@gmail.com"].includes(String(parsed.email || "").toLowerCase().trim());
+                        return {
+                            uid: parsed.uid || null,
+                            email: parsed.email || "",
+                            primaryCareer: primary,
+                            enabledCareers: isMaster
+                                ? ["preuniversitario_salud", ...UNIVERSITY_CAREERS.map(c => c.id)]
+                                : enabled,
+                            isMaster
+                        };
+                    }
+                } catch (e) {}
+
+                const fallbackCareer = normalizeCareerKey(
+                    sessionStorage.getItem("makai_selected_career") ||
+                    localStorage.getItem("makai_selected_career") ||
+                    "medicina"
+                );
+                return {
+                    uid: null,
+                    email: "",
+                    primaryCareer: fallbackCareer,
+                    enabledCareers: [fallbackCareer],
+                    isMaster: false
+                };
+            }
+
+            const initialUserConfig = loadClassifiedUserConfig();
+
+            // Estado interactivo local (Salta directamente al Paso 2 de su carrera o al Modo Preuniversitario sin mostrar las 11 carreras)
             const uiState = {
-                carreraStep: 1,
-                selectedUnivCareer: null,
+                userPrimaryCareer: initialUserConfig.primaryCareer,
+                userEnabledCareers: initialUserConfig.enabledCareers,
+                isMasterUser: initialUserConfig.isMaster,
+                carreraStep: initialUserConfig.primaryCareer === "preuniversitario_salud" ? 2 : 2,
+                selectedUnivCareer: initialUserConfig.primaryCareer,
                 selectedUnivLevel: null,
-                cacesStep: 1,
-                selectedCacesCareer: null,
+                cacesStep: ["medicina", "enfermeria", "odontologia", "obstetricia"].includes(initialUserConfig.primaryCareer) ? 2 : 1,
+                selectedCacesCareer: ["medicina", "enfermeria", "odontologia", "obstetricia"].includes(initialUserConfig.primaryCareer) ? initialUserConfig.primaryCareer : null,
                 expandedCacesSubject: null,
                 showCacesDifficultyLevels: false,
-                activeMaterialCareer: "medicina",
+                activeMaterialCareer: initialUserConfig.primaryCareer === "preuniversitario_salud" ? "medicina" : initialUserConfig.primaryCareer,
                 activeMaterialLevel: "Nivelación Académica",
                 activeMaterialSubject: "Morfofisiología Básica I",
                 activeMaterialCategoryFilter: "all",
@@ -1263,6 +1410,84 @@
                 selectedLang: "ingles",
                 selectedThesisTutor: null
             };
+
+            function syncPersonalizedMenusAndHeader() {
+                const isPreuniMode = uiState.selectedUnivCareer === "preuniversitario_salud";
+                const careerObj = UNIVERSITY_CAREERS.find(c => c.id === uiState.selectedUnivCareer);
+                const navLabel = document.getElementById("nav-label-carrera");
+                const navBadge = document.getElementById("nav-badge-carrera");
+                const navIcon = document.getElementById("nav-icon-carrera");
+                const headerPill = document.getElementById("header-active-career-pill");
+                const switcher = document.getElementById("header-career-switcher");
+
+                if (isPreuniMode) {
+                    if (navLabel) navLabel.textContent = "PREUNIVERSITARIO";
+                    if (navBadge) navBadge.textContent = "SALUD";
+                    if (navIcon) navIcon.textContent = "biotech";
+                    if (headerPill) headerPill.textContent = "Preuniversitario Salud";
+                } else if (careerObj) {
+                    const shortName = careerObj.nombre.split(" ")[0].toUpperCase();
+                    if (navLabel) navLabel.textContent = "MI CARRERA";
+                    if (navBadge) navBadge.textContent = shortName;
+                    if (navIcon) navIcon.textContent = careerObj.icon || "school";
+                    if (headerPill) headerPill.textContent = careerObj.nombre;
+                }
+
+                // Si tiene más de 1 área habilitada por el Admin Maestro, mostrar el selector rápido en el Header
+                if (switcher) {
+                    if (uiState.userEnabledCareers.length > 1 || uiState.isMasterUser) {
+                        const list = uiState.isMasterUser
+                            ? ["preuniversitario_salud", ...UNIVERSITY_CAREERS.map(c => c.id)]
+                            : uiState.userEnabledCareers;
+
+                        switcher.innerHTML = list.map(cid => {
+                            const label = cid === "preuniversitario_salud"
+                                ? "🎓 Preuniversitario Salud"
+                                : (UNIVERSITY_CAREERS.find(c => c.id === cid)?.nombre || cid);
+                            return `<option value="${cid}" ${cid === uiState.selectedUnivCareer ? "selected" : ""}>⇄ ${label}</option>`;
+                        }).join("");
+                        switcher.classList.remove("hidden");
+                    } else {
+                        switcher.classList.add("hidden");
+                    }
+                }
+
+                // Sincronizar también la sección de Perfil (#view-profile)
+                const profileTitle = document.getElementById("profile-current-career-title");
+                const profileBadge = document.getElementById("profile-level-badge");
+                const profileList = document.getElementById("profile-enabled-careers-list");
+
+                if (profileTitle) {
+                    profileTitle.textContent = isPreuniMode
+                        ? "Área Principal Activa: Preuniversitario General de Salud"
+                        : `Carrera Principal Activa: ${careerObj ? careerObj.nombre : "Medicina Humana"}`;
+                }
+                if (profileBadge) {
+                    profileBadge.textContent = isPreuniMode ? "MODALIDAD PREUNIVERSITARIA" : "MODALIDAD CARRERA UNIVERSITARIA";
+                }
+                if (profileList) {
+                    const list = uiState.isMasterUser
+                        ? ["preuniversitario_salud", ...UNIVERSITY_CAREERS.map(c => c.id)]
+                        : uiState.userEnabledCareers;
+                    profileList.innerHTML = list.map(cid => {
+                        const label = cid === "preuniversitario_salud"
+                            ? "🎓 Preuniversitario General de Salud"
+                            : (UNIVERSITY_CAREERS.find(c => c.id === cid)?.nombre || cid);
+                        const active = cid === uiState.selectedUnivCareer;
+                        return `
+                            <button type="button"
+                                    onclick="window.MakaiDashboardUI.switchActiveAllowedCareer('${cid}')"
+                                    class="px-3.5 py-2 rounded-xl text-xs font-mono font-bold border transition-all ${
+                                        active
+                                            ? "bg-primary text-surface border-primary shadow-[0_0_12px_rgba(0,229,255,0.25)]"
+                                            : "bg-surface border-surface-high text-gray-300 hover:border-primary"
+                                    }">
+                                ${active ? "✓ " : ""}${label}
+                            </button>
+                        `;
+                    }).join("");
+                }
+            }
 
             function getLevelsForCareer(careerObj) {
                 const levels = [
@@ -1306,7 +1531,7 @@
             }
 
             // =================================================================
-            // RENDERIZADO ENCADENADO DE LA SECCIÓN: CARRERA
+            // RENDERIZADO OPTIMIZADO DE CARRERA Y PREUNIVERSITARIO EXCLUSIVO
             // =================================================================
             function renderCarreraFlow() {
                 const root = document.getElementById("carrera-flow-container");
@@ -1316,15 +1541,185 @@
                 if (!root) return;
 
                 document.getElementById("makai-carrera-dynamic-root")?.remove();
+                syncPersonalizedMenusAndHeader();
 
+                // =============================================================
+                // CASO A: ESTUDIANTE REGISTRADO EN PREUNIVERSITARIO DE SALUD
+                // Despliega netamente el menú de Preuniversitario + las 11 bases vocacionales
+                // =============================================================
+                if (uiState.selectedUnivCareer === "preuniversitario_salud" && uiState.carreraStep !== 1) {
+                    if (badge) badge.textContent = "● MÓDULO EXCLUSIVO • PREUNIVERSITARIO GENERAL DE SALUD";
+                    if (title) title.textContent = "Preuniversitario General de Ciencias de la Salud";
+                    if (subtitle) subtitle.textContent = "Tronco común de admisión universitaria y bases vocacionales de las 11 carreras de salud (Puedes cambiar de modalidad en tu Perfil).";
+
+                    const preuniSubjects = SUBJECTS_BY_LEVEL.preuniversitario;
+                    const nivelacionSubjects = SUBJECTS_BY_LEVEL.nivelacion;
+
+                    root.innerHTML = `
+                        <!-- Barra de Estado Preuniversitario -->
+                        <div class="flex flex-wrap items-center justify-between gap-3 bg-surface-container border border-primary/40 rounded-2xl p-4">
+                            <div class="flex items-center gap-2.5">
+                                <span class="px-3 py-1 rounded-lg bg-primary/15 border border-primary/30 text-primary font-mono text-xs font-extrabold">
+                                    🎓 MODO PREUNIVERSITARIO ACTIVO
+                                </span>
+                                <span class="text-xs text-gray-300">
+                                    Sin semestres clínicos ni distractores • Enfocado 100% en tu ingreso universitario
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button"
+                                        onclick="window.MakaiDashboardUI.startSubjectExam('preuniversitario', 'Simulacro General de Admisión en Salud (50 Preg.)', 'tutor')"
+                                        class="px-4 py-2 rounded-xl bg-primary text-surface font-extrabold text-xs uppercase tracking-wider hover:bg-opacity-90 transition-all shadow-[0_0_15px_rgba(0,229,255,0.3)]">
+                                    ⚡ Simulacro General de Admisión
+                                </button>
+                                <button type="button"
+                                        onclick="window.MakaiDashboardUI.openView('view-profile')"
+                                        class="px-3.5 py-2 rounded-xl bg-surface border border-warning/50 text-warning hover:bg-warning hover:text-surface text-xs font-mono font-bold transition-all">
+                                    🔒 Solicitar Cambio a Carrera Universitaria
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Bloque 1: Tronco Común de Admisión Preuniversitaria -->
+                        <div class="space-y-3">
+                            <h3 class="text-xs font-mono uppercase tracking-wider text-primary font-extrabold">
+                                1. TRONCO COMÚN DE ADMISIÓN UNIVERSITARIA EN SALUD (5 ASIGNATURAS BASE)
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                ${preuniSubjects.map((subj, idx) => `
+                                    <div class="bg-surface-container border border-surface-high hover:border-primary/60 rounded-2xl p-5 flex flex-col justify-between gap-4 transition-all">
+                                        <div>
+                                            <span class="text-[10px] font-mono text-primary uppercase font-bold">MÓDULO PREUNIVERSITARIO 0${idx + 1}</span>
+                                            <h4 class="text-base font-extrabold text-white mt-1">${subj}</h4>
+                                            <p class="text-xs text-gray-400 mt-1">Banco de preguntas de admisión, tarjetas Sináptico v4.4 y guías PDF resumidas.</p>
+                                        </div>
+                                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3 border-t border-surface-high">
+                                            <button type="button"
+                                                    onclick="window.MakaiDashboardUI.startSubjectExam('preuniversitario', '${subj}', 'tutor')"
+                                                    class="py-2.5 px-3 rounded-xl bg-primary text-surface font-extrabold text-xs flex items-center justify-center gap-1.5">
+                                                <span class="material-symbols-outlined text-sm">quiz</span>
+                                                <span>Simulador</span>
+                                            </button>
+                                            <button type="button"
+                                                    onclick="window.MakaiDashboardUI.openSinapticoForSubject('Preuniversitario Salud', '${subj}')"
+                                                    class="py-2.5 px-3 rounded-xl bg-surface border border-secondary/50 text-secondary hover:bg-secondary hover:text-surface font-extrabold text-xs flex items-center justify-center gap-1.5">
+                                                <span class="material-symbols-outlined text-sm">psychology</span>
+                                                <span>Sináptico</span>
+                                            </button>
+                                            <button type="button"
+                                                    onclick="window.MakaiDashboardUI.openMaterialsForSubject('medicina', 'Preuniversitario de Salud', '${subj}')"
+                                                    class="py-2.5 px-3 rounded-xl bg-surface border border-warning/60 text-warning hover:bg-warning hover:text-surface font-extrabold text-xs flex items-center justify-center gap-1.5">
+                                                <span class="material-symbols-outlined text-sm">menu_book</span>
+                                                <span>Materiales</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join("")}
+                            </div>
+                        </div>
+
+                        <!-- Bloque 2: Nivelación Universitaria (Semestre 0) -->
+                        <div class="space-y-3 pt-2">
+                            <h3 class="text-xs font-mono uppercase tracking-wider text-secondary font-extrabold">
+                                2. MÓDULOS DE NIVELACIÓN DE CARRERA (SEMESTRE 0 DE CIENCIAS DE LA SALUD)
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                ${nivelacionSubjects.map((subj, idx) => `
+                                    <div class="bg-surface-container border border-surface-high hover:border-secondary/60 rounded-2xl p-5 flex flex-col justify-between gap-4 transition-all">
+                                        <div>
+                                            <span class="text-[10px] font-mono text-secondary uppercase font-bold">NIVELACIÓN 0${idx + 1}</span>
+                                            <h4 class="text-base font-extrabold text-white mt-1">${subj}</h4>
+                                        </div>
+                                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3 border-t border-surface-high">
+                                            <button type="button"
+                                                    onclick="window.MakaiDashboardUI.startSubjectExam('nivelacion', '${subj}', 'tutor')"
+                                                    class="py-2 px-3 rounded-xl bg-secondary text-surface font-extrabold text-xs">
+                                                Simulador
+                                            </button>
+                                            <button type="button"
+                                                    onclick="window.MakaiDashboardUI.openSinapticoForSubject('Nivelación Salud', '${subj}')"
+                                                    class="py-2 px-3 rounded-xl bg-surface border border-primary/50 text-primary hover:bg-primary hover:text-surface font-extrabold text-xs">
+                                                Sináptico
+                                            </button>
+                                            <button type="button"
+                                                    onclick="window.MakaiDashboardUI.openMaterialsForSubject('medicina', 'Nivelación de Salud', '${subj}')"
+                                                    class="py-2 px-3 rounded-xl bg-surface border border-warning/60 text-warning hover:bg-warning hover:text-surface font-extrabold text-xs">
+                                                Guías PDF
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join("")}
+                            </div>
+                        </div>
+
+                        <!-- Bloque 3: Explorador Vocacional de Preuniversitario para las 11 Carreras -->
+                        <div class="space-y-3 pt-2">
+                            <h3 class="text-xs font-mono uppercase tracking-wider text-warning font-extrabold">
+                                3. ORIENTACIÓN E INTRODUCCIÓN PREUNIVERSITARIA A LAS 11 CARRERAS DE SALUD
+                            </h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                                ${UNIVERSITY_CAREERS.map(c => `
+                                    <div class="bg-surface-container border border-surface-high hover:border-warning/60 rounded-2xl p-4 flex flex-col justify-between gap-3">
+                                        <div>
+                                            <span class="text-[10px] font-mono text-warning font-bold uppercase">BASE PREUNIVERSITARIA • ÁREA ${c.num}</span>
+                                            <h4 class="text-sm font-extrabold text-white mt-1">${c.nombre}</h4>
+                                            <p class="text-[11px] text-gray-400 mt-1">Introducción vocacional, perfil de ingreso y bases específicas.</p>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-surface-high">
+                                            <button type="button"
+                                                    onclick="window.MakaiDashboardUI.startSubjectExam('${c.id}', 'Admisión Preuniversitaria a ${c.nombre}', 'tutor')"
+                                                    class="py-2 px-2.5 rounded-xl bg-primary/15 border border-primary/40 text-primary hover:bg-primary hover:text-surface font-extrabold text-[11px]">
+                                                Test Admisión
+                                            </button>
+                                            <button type="button"
+                                                    onclick="window.MakaiDashboardUI.openMaterialsForSubject('${c.id}', 'Preuniversitario', 'Introducción a ${c.nombre}')"
+                                                    class="py-2 px-2.5 rounded-xl bg-warning/15 border border-warning/40 text-warning hover:bg-warning hover:text-surface font-extrabold text-[11px]">
+                                                Guía Base
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join("")}
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // =============================================================
+                // PASO 1 (SOLO SI EL ADMIN O EL USUARIO CON MÚLTIPLES CARRERAS PULSA CAMBIAR ÁREA)
+                // =============================================================
                 if (uiState.carreraStep === 1 || !uiState.selectedUnivCareer) {
-                    if (badge) badge.textContent = "● MÓDULO UNIVERSITARIO • PASO 1 DE 3";
-                    if (title) title.textContent = "Carreras de Ciencias de la Salud";
-                    if (subtitle) subtitle.textContent = "Selecciona tu carrera para acceder a Preuniversitario, Nivelación, Semestres y Modalidades de Graduación (Tesis 1 a 1 o Examen Complexivo).";
+                    const allowedCareersList = uiState.isMasterUser
+                        ? UNIVERSITY_CAREERS
+                        : UNIVERSITY_CAREERS.filter(c => uiState.userEnabledCareers.includes(c.id));
+
+                    if (badge) badge.textContent = "● MÓDULO UNIVERSITARIO • CARRERAS HABILITADAS EN TU CUENTA";
+                    if (title) title.textContent = "Tus Áreas de Ciencias de la Salud Habilitadas";
+                    if (subtitle) subtitle.textContent = "Selecciona entre tus carreras autorizadas o solicita habilitar un área adicional al Administrador Maestro desde tu Perfil.";
 
                     root.innerHTML = `
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            ${UNIVERSITY_CAREERS.map(c => `
+                            ${(uiState.isMasterUser || uiState.userEnabledCareers.includes("preuniversitario_salud")) ? `
+                                <div onclick="window.MakaiDashboardUI.selectUnivCareer('preuniversitario_salud')"
+                                     class="group bg-surface-container border-2 border-secondary/50 hover:border-secondary rounded-2xl p-5 cursor-pointer transition-all flex flex-col justify-between">
+                                    <div>
+                                        <span class="px-2.5 py-1 rounded-lg bg-secondary/15 text-secondary font-mono text-xs font-extrabold">
+                                            OPCIÓN A • PREUNIVERSITARIO
+                                        </span>
+                                        <h3 class="text-lg font-extrabold text-white mt-3 group-hover:text-secondary">
+                                            Preuniversitario General de Salud
+                                        </h3>
+                                        <p class="text-xs text-gray-400 mt-1.5 leading-relaxed">
+                                            Biología Celular, Química General/Orgánica, Anatomía Elemental y bases de las 11 carreras.
+                                        </p>
+                                    </div>
+                                    <div class="mt-4 pt-3 border-t border-surface-high flex items-center justify-between text-[11px] font-mono">
+                                        <span class="text-secondary font-bold">Tronco Común + 11 Bases</span>
+                                        <span class="text-white font-extrabold">Abrir →</span>
+                                    </div>
+                                </div>
+                            ` : ""}
+                            ${allowedCareersList.map(c => `
                                 <div onclick="window.MakaiDashboardUI.selectUnivCareer('${c.id}')"
                                      class="group bg-surface-container border border-surface-high hover:border-primary rounded-2xl p-5 cursor-pointer transition-all hover:shadow-[0_0_25px_rgba(0,229,255,0.14)] flex flex-col justify-between">
                                     <div>
@@ -1354,27 +1749,47 @@
                     return;
                 }
 
+                // =============================================================
+                // CASO B: ENTRADA DIRECTA A SU CARRERA UNIVERSITARIA ELEGIDA
+                // (Despliega directamente Medicina/Enfermería/etc., sus semestres, preuniversitario y titulación)
+                // =============================================================
                 const careerObj = UNIVERSITY_CAREERS.find(c => c.id === uiState.selectedUnivCareer) || UNIVERSITY_CAREERS[0];
                 const levels = getLevelsForCareer(careerObj);
+                const hasMultipleAllowed = uiState.isMasterUser || uiState.userEnabledCareers.length > 1;
 
                 if (uiState.carreraStep === 2 || !uiState.selectedUnivLevel) {
-                    if (badge) badge.textContent = `● MÓDULO UNIVERSITARIO • PASO 2 DE 3 • ${careerObj.nombre.toUpperCase()}`;
-                    if (title) title.textContent = `${careerObj.nombre} — Selecciona tu Nivel o Modalidad de Graduación`;
-                    if (subtitle) subtitle.textContent = "Elige tu semestre actual o ve al final para seleccionar tu modalidad de graduación: Trabajo de Titulación (Tesis 1 a 1) o Examen Complexivo.";
+                    if (badge) badge.textContent = `● MI CARRERA ACTIVA • ${careerObj.nombre.toUpperCase()}`;
+                    if (title) title.textContent = `${careerObj.nombre} — Tus Semestres, Preuniversitario y Titulación`;
+                    if (subtitle) subtitle.textContent = "Selecciona directamente tu semestre actual, etapa preuniversitaria o modalidad de graduación sin distracciones de otras carreras.";
 
                     const academicLevels = levels.filter(l => l.tipo === "standard" || l.tipo === "internado");
 
                     root.innerHTML = `
                         <div class="flex flex-wrap items-center justify-between gap-3 bg-surface-container border border-surface-high rounded-2xl p-4">
-                            <button type="button"
-                                    onclick="window.MakaiDashboardUI.resetCarreraStep(1)"
-                                    class="px-4 py-2 rounded-xl bg-surface border border-surface-high hover:border-primary text-xs font-extrabold text-gray-200 flex items-center gap-2 transition-all">
-                                <span class="material-symbols-outlined text-sm">arrow_back</span>
-                                <span>Cambiar de Carrera (11 Áreas)</span>
-                            </button>
-                            <span class="text-xs font-mono text-primary font-bold">
-                                Carrera activa: ${careerObj.nombre}
-                            </span>
+                            <div class="flex items-center gap-2.5">
+                                <span class="px-3 py-1 rounded-lg bg-primary/15 border border-primary/30 text-primary font-mono text-xs font-extrabold">
+                                    ÁREA ${careerObj.num} • ${careerObj.nombre.toUpperCase()}
+                                </span>
+                                <span class="text-xs text-gray-400 font-mono">
+                                    Panel optimizado para tu carrera
+                                </span>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-2">
+                                ${hasMultipleAllowed ? `
+                                    <button type="button"
+                                            onclick="window.MakaiDashboardUI.resetCarreraStep(1)"
+                                            class="px-3.5 py-2 rounded-xl bg-surface border border-primary/50 hover:border-primary text-xs font-extrabold text-primary flex items-center gap-1.5 transition-all">
+                                        <span class="material-symbols-outlined text-sm">swap_horiz</span>
+                                        <span>Cambiar entre mis carreras habilitadas</span>
+                                    </button>
+                                ` : ""}
+                                <button type="button"
+                                        onclick="window.MakaiDashboardUI.openView('view-profile')"
+                                        class="px-3.5 py-2 rounded-xl bg-surface border border-surface-high hover:border-warning text-xs font-mono font-bold text-gray-300 hover:text-warning flex items-center gap-1.5 transition-all">
+                                    <span>🔒 Solicitar otra carrera al Admin</span>
+                                </button>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -1476,7 +1891,7 @@
                                     onclick="window.MakaiDashboardUI.resetCarreraStep(2)"
                                     class="px-4 py-2 rounded-xl bg-surface border border-surface-high hover:border-warning text-xs font-extrabold text-gray-200 flex items-center gap-2">
                                 <span class="material-symbols-outlined text-sm">arrow_back</span>
-                                <span>← Volver a Niveles de ${careerObj.nombre}</span>
+                                <span>← Volver a Semestres de ${careerObj.nombre}</span>
                             </button>
                             <span class="px-3 py-1 rounded-lg bg-warning/15 border border-warning/40 text-warning text-xs font-mono font-bold">
                                 Tasa única de vinculación en plataforma: $10.00 USD (Acuerdo libre con el Tutor)
@@ -1512,47 +1927,6 @@
                                 `).join("")}
                             </div>
                         </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="bg-surface-container border border-surface-high rounded-2xl p-5 flex flex-col justify-between">
-                                <div>
-                                    <span class="text-[10px] font-mono text-primary uppercase font-bold">RECURSO DE TESIS 01</span>
-                                    <h4 class="text-base font-extrabold text-white mt-1">Plantillas de Anteproyecto & Matriz de Consistencia</h4>
-                                    <p class="text-xs text-gray-400 mt-1">Planteamiento del problema, pregunta PICO, objetivos e hipótesis listas para adaptar.</p>
-                                </div>
-                                <button type="button"
-                                        onclick="window.MakaiDashboardUI.openMaterialsForSubject('${careerObj.id}', 'Trabajo de Titulación', 'Plantillas PICO y Anteproyecto de Tesis')"
-                                        class="mt-4 py-2.5 rounded-xl bg-surface border border-primary/50 text-primary hover:bg-primary hover:text-surface font-extrabold text-xs">
-                                    Abrir Materiales de Tesis
-                                </button>
-                            </div>
-
-                            <div class="bg-surface-container border border-surface-high rounded-2xl p-5 flex flex-col justify-between">
-                                <div>
-                                    <span class="text-[10px] font-mono text-secondary uppercase font-bold">RECURSO DE TESIS 02</span>
-                                    <h4 class="text-base font-extrabold text-white mt-1">Guía Práctica de Bioestadística (SPSS / R / Excel)</h4>
-                                    <p class="text-xs text-gray-400 mt-1">Cálculo de tamaño muestral, Chi-cuadrado, t de Student, Odds Ratio e interpretación de valor p.</p>
-                                </div>
-                                <button type="button"
-                                        onclick="window.MakaiDashboardUI.openMaterialsForSubject('${careerObj.id}', 'Trabajo de Titulación', 'Bioestadística Aplicada en SPSS y R')"
-                                        class="mt-4 py-2.5 rounded-xl bg-surface border border-secondary/50 text-secondary hover:bg-secondary hover:text-surface font-extrabold text-xs">
-                                    Abrir Guía Estadística
-                                </button>
-                            </div>
-
-                            <div class="bg-surface-container border border-surface-high rounded-2xl p-5 flex flex-col justify-between">
-                                <div>
-                                    <span class="text-[10px] font-mono text-warning uppercase font-bold">RECURSO DE TESIS 03</span>
-                                    <h4 class="text-base font-extrabold text-white mt-1">Normas Vancouver, PRISMA & Defensa ante Tribunal</h4>
-                                    <p class="text-xs text-gray-400 mt-1">Estructura de diapositivas para sustentación oral y preguntas frecuentes del tribunal calificador.</p>
-                                </div>
-                                <button type="button"
-                                        onclick="window.MakaiDashboardUI.openMaterialsForSubject('${careerObj.id}', 'Trabajo de Titulación', 'Normas Vancouver y Defensa Oral de Tesis')"
-                                        class="mt-4 py-2.5 rounded-xl bg-surface border border-warning/50 text-warning hover:bg-warning hover:text-surface font-extrabold text-xs">
-                                    Ver Guía de Sustentación
-                                </button>
-                            </div>
-                        </div>
                     `;
                     return;
                 }
@@ -1564,7 +1938,7 @@
                 if (badge) {
                     badge.textContent = isComplexivo
                         ? `● BOOTCAMP SÚPER INTENSIVO • EXAMEN COMPLEXIVO • ${careerObj.nombre.toUpperCase()}`
-                        : `● MÓDULO UNIVERSITARIO • PASO 3 DE 3 • ${careerObj.nombre.toUpperCase()}`;
+                        : `● ${careerObj.nombre.toUpperCase()} • ${levelObj.nombre.toUpperCase()}`;
                 }
                 if (title) title.textContent = `${levelObj.nombre} • ${careerObj.nombre}`;
                 if (subtitle) {
@@ -1577,15 +1951,9 @@
                     <div class="flex flex-wrap items-center justify-between gap-3 bg-surface-container border ${isComplexivo ? 'border-primary' : 'border-surface-high'} rounded-2xl p-4">
                         <div class="flex flex-wrap items-center gap-2">
                             <button type="button"
-                                    onclick="window.MakaiDashboardUI.resetCarreraStep(1)"
-                                    class="px-3.5 py-2 rounded-xl bg-surface border border-surface-high hover:border-primary text-xs font-bold text-gray-300">
-                                1. ${careerObj.nombre}
-                            </button>
-                            <span class="text-gray-500 font-mono">→</span>
-                            <button type="button"
                                     onclick="window.MakaiDashboardUI.resetCarreraStep(2)"
                                     class="px-3.5 py-2 rounded-xl bg-surface border border-primary/50 text-xs font-extrabold text-primary">
-                                ← Cambiar Nivel (${levelObj.nombre})
+                                ← Volver a Semestres de ${careerObj.nombre}
                             </button>
                         </div>
 
@@ -1611,7 +1979,7 @@
                                 <div class="flex items-start justify-between gap-3">
                                     <div>
                                         <span class="text-[10px] font-mono text-primary uppercase font-bold">
-                                            ${isComplexivo ? "EJE INTEGRADOR COMPLEXIVO 0" + (idx + 1) : "ASIGNATURA 0" + (idx + 1) + " • MALLA UNIVERSAL"}
+                                            ${isComplexivo ? "EJE INTEGRADOR COMPLEXIVO 0" + (idx + 1) : "ASIGNATURA 0" + (idx + 1) + " • " + careerObj.nombre.toUpperCase()}
                                         </span>
                                         <h4 class="text-base font-extrabold text-white mt-1">${subj}</h4>
                                         <p class="text-xs text-gray-400 mt-1">
@@ -1648,7 +2016,7 @@
                     </div>
                 `;
             }
-
+           
             // =================================================================
             // 4. SECCIÓN: PROFESIONALES, PSICOMÉTRICAS Y EXTRANJERO B2
             // =================================================================
@@ -2584,10 +2952,91 @@
                     localStorage.setItem("makai_note_" + docId + "_" + uiState.activeMaterialSubject, val);
                     alert("✅ Apuntes guardados en tu cuaderno clínico de " + uiState.activeMaterialSubject);
                 },
-                openAdminMaterialsManager() {
+              openAdminMaterialsManager() {
                     openView("view-admin");
                     const matTabBtn = document.querySelector('[data-admin-tab="materiales"]');
                     if (matTabBtn) matTabBtn.click();
+                },
+                switchActiveAllowedCareer(careerId) {
+                    const norm = normalizeCareerKey(careerId);
+                    uiState.selectedUnivCareer = norm;
+                    uiState.selectedUnivLevel = null;
+                    uiState.carreraStep = 2;
+                    localStorage.setItem("makai_selected_career", norm);
+                    if ( ["medicina", "enfermeria", "odontologia", "obstetricia"].includes(norm) ) {
+                        uiState.selectedCacesCareer = norm;
+                        uiState.cacesStep = 2;
+                    }
+                    renderCarreraFlow();
+                    renderCacesFlow();
+                    openView("view-launcher");
+                },
+                applyFirestoreUserCareerProfile(userDoc) {
+                    if (!userDoc) return;
+                    const isMaster = ["anthonnyvelastegui@gmail.com", "aavemakaihc@gmail.com"].includes(String(userDoc.email || "").toLowerCase().trim());
+                    const primary = normalizeCareerKey(userDoc.carrera || uiState.userPrimaryCareer);
+                    const enabledArr = Array.isArray(userDoc.carrerasHabilitadas) && userDoc.carrerasHabilitadas.length > 0
+                        ? userDoc.carrerasHabilitadas.map(normalizeCareerKey)
+                        : [primary];
+
+                    uiState.isMasterUser = isMaster;
+                    uiState.userPrimaryCareer = primary;
+                    uiState.userEnabledCareers = isMaster
+                        ? ["preuniversitario_salud", ...UNIVERSITY_CAREERS.map(c => c.id)]
+                        : Array.from(new Set(enabledArr));
+                    uiState.selectedUnivCareer = primary;
+                    uiState.carreraStep = 2;
+
+                    renderCarreraFlow();
+                    renderCacesFlow();
+                },
+                async submitCareerAccessRequest() {
+                    const actionType = document.getElementById("req-career-action-type")?.value || "agregar_carrera_adicional";
+                    const targetCareer = document.getElementById("req-target-career")?.value || "medicina";
+                    const reason = document.getElementById("req-career-reason")?.value.trim() || "";
+                    const feedback = document.getElementById("req-career-feedback");
+
+                    if (!reason) {
+                        if (feedback) {
+                            feedback.className = "p-3.5 rounded-xl border border-danger bg-danger/15 text-danger text-xs font-mono";
+                            feedback.textContent = "⚠️ Por favor escribe un breve motivo para que el Administrador Maestro apruebe tu solicitud.";
+                            feedback.classList.remove("hidden");
+                        }
+                        return;
+                    }
+
+                    try {
+                        const { auth, db, collection, addDoc } = await import("./js/2-core/firebase.service.js");
+                        const u = auth.currentUser;
+                        const payload = {
+                            uid: u?.uid || initialUserConfig.uid || "sin_uid",
+                            estudianteEmail: u?.email || initialUserConfig.email || "estudiante@makai.ec",
+                            estudianteNombre: document.getElementById("user-name")?.textContent || "Estudiante",
+                            carreraActual: uiState.selectedUnivCareer,
+                            carrerasHabilitadasActuales: uiState.userEnabledCareers,
+                            tipoSolicitud: actionType,
+                            carreraSolicitada: targetCareer,
+                            motivo: reason,
+                            estado: "pendiente_aprobacion_admin",
+                            fechaSolicitud: new Date().toLocaleString("es-EC", { timeZone: "America/Guayaquil" }),
+                            createdAt: new Date().toISOString()
+                        };
+
+                        await addDoc(collection(db, "solicitudes_cambio_carrera"), payload);
+
+                        if (feedback) {
+                            feedback.className = "p-3.5 rounded-xl border border-secondary bg-secondary/15 text-secondary text-xs font-mono";
+                            feedback.innerHTML = "✅ <strong>Solicitud enviada al Administrador Maestro.</strong> En cuanto se active tu nueva área, te aparecerá automáticamente en tu selector superior.";
+                            feedback.classList.remove("hidden");
+                        }
+                        document.getElementById("req-career-reason").value = "";
+                    } catch (err) {
+                        if (feedback) {
+                            feedback.className = "p-3.5 rounded-xl border border-danger bg-danger/15 text-danger text-xs font-mono";
+                            feedback.textContent = "⚠️ Error al enviar la solicitud: " + err.message;
+                            feedback.classList.remove("hidden");
+                        }
+                    }
                 }
             };
 
