@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Apertura de Expediente Académico | Makai Academy</title>
+    <link rel="icon" type="image/png" href="assets/1-branding/logos/logo.png" />
 
     <!-- Tailwind CSS & Google Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -41,8 +42,15 @@
         <!-- BARRA SUPERIOR DE NAVEGACIÓN -->
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-surface-container border border-primary/40 flex items-center justify-center text-primary font-mono font-extrabold text-sm">
-                    MK
+                <div class="w-10 h-10 rounded-xl bg-surface-container border border-primary/40 flex items-center justify-center text-primary font-mono font-extrabold text-sm overflow-hidden p-1">
+                    <img
+                        src="assets/1-branding/logos/logo.png"
+                        alt="Makai Academy"
+                        class="w-full h-full object-contain hidden"
+                        onload="this.classList.remove('hidden'); this.nextElementSibling.classList.add('hidden');"
+                        onerror="if(!this.dataset.try1){this.dataset.try1='1';this.src='assets/1-branding/logos/logo.jpg';}else if(!this.dataset.try2){this.dataset.try2='1';this.src='logo.png';}else{this.classList.add('hidden');}"
+                    />
+                    <span>MK</span>
                 </div>
                 <div>
                     <span class="text-xs font-mono text-primary font-bold tracking-wider uppercase">MAKAI ACADEMY • ALICIZATION</span>
@@ -69,7 +77,7 @@
                     Apertura de Expediente Académico
                 </h1>
                 <p class="text-sm text-gray-400 mt-1">
-                    Completa tus datos profesionales, elige tu modalidad de preparación CACES y activa tu acceso.
+                    Completa tus datos profesionales, clasifica tu área o carrera actual y activa tu acceso optimizado.
                 </p>
             </div>
 
@@ -79,11 +87,11 @@
             <!-- FORMULARIO PRINCIPAL -->
             <form id="full-register-form" class="mt-6 space-y-8">
 
-                <!-- 1. IDENTIFICACIÓN PROFESIONAL Y CARRERA CACES -->
+                <!-- 1. IDENTIFICACIÓN PROFESIONAL Y CLASIFICACIÓN DE CARRERA / PREUNIVERSITARIO -->
                 <section class="space-y-4">
                     <h2 class="text-xs font-mono font-extrabold text-primary uppercase tracking-widest flex items-center gap-2">
                         <span class="material-symbols-outlined text-base">badge</span>
-                        <span>1. IDENTIFICACIÓN PROFESIONAL Y CARRERA CACES</span>
+                        <span>1. IDENTIFICACIÓN PROFESIONAL Y CLASIFICACIÓN DE CARRERA</span>
                     </h2>
 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -95,6 +103,7 @@
                                 <option value="Lic.">Lic. (Enfermería / Obstetricia / Salud)</option>
                                 <option value="Interno/a">Interno/a Rotativo</option>
                                 <option value="Est.">Estudiante de Ciencias de la Salud</option>
+                                <option value="Asp.">Aspirante Preuniversitario de Salud</option>
                             </select>
                         </div>
                         <div>
@@ -107,7 +116,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                             <label for="reg-cedula" class="block text-xs font-medium text-primary mb-1.5">Cédula / DNI / Matrícula</label>
                             <input type="text" id="reg-cedula" required placeholder="Ej: 0601234567" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary font-mono" />
@@ -115,22 +124,6 @@
                         <div>
                             <label for="reg-nickname" class="block text-xs font-medium text-gray-400 mb-1.5">Alias / Nickname Clínico</label>
                             <input type="text" id="reg-nickname" required placeholder="Ej: DrVelasteguiEC" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary" />
-                        </div>
-                        <div>
-                            <label for="reg-career" class="block text-xs font-medium text-gray-400 mb-1.5">Carrera a Evaluar (CACES)</label>
-                            <select id="reg-career" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-primary">
-                                <option value="medicina">Medicina Humana (FCS-EC)</option>
-                                <option value="enfermeria">Enfermería (FCS-EC)</option>
-                                <option value="odontologia">Odontología (FCS-EC)</option>
-                                <option value="obstetricia">Obstetricia (FCS-EC)</option>
-                                <option value="nutricion">Nutrición y Dietética</option>
-                                <option value="fisioterapia">Fisioterapia y Rehabilitación</option>
-                                <option value="laboratorio_clinico">Laboratorio Clínico</option>
-                                <option value="imagenologia">Imagenología y Radiología</option>
-                                <option value="psicologia_clinica">Psicología Clínica</option>
-                                <option value="bioquimica_farmacia">Bioquímica y Farmacia</option>
-                                <option value="atencion_prehospitalaria">Emergencias Médicas / APH</option>
-                            </select>
                         </div>
                         <div>
                             <label for="reg-country" class="block text-xs font-medium text-gray-400 mb-1.5">País de Residencia</label>
@@ -143,6 +136,60 @@
                                 <option value="Argentina">AR Argentina</option>
                                 <option value="Otro">Otro País</option>
                             </select>
+                        </div>
+                    </div>
+
+                    <!-- =========================================================
+                         SELECTOR OBLIGATORIO DE CLASIFICACIÓN Y AVISO DE CONTROL
+                         ========================================================= -->
+                    <div class="p-4 sm:p-5 rounded-2xl bg-surface border-2 border-primary/40 space-y-3 shadow-[0_0_20px_rgba(0,229,255,0.08)]">
+                        <div>
+                            <label for="reg-career" class="block text-xs font-mono font-extrabold uppercase text-primary mb-2 flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-base">clinical_notes</span>
+                                <span>¿Qué área o carrera cursas actualmente? (Obligatorio) *</span>
+                            </label>
+                            <select
+                                id="reg-career"
+                                required
+                                class="w-full bg-surface-container border border-primary/50 focus:border-primary rounded-xl px-3.5 py-3 text-xs sm:text-sm font-bold text-white focus:outline-none transition-colors cursor-pointer"
+                            >
+                                <!-- OPCIÓN A — PREUNIVERSITARIO GENERAL DE SALUD -->
+                                <optgroup label="OPCIÓN A — PREUNIVERSITARIO GENERAL DE SALUD (ASPIRANTES)">
+                                    <option value="preuniversitario_salud">
+                                        🎓 Preuniversitario General de Salud (Biología Celular, Química General/Orgánica, Anatomía Elemental y Razonamiento Clínico)
+                                    </option>
+                                </optgroup>
+
+                                <!-- OPCIÓN B — LAS 11 CARRERAS UNIVERSITARIAS -->
+                                <optgroup label="OPCIÓN B — LAS 11 CARRERAS UNIVERSITARIAS DE CIENCIAS DE LA SALUD">
+                                    <option value="medicina" selected>Medicina Humana (FCS-EC)</option>
+                                    <option value="enfermeria">Enfermería (FCS-EC)</option>
+                                    <option value="odontologia">Odontología (FCS-EC)</option>
+                                    <option value="obstetricia">Obstetricia (FCS-EC)</option>
+                                    <option value="fisioterapia">Fisioterapia y Rehabilitación</option>
+                                    <option value="laboratorio_clinico">Laboratorio Clínico</option>
+                                    <option value="psicologia_clinica">Psicología Clínica</option>
+                                    <option value="nutricion">Nutrición y Dietética</option>
+                                    <option value="bioquimica_farmacia">Bioquímica y Farmacia</option>
+                                    <option value="imagenologia">Imagenología y Radiología</option>
+                                    <option value="atencion_prehospitalaria">Atención Prehospitalaria y Emergencias (APH)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <!-- RESUMEN DINÁMICO DE LO QUE SE HABILITARÁ -->
+                        <div id="reg-career-preview" class="p-3 rounded-xl bg-surface-container border border-secondary/40 text-xs space-y-1">
+                            <span id="reg-career-preview-title" class="block font-mono font-extrabold text-secondary text-[11px] uppercase">
+                                OPCIÓN B • MEDICINA HUMANA SELECCIONADA
+                            </span>
+                            <p id="reg-career-preview-desc" class="text-gray-300 text-xs leading-relaxed">
+                                Se desplegará directamente Medicina Humana en tu panel: Preuniversitario, Nivelación, 1.° a 10.° Semestre, Internado Rotativo, Titulación y CACES Medicina sin saturar tu pantalla con otras carreras.
+                            </p>
+                        </div>
+
+                        <!-- AVISO TRANSPARENTE ANTI-ABUSO -->
+                        <div class="p-3.5 rounded-xl bg-warning/10 border border-warning/40 text-xs text-gray-200 leading-relaxed">
+                            🔒 Tu plataforma se optimizará exclusivamente para la carrera seleccionada sin cobros adicionales. Si en el futuro cambias de carrera o deseas habilitar asignaturas de otra área (ej. Enfermería + Medicina), podrás solicitarlo desde tu Perfil directamente al Administrador Maestro.
                         </div>
                     </div>
 
@@ -219,7 +266,7 @@
 
                     <input type="hidden" id="reg-plan-select" value="pro_mensual" />
 
-                    <!-- 4 TARJETAS DE PLANES -->
+                    <!-- 4 TARJETAS DE PLANES (CON PRECIOS ACTUALIZADOS: $18.60 MENSUAL Y $144.75 ANUAL) -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
                         <!-- Plan Básico -->
@@ -240,7 +287,7 @@
                             </div>
                         </div>
 
-                        <!-- Makai PRO Mensual -->
+                        <!-- Makai PRO Mensual ($18.60) -->
                         <div data-plan-card="pro_mensual" class="plan-card cursor-pointer rounded-xl p-4 border-2 border-primary bg-surface-high/95 shadow-[0_0_20px_rgba(0,229,255,0.2)] transition-all relative flex flex-col justify-between">
                             <div>
                                 <div class="flex items-center justify-between mb-2">
@@ -249,7 +296,7 @@
                                 </div>
                                 <h3 class="text-base font-extrabold text-white leading-snug">Makai PRO<br />Mensual</h3>
                                 <div class="mt-2">
-                                    <span class="text-2xl font-extrabold text-primary font-mono">$17.99</span>
+                                    <span class="text-2xl font-extrabold text-primary font-mono">$18.60</span>
                                     <span class="text-xs text-gray-400 font-mono"> / mes</span>
                                 </div>
                                 <p class="text-xs text-gray-400 mt-3 leading-relaxed">
@@ -258,7 +305,7 @@
                             </div>
                         </div>
 
-                        <!-- Makai PRO Anual -->
+                        <!-- Makai PRO Anual ($144.75 con 35% de descuento) -->
                         <div data-plan-card="pro_anual" class="plan-card cursor-pointer rounded-xl p-4 border border-surface-high bg-surface hover:border-gray-600 transition-all relative flex flex-col justify-between">
                             <div>
                                 <div class="flex items-center justify-between mb-2">
@@ -267,7 +314,7 @@
                                 </div>
                                 <h3 class="text-base font-extrabold text-white">Makai PRO Anual</h3>
                                 <div class="mt-2">
-                                    <span class="text-2xl font-extrabold text-secondary font-mono">$139.99</span>
+                                    <span class="text-2xl font-extrabold text-secondary font-mono">$144.75</span>
                                     <span class="text-xs text-gray-400 font-mono"> / año</span>
                                 </div>
                                 <p class="text-xs text-gray-400 mt-3 leading-relaxed">
@@ -506,7 +553,7 @@
                             </div>
                             <div>
                                 <label for="pay-amount" class="block text-xs font-medium text-gray-400 mb-1.5">Monto Transferido (USD)</label>
-                                <input type="text" id="pay-amount" value="17.99" class="w-full bg-surface-container border border-surface-high rounded-xl px-3.5 py-3 text-sm text-secondary font-extrabold font-mono focus:outline-none focus:border-primary" />
+                                <input type="text" id="pay-amount" value="18.60" class="w-full bg-surface-container border border-surface-high rounded-xl px-3.5 py-3 text-sm text-secondary font-extrabold font-mono focus:outline-none focus:border-primary" />
                             </div>
                             <div>
                                 <label for="pay-receipt-date" class="block text-xs font-medium text-gray-400 mb-1.5">Fecha del Comprobante</label>
@@ -600,7 +647,7 @@
         </div>
     </div>
 
-    <!-- CONTROLADOR INTEGRADO DE PLANES, BANCOS, REGISTRO Y VALIDACIÓN DE CORREO -->
+    <!-- CONTROLADOR INTEGRADO DE PLANES, CLASIFICACIÓN DE CARRERA, BANCOS, REGISTRO Y VALIDACIÓN DE CORREO -->
     <script type="module">
         import {
             auth,
@@ -615,15 +662,108 @@
         } from "./js/2-core/firebase.service.js";
         import { isMasterAdmin } from "./js/2-core/state.store.js";
 
+        const ALL_CAREER_KEYS = [
+            "preuniversitario_salud",
+            "medicina",
+            "enfermeria",
+            "odontologia",
+            "obstetricia",
+            "fisioterapia",
+            "laboratorio_clinico",
+            "psicologia_clinica",
+            "nutricion",
+            "bioquimica_farmacia",
+            "imagenologia",
+            "atencion_prehospitalaria"
+        ];
+
+        const CAREER_PREVIEW_DESCRIPTIONS = {
+            preuniversitario_salud: {
+                title: "OPCIÓN A • PREUNIVERSITARIO GENERAL DE SALUD SELECCIONADO",
+                desc: "Habilita el tronco común de admisión (Biología Celular, Química General/Orgánica, Anatomía Elemental y Razonamiento Clínico) con acceso a las bases vocacionales de las carreras de salud, sin abrumarte con semestres clínicos ni internado."
+            },
+            medicina: {
+                title: "OPCIÓN B • MEDICINA HUMANA SELECCIONADA",
+                desc: "Se desplegará directamente Medicina Humana en tu panel: Preuniversitario, Nivelación, 1.° a 10.° Semestre, Internado Rotativo, Titulación y CACES Medicina sin saturar tu pantalla con otras carreras."
+            },
+            enfermeria: {
+                title: "OPCIÓN B • ENFERMERÍA SELECCIONADA",
+                desc: "Se desplegará directamente Enfermería en tu panel: PAE (NANDA-NIC-NOC), Semestres 1.° a 7.°, Internado Rotativo, Titulación y CACES Enfermería."
+            },
+            odontologia: {
+                title: "OPCIÓN B • ODONTOLOGÍA SELECCIONADA",
+                desc: "Se desplegará directamente Odontología en tu panel: Preuniversitario, Nivelación, 1.° a 10.° Semestre, Clínicas Integrales, Titulación y CACES Odontología."
+            },
+            obstetricia: {
+                title: "OPCIÓN B • OBSTETRICIA SELECCIONADA",
+                desc: "Se desplegará directamente Obstetricia en tu panel: Semestres 1.° a 7.°, Claves Obstétricas MSP, Internado Rotativo, Titulación y CACES Obstetricia."
+            },
+            fisioterapia: {
+                title: "OPCIÓN B • FISIOTERAPIA Y REHABILITACIÓN SELECCIONADA",
+                desc: "Se desplegará directamente Fisioterapia en tu panel: Semestres 1.° a 8.°, Biomecánica, Kinesiología, Neurorrehabilitación y Titulación."
+            },
+            laboratorio_clinico: {
+                title: "OPCIÓN B • LABORATORIO CLÍNICO SELECCIONADO",
+                desc: "Se desplegará directamente Laboratorio Clínico en tu panel: Semestres 1.° a 8.°, Hematología, Bioquímica Clínica, Microbiología y Titulación."
+            },
+            psicologia_clinica: {
+                title: "OPCIÓN B • PSICOLOGÍA CLÍNICA SELECCIONADA",
+                desc: "Se desplegará directamente Psicología Clínica en tu panel: Semestres 1.° a 8.°, Psicopatología DSM-5-TR/CIE-11, Psicodiagnóstico y Titulación."
+            },
+            nutricion: {
+                title: "OPCIÓN B • NUTRICIÓN Y DIETÉTICA SELECCIONADA",
+                desc: "Se desplegará directamente Nutrición y Dietética en tu panel: Semestres 1.° a 8.°, Evaluación ABCD, Dietoterapia, Internado y Titulación."
+            },
+            bioquimica_farmacia: {
+                title: "OPCIÓN B • BIOQUÍMICA Y FARMACIA SELECCIONADA",
+                desc: "Se desplegará directamente Bioquímica y Farmacia en tu panel: Semestres 1.° a 9.°, Farmacología, Farmacia Hospitalaria, Toxicología y Titulación."
+            },
+            imagenologia: {
+                title: "OPCIÓN B • IMAGENOLOGÍA Y RADIOLOGÍA SELECCIONADA",
+                desc: "Se desplegará directamente Imagenología y Radiología en tu panel: Semestres 1.° a 8.°, Radiología, TC, RMN, Ecografía y Titulación."
+            },
+            atencion_prehospitalaria: {
+                title: "OPCIÓN B • ATENCIÓN PREHOSPITALARIA Y EMERGENCIAS SELECCIONADA",
+                desc: "Se desplegará directamente Atención Prehospitalaria en tu panel: Semestres 1.° a 8.°, Soporte Vital BLS/ACLS, Trauma PHTLS, Triaje y Titulación."
+            }
+        };
+
         const params = new URLSearchParams(window.location.search);
         const urlPlan = params.get("plan");
         const urlPago = params.get("pago");
+        const urlCareer = params.get("carrera") || sessionStorage.getItem("makai_selected_career") || localStorage.getItem("makai_selected_career");
         const isVerifyPending = params.get("verify") === "pending";
 
         const registrationCard = document.getElementById("registration-card");
         const verificationCard = document.getElementById("verification-card");
         const verifyEmailDisplay = document.getElementById("verify-email-display");
         const verifyStatusMsg = document.getElementById("verify-status-msg");
+
+        const careerSelectEl = document.getElementById("reg-career");
+        const careerPreviewTitle = document.getElementById("reg-career-preview-title");
+        const careerPreviewDesc = document.getElementById("reg-career-preview-desc");
+        const titleSelectEl = document.getElementById("reg-title");
+
+        function updateCareerPreviewUI(careerKey) {
+            const info = CAREER_PREVIEW_DESCRIPTIONS[careerKey] || CAREER_PREVIEW_DESCRIPTIONS.medicina;
+            if (careerPreviewTitle) careerPreviewTitle.textContent = info.title;
+            if (careerPreviewDesc) careerPreviewDesc.textContent = info.desc;
+            if (careerKey === "preuniversitario_salud" && titleSelectEl) {
+                titleSelectEl.value = "Asp.";
+            }
+        }
+
+        if (careerSelectEl) {
+            if (urlCareer && ALL_CAREER_KEYS.includes(urlCareer)) {
+                careerSelectEl.value = urlCareer;
+            }
+            updateCareerPreviewUI(careerSelectEl.value);
+            careerSelectEl.addEventListener("change", () => {
+                updateCareerPreviewUI(careerSelectEl.value);
+                sessionStorage.setItem("makai_selected_career", careerSelectEl.value);
+                localStorage.setItem("makai_selected_career", careerSelectEl.value);
+            });
+        }
 
         const planHiddenInput = document.getElementById("reg-plan-select");
         const planCards = document.querySelectorAll(".plan-card");
@@ -641,10 +781,11 @@
             dateInput.value = new Date().toISOString().split("T")[0];
         }
 
+        // Precios actualizados ($18.60 mensual y $144.75 anual con 35% de descuento)
         const planPrices = {
             basico: "0.00",
-            pro_mensual: "17.99",
-            pro_anual: "139.99",
+            pro_mensual: "18.60",
+            pro_anual: "144.75",
             vip: "49.99"
         };
 
@@ -712,7 +853,7 @@
 
             // Habilitar formulario de comprobante tanto para QR, Transferencia como Tarjeta
             evidenceSection?.classList.remove("hidden");
-            const amountForPlan = currentPlan === "basico" ? "17.99" : (planPrices[currentPlan] || "17.99");
+            const amountForPlan = currentPlan === "basico" ? "18.60" : (planPrices[currentPlan] || "18.60");
             if (payAmountInput) payAmountInput.value = amountForPlan;
 
             requiredEvidenceIds.forEach((id) => {
@@ -946,7 +1087,7 @@
                     titularCuenta: document.getElementById("pay-holder-name")?.value.trim() || `${firstName} ${lastName}`,
                     cedulaTitular: document.getElementById("pay-holder-id")?.value.trim() || cedula,
                     bancoOrigen: document.getElementById("pay-origin-bank")?.value || "Banco Pichincha (2205616642)",
-                    montoDeclarado: document.getElementById("pay-amount")?.value.trim() || "17.99",
+                    montoDeclarado: document.getElementById("pay-amount")?.value.trim() || "18.60",
                     fechaComprobante: document.getElementById("pay-receipt-date")?.value || "",
                     archivoNombre: receiptFile ? receiptFile.name : "",
                     archivoTipo: receiptFile ? receiptFile.type : "",
@@ -956,6 +1097,7 @@
                 } : null;
 
                 const isUserAdmin = isMasterAdmin(email);
+                const isPreuni = career === "preuniversitario_salud";
 
                 const profileData = {
                     uid: cred.user.uid,
@@ -966,6 +1108,10 @@
                     cedula: cedula,
                     nickname: nickname,
                     carrera: career,
+                    nivelIngreso: isPreuni ? "preuniversitario" : "universitario",
+                    esPreuniversitarioExclusivo: isPreuni,
+                    carrerasHabilitadas: isUserAdmin ? ALL_CAREER_KEYS : [career],
+                    avisoControlAceptado: true,
                     pais: country,
                     telefonoExtension: phoneExt,
                     telefonoNumero: phoneNumber,
@@ -996,6 +1142,7 @@
                             estudianteCedula: cedula,
                             estudianteEmail: email,
                             estudianteTelefono: `${phoneExt} ${phoneNumber}`,
+                            estudianteCarrera: career,
                             planSolicitado: chosenPlan,
                             metodoPago: chosenPayment,
                             cuentaReceptoraPichincha: "2205616642",
@@ -1007,6 +1154,16 @@
                 } catch (fireErr) {
                     console.warn("Aviso guardando en Firestore:", fireErr);
                 }
+
+                // Guardar clasificación local para que dashboard.html optimice la vista desde el primer segundo
+                localStorage.setItem("makai_classified_profile", JSON.stringify({
+                    uid: cred.user.uid,
+                    email: email,
+                    carrera: career,
+                    nivelIngreso: profileData.nivelIngreso,
+                    esPreuniversitarioExclusivo: isPreuni,
+                    carrerasHabilitadas: profileData.carrerasHabilitadas
+                }));
 
                 if (isUserAdmin) {
                     window.location.href = "dashboard.html";
