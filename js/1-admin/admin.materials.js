@@ -36,8 +36,20 @@ const MATERIALS_COLLECTION = COLLECTIONS?.MATERIALS || "materiales_estudio";
 let materialsCache = [];
 let editingMaterialId = null;
 
-// Catálogo curricular de respaldo (11 Carreras de Salud + 4 Oficiales CACES)
+// Catálogo curricular de respaldo (Preuniversitario + 11 Carreras de Salud + 4 Oficiales CACES)
 const DEFAULT_CAREERS = [
+    {
+        id: "preuniversitario_salud",
+        nombre: "Preuniversitario General de Salud",
+        caces: false,
+        materias: [
+            "Biología Celular y Molecular",
+            "Química General e Inorgánica",
+            "Química Orgánica Aplicada a la Salud",
+            "Anatomía y Fisiología Elemental",
+            "Terminología Médica y Razonamiento Clínico"
+        ]
+    },
     {
         id: "medicina",
         nombre: "Medicina",
