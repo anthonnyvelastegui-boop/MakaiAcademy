@@ -41,7 +41,8 @@ const SAFE_COLLECTIONS = {
     PAYMENTS: COLLECTIONS?.PAYMENTS || "solicitudes_pago",
     QUESTIONS: COLLECTIONS?.QUESTIONS || "preguntas_caces",
     SINAPTICO: COLLECTIONS?.SINAPTICO || "tarjetas_sinaptico",
-    MATERIALS: COLLECTIONS?.MATERIALS || "materiales_estudio"
+    MATERIALS: COLLECTIONS?.MATERIALS || "materiales_estudio",
+    CAREER_REQUESTS: "solicitudes_cambio_carrera"
 };
 
 // ============================================================================
