@@ -211,6 +211,9 @@ async function initSubmodulesSafely() {
     if (!document.getElementById("admin-tutors-section")) {
         initAdminTutorsFallback();
     }
+
+    // 7. Inicializar Centro de Control de Carreras Habilitadas y Dispositivos (1 PC + 1 Móvil)
+    initAdminAccessAndDevicesManager();
 }
 
 // ============================================================================
