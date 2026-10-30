@@ -383,8 +383,8 @@ function renderMaterialsSectionUI() {
                             <label class="block text-[11px] font-mono text-gray-400 uppercase mb-1">Plan Requerido (Candado) *</label>
                             <select id="mat-plan" required class="w-full bg-surface-container border border-surface-high rounded-xl px-3 py-2.5 text-xs text-white focus:border-primary focus:outline-none">
                                 <option value="Básico">🔓 Plan Básico ($0 - Abierto)</option>
-                                <option value="PRO">⚡ Makai PRO CACES ($17.99 / $139.99)</option>
-                                <option value="VIP">👑 Mentoría Élite VIP ($49.99)</option>
+                                <option value="PRO">⚡ Makai PRO CACES ($18.60 / $144.75)</option>
+                                <option value="VIP">👑 Mentoría Élite VIP ($45.99)</option>
                             </select>
                         </div>
                         <div>
