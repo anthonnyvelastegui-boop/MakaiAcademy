@@ -15,8 +15,13 @@ import {
     signOut,
     doc,
     getDoc,
+    setDoc,
     updateDoc
 } from "../2-core/firebase.service.js";
+
+import {
+    onSnapshot
+} from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
 
 import {
     appState,
@@ -43,24 +48,11 @@ let domAdminObserver = null;
 let examAntiCheatBound = false;
 let focusLostCounter = 0;
 
-/**
- * Carreras con candado "(Próximamente)" para cuentas estándar,
- * pero 100% desbloqueadas para Administradores Maestros.
- */
-const COMING_SOON_CAREERS = Object.freeze([
-    "odontologia",
-    "obstetricia"
-]);
-
-/**
- * Modos de evaluación que exigen suscripción PRO o VIP activa.
- */
-const PRO_ONLY_EXAM_MODES = Object.freeze([
-    "estandar",
-    "standard",
-    "critico",
-    "refuerzo_critico"
-]);
+// Configuración del Sistema Estilo Netflix / Crunchyroll (1 PC + 1 Celular)
+const DEVICE_ID_STORAGE_KEY = "makai_hardware_device_id_v1";
+const SESSION_TOKEN_STORAGE_KEY = "makai_active_session_token_v1";
+const MAX_SELF_SWAPS_PER_MONTH = 2;
+let activeDeviceUnsubscribe = null;
 
 // ============================================================================
 // 2. PUNTO DE ENTRADA DEL MÓDULO (initSecurityGuard)
@@ -161,11 +153,15 @@ export async function enforceRouteProtection(user, userData = null, pageType = n
         return true;
     }
 
-    // Caso 2: Cuenta Maestra de Administración (Pase directo total)
+    // Caso 2: Cuenta Maestra de Administración (Pase directo total sin límite de dispositivos)
     if (verifyMasterAdminAccess(user)) {
+        await verifyAndRegisterUserDevice(user);
         if (view === "index") {
             window.location.href = "dashboard.html";
             return false;
+        }
+        if (view === "dashboard") {
+            await auditUserSessionIntegrity(user);
         }
         return true;
     }
@@ -183,13 +179,20 @@ export async function enforceRouteProtection(user, userData = null, pageType = n
         return true;
     }
 
-    // Caso 4: Usuario autenticado y verificado que abre index.html -> llevar al Dashboard
+    // Caso 4: Verificar límite de 2 dispositivos (Slot 1: PC + Slot 2: Móvil) en index.html y dashboard.html
+    const deviceCheck = await verifyAndRegisterUserDevice(user);
+    if (!deviceCheck.allowed) {
+        // Si hay conflicto de 3.er dispositivo, se muestra el modal interactivo y se detiene el paso
+        return false;
+    }
+
+    // Caso 5: Usuario autenticado, verificado y con dispositivo autorizado que abre index.html -> llevar al Dashboard
     if (view === "index") {
         window.location.href = "dashboard.html";
         return false;
     }
 
-    // Caso 5: Auditar integridad de suscripción al entrar a dashboard.html
+    // Caso 6: Auditar integridad de suscripción y carreras habilitadas al entrar a dashboard.html
     if (view === "dashboard") {
         await auditUserSessionIntegrity(user);
     }
@@ -337,9 +340,13 @@ export async function auditUserSessionIntegrity(user = null) {
             remoteData.subscriptionLevel = "Básico";
         }
 
-        // Sincronizar con state.store.js
+        // Sincronizar con state.store.js y con el selector de carreras del Dashboard
         setSessionState(activeUser, remoteData);
         enforceAdminVaultLock(activeUser);
+
+        if (typeof window !== "undefined" && typeof window.MakaiDashboardUI?.applyFirestoreUserCareerProfile === "function") {
+            window.MakaiDashboardUI.applyFirestoreUserCareerProfile(remoteData);
+        }
 
         return remoteData;
     } catch (err) {
@@ -673,6 +680,493 @@ export function showSecurityToast(message, type = "info") {
     }, 3600);
 }
 
+// ============================================================================
+// 9. IDENTIFICACIÓN INTELIGENTE DE DISPOSITIVOS (1 PC + 1 CELULAR)
+//    Slot 1: Computadora (desktop) | Slot 2: Teléfono / Móvil (mobile)
+//    Guarda en Firestore: usuarios/{uid}.dispositivosRegistrados
+// ============================================================================
+
+/**
+ * Analiza el navegador y clasifica el equipo en:
+ * - Slot 1 ("desktop"): Windows, Mac o Linux (ej. Chrome en Windows 10/11)
+ * - Slot 2 ("mobile"): Android o iOS (ej. Safari en iPhone o Chrome en Samsung)
+ */
+export function detectDeviceEnvironment() {
+    const ua = navigator.userAgent || "";
+    const platform = (navigator.userAgentData?.platform || navigator.platform || "").toLowerCase();
+
+    const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
+    const isIPadOS = platform.includes("mac") && navigator.maxTouchPoints > 1;
+    const category = (isMobileUA || isIPadOS) ? "mobile" : "desktop";
+
+    let osName = "Sistema Operativo";
+    if (/Windows NT 10\.0/i.test(ua)) osName = "Windows 10/11";
+    else if (/Windows/i.test(ua)) osName = "Windows";
+    else if (/iPhone/i.test(ua)) osName = "iPhone (iOS)";
+    else if (/iPad/i.test(ua) || isIPadOS) osName = "iPad (iPadOS)";
+    else if (/Android/i.test(ua)) {
+        const match = ua.match(/Android\s([0-9.]+)/i);
+        osName = match ? `Android ${match[1]}` : "Android";
+    } else if (/Mac OS X|Macintosh/i.test(ua)) osName = "macOS";
+    else if (/Linux/i.test(ua)) osName = "Linux";
+
+    let browserName = "Navegador";
+    if (/Edg\//i.test(ua)) browserName = "Edge";
+    else if (/OPR\/|Opera/i.test(ua)) browserName = "Opera";
+    else if (/Chrome\//i.test(ua) && !/Edg\//i.test(ua)) browserName = "Chrome";
+    else if (/Firefox\//i.test(ua)) browserName = "Firefox";
+    else if (/Safari\//i.test(ua) && !/Chrome\//i.test(ua)) browserName = "Safari";
+
+    const slotLabel = category === "desktop" ? "PC/Laptop" : "Móvil";
+    return {
+        category, // "desktop" (Slot 1) | "mobile" (Slot 2)
+        osName,
+        browserName,
+        label: `${slotLabel}: ${browserName} en ${osName}`
+    };
+}
+
+/**
+ * Crea o recupera la Huella Única de Dispositivo (deviceId) para este navegador.
+ */
+export function getOrCreateDeviceId() {
+    const env = detectDeviceEnvironment();
+    const prefix = env.category === "desktop" ? "MK-DESK" : "MK-MOB";
+
+    try {
+        const saved = localStorage.getItem(DEVICE_ID_STORAGE_KEY);
+        if (saved && saved.startsWith(prefix)) {
+            return saved;
+        }
+    } catch (e) {}
+
+    const traits = [
+        navigator.userAgent || "",
+        navigator.language || "",
+        screen?.width || 0,
+        screen?.height || 0,
+        screen?.colorDepth || 0,
+        navigator.hardwareConcurrency || 0,
+        Intl.DateTimeFormat().resolvedOptions().timeZone || ""
+    ].join("|");
+
+    let hash = 2166136261;
+    for (let i = 0; i < traits.length; i++) {
+        hash ^= traits.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+    }
+    const hwHex = (hash >>> 0).toString(16).toUpperCase().padStart(8, "0");
+
+    const rand = new Uint32Array(1);
+    if (window.crypto && window.crypto.getRandomValues) {
+        window.crypto.getRandomValues(rand);
+    } else {
+        rand[0] = Math.floor(Math.random() * 0xffffffff);
+    }
+    const randHex = (rand[0] >>> 0).toString(16).toUpperCase().padStart(6, "0").slice(0, 6);
+
+    const newId = `${prefix}-${hwHex}-${randHex}`;
+    try {
+        localStorage.setItem(DEVICE_ID_STORAGE_KEY, newId);
+    } catch (e) {}
+
+    return newId;
+}
+
+function getOrCreateSessionToken() {
+    let token = sessionStorage.getItem(SESSION_TOKEN_STORAGE_KEY);
+    if (!token) {
+        token = `SES-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+        sessionStorage.setItem(SESSION_TOKEN_STORAGE_KEY, token);
+    }
+    return token;
+}
+
+function buildCurrentDevicePayload() {
+    const env = detectDeviceEnvironment();
+    const deviceId = getOrCreateDeviceId();
+    const sessionToken = getOrCreateSessionToken();
+    const nowIso = new Date().toISOString();
+    const nowReadable = new Date().toLocaleString("es-EC", { timeZone: "America/Guayaquil" });
+
+    return {
+        deviceId,
+        slot: env.category, // "desktop" o "mobile"
+        etiqueta: env.label,
+        sistemaOperativo: env.osName,
+        navegador: env.browserName,
+        resolucion: `${window.screen?.width || 0}x${window.screen?.height || 0}`,
+        sessionToken,
+        ultimoAcceso: nowIso,
+        ultimoAccesoLegible: nowReadable
+    };
+}
+
+/**
+ * Valida y registra el dispositivo en `usuarios/{uid}.dispositivosRegistrados`.
+ * - Cuentas maestras (anthonnyvelastegui@gmail.com / aavemakaihc@gmail.com): Pase libre sin límite.
+ * - Estudiantes: Máximo 1 Computadora (desktop) + 1 Celular (mobile).
+ */
+export async function verifyAndRegisterUserDevice(user) {
+    if (!user || !user.uid) return { allowed: false };
+
+    const usersCollection = COLLECTIONS?.USERS || "usuarios";
+    const userRef = doc(db, usersCollection, user.uid);
+    const isAdmin = verifyMasterAdminAccess(user);
+    const currentDevice = buildCurrentDevicePayload();
+    const slotKey = currentDevice.slot; // "desktop" | "mobile"
+
+    // 1. PASE LIBRE ILIMITADO PARA TUS 2 CUENTAS MAESTRAS
+    if (isAdmin) {
+        try {
+            await setDoc(userRef, {
+                dispositivosRegistrados: {
+                    [slotKey]: {
+                        ...currentDevice,
+                        vinculadoEn: currentDevice.ultimoAcceso,
+                        modoAdministradorMaestro: true
+                    },
+                    politicaDispositivos: "ADMIN_ILIMITADO"
+                }
+            }, { merge: true });
+        } catch (e) {}
+
+        renderProfileDevicesSummary({
+            desktop: slotKey === "desktop" ? currentDevice : null,
+            mobile: slotKey === "mobile" ? currentDevice : null,
+            isMaster: true
+        });
+        return { allowed: true, isMaster: true };
+    }
+
+    // 2. CONTROL DE 2 SLOTS (1 PC + 1 CELULAR) PARA ALUMNOS
+    try {
+        const snap = await getDoc(userRef);
+        const userData = snap.exists() ? snap.data() : {};
+        const registeredMap = userData.dispositivosRegistrados || {};
+        const existingSlotDevice = registeredMap[slotKey] || null;
+
+        const currentMonthKey = new Date().toISOString().slice(0, 7);
+        const swapStats = registeredMap.controlReemplazos || { mes: currentMonthKey, usados: 0 };
+        if (swapStats.mes !== currentMonthKey) {
+            swapStats.mes = currentMonthKey;
+            swapStats.usados = 0;
+        }
+
+        // CASO A: El Slot (desktop o mobile) está vacío -> Registrar automáticamente
+        if (!existingSlotDevice || !existingSlotDevice.deviceId) {
+            const updatedDevices = {
+                ...registeredMap,
+                [slotKey]: {
+                    ...currentDevice,
+                    vinculadoEn: currentDevice.ultimoAcceso
+                },
+                controlReemplazos: swapStats,
+                maxDispositivosPermitidos: 2
+            };
+
+            await setDoc(userRef, { dispositivosRegistrados: updatedDevices }, { merge: true });
+            startRealtimeDeviceWatchdog(user.uid, slotKey, currentDevice.deviceId, currentDevice.sessionToken);
+            renderProfileDevicesSummary(updatedDevices);
+            return { allowed: true, status: "registered_new_slot" };
+        }
+
+        // CASO B: Coincide con el dispositivo ya registrado en ese Slot -> Permitir acceso
+        if (existingSlotDevice.deviceId === currentDevice.deviceId) {
+            const updatedDevices = {
+                ...registeredMap,
+                [slotKey]: {
+                    ...existingSlotDevice,
+                    ...currentDevice,
+                    vinculadoEn: existingSlotDevice.vinculadoEn || currentDevice.ultimoAcceso
+                },
+                controlReemplazos: swapStats,
+                maxDispositivosPermitidos: 2
+            };
+
+            await setDoc(userRef, { dispositivosRegistrados: updatedDevices }, { merge: true });
+            startRealtimeDeviceWatchdog(user.uid, slotKey, currentDevice.deviceId, currentDevice.sessionToken);
+            renderProfileDevicesSummary(updatedDevices);
+            return { allowed: true, status: "matched_existing_slot" };
+        }
+
+        // CASO C: Intenta abrir un 2.º PC o un 2.º Celular distinto -> Mostrar Modal de Conflicto
+        showDeviceLimitConflictModal({
+            user,
+            slotKey,
+            existingDevice: existingSlotDevice,
+            newDevice: currentDevice,
+            registeredMap,
+            swapStats
+        });
+
+        return { allowed: false, status: "slot_conflict" };
+    } catch (err) {
+        console.warn("[MakaiSecurityGuard] Aviso verificando dispositivos en Firestore:", err);
+        return { allowed: true, status: "offline_fallback" };
+    }
+}
+
+/**
+ * Escucha cambios en vivo sobre `usuarios/{uid}` para expulsar en <1s al equipo
+ * anterior si se autoriza un reemplazo desde otro dispositivo del mismo tipo.
+ */
+function startRealtimeDeviceWatchdog(uid, slotKey, myDeviceId, mySessionToken) {
+    if (activeDeviceUnsubscribe) {
+        try { activeDeviceUnsubscribe(); } catch (e) {}
+    }
+
+    const usersCollection = COLLECTIONS?.USERS || "usuarios";
+    const userRef = doc(db, usersCollection, uid);
+
+    activeDeviceUnsubscribe = onSnapshot(userRef, async (docSnap) => {
+        if (!docSnap.exists()) return;
+        const data = docSnap.data();
+        if (verifyMasterAdminAccess(data.email)) return;
+
+        const map = data.dispositivosRegistrados || {};
+        const activeSlot = map[slotKey];
+
+        renderProfileDevicesSummary(map);
+
+        if (activeSlot && activeSlot.deviceId && activeSlot.deviceId !== myDeviceId) {
+            if (activeDeviceUnsubscribe) {
+                activeDeviceUnsubscribe();
+                activeDeviceUnsubscribe = null;
+            }
+            await forceSignOutByRemoteDevice(activeSlot);
+        } else if (activeSlot && activeSlot.sessionToken && activeSlot.sessionToken !== mySessionToken) {
+            if (activeDeviceUnsubscribe) {
+                activeDeviceUnsubscribe();
+                activeDeviceUnsubscribe = null;
+            }
+            await forceSignOutByRemoteDevice(activeSlot);
+        }
+    }, () => {});
+}
+
+async function forceSignOutByRemoteDevice(newActiveDevice) {
+    disableExamAntiCheatGuard();
+    try { await signOut(auth); } catch (e) {}
+
+    const overlay = document.createElement("div");
+    overlay.className = "fixed inset-0 z-[9999] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 font-sans";
+    overlay.innerHTML = `
+        <div class="bg-[#111722] border-2 border-[#ff4d4d] rounded-2xl max-w-md w-full p-6 text-center space-y-4 shadow-2xl">
+            <div class="w-14 h-14 rounded-2xl bg-[#ff4d4d]/15 border border-[#ff4d4d] text-[#ff4d4d] flex items-center justify-center mx-auto text-2xl">
+                🔒
+            </div>
+            <span class="inline-block px-3 py-1 rounded-full bg-[#ff4d4d]/15 text-[#ff4d4d] text-[10px] font-mono font-extrabold uppercase">
+                SESIÓN ABIERTA EN OTRO DISPOSITIVO
+            </span>
+            <h3 class="text-xl font-extrabold text-white">Se transfirió tu acceso</h3>
+            <p class="text-xs text-gray-300 leading-relaxed">
+                Tu cuenta permite máximo <strong>1 Computadora + 1 Teléfono Móvil</strong>. Se ha iniciado sesión en:
+            </p>
+            <div class="p-3 rounded-xl bg-[#06090e] border border-gray-800 text-xs font-mono text-[#00e5ff]">
+                ${newActiveDevice.etiqueta || "Nuevo dispositivo"}
+            </div>
+            <button type="button"
+                    onclick="window.location.href='index.html'"
+                    class="w-full py-3 rounded-xl bg-[#00e5ff] text-[#06090e] font-extrabold text-xs uppercase tracking-wider">
+                Volver al Login
+            </button>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+}
+
+function showDeviceLimitConflictModal({ user, slotKey, existingDevice, newDevice, registeredMap, swapStats }) {
+    document.getElementById("makai-device-conflict-modal")?.remove();
+
+    const slotTitle = slotKey === "desktop" ? "COMPUTADORA (SLOT 1)" : "TELÉFONO MÓVIL (SLOT 2)";
+    const remainingSwaps = Math.max(0, MAX_SELF_SWAPS_PER_MONTH - (swapStats.usados || 0));
+    const canSelfSwap = remainingSwaps > 0;
+    const usersCollection = COLLECTIONS?.USERS || "usuarios";
+
+    const modal = document.createElement("div");
+    modal.id = "makai-device-conflict-modal";
+    modal.className = "fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 font-sans";
+    modal.innerHTML = `
+        <div class="bg-[#111722] border-2 border-[#ffbe0b] rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+            <div>
+                <span class="px-2.5 py-1 rounded-full bg-[#ffbe0b]/15 border border-[#ffbe0b]/40 text-[#ffbe0b] text-[10px] font-mono font-extrabold uppercase">
+                    🛡️ LÍMITE DE 2 DISPOSITIVOS (1 PC + 1 CELULAR)
+                </span>
+                <h3 class="text-lg sm:text-xl font-extrabold text-white mt-2">
+                    Espacio ocupado en ${slotTitle}
+                </h3>
+                <p class="text-xs text-gray-300 mt-1 leading-relaxed">
+                    Tu cuenta ya tiene vinculado un equipo en la categoría <strong>${slotTitle}</strong>:
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+                <div class="p-3.5 rounded-xl bg-[#06090e] border border-gray-800 space-y-1">
+                    <span class="text-[10px] text-gray-400 uppercase block">EQUIPO VINCULADO ACTUAL</span>
+                    <strong class="text-white block">${existingDevice.etiqueta || "Equipo registrado"}</strong>
+                    <span class="text-[10px] text-gray-500 block">ID: ${existingDevice.deviceId}</span>
+                </div>
+                <div class="p-3.5 rounded-xl bg-[#06090e] border border-[#00e5ff]/50 space-y-1">
+                    <span class="text-[10px] text-[#00e5ff] uppercase block">ESTE DISPOSITIVO NUEVO</span>
+                    <strong class="text-white block">${newDevice.etiqueta}</strong>
+                    <span class="text-[10px] text-gray-500 block">ID: ${newDevice.deviceId}</span>
+                </div>
+            </div>
+
+            ${canSelfSwap ? `
+                <div class="p-3 rounded-xl bg-[#00e5ff]/10 border border-[#00e5ff]/30 text-xs text-gray-200">
+                    ⚡ Tienes <strong>${remainingSwaps} cambio(s) disponible(s) este mes</strong>. Si vinculas este equipo, se cerrará automáticamente la sesión en el anterior.
+                </div>
+            ` : `
+                <div class="p-3 rounded-xl bg-[#ff4d4d]/15 border border-[#ff4d4d]/40 text-xs text-gray-200">
+                    🔒 Has alcanzado el límite mensual de cambios de dispositivo. Solicita la desvinculación al Administrador Maestro para autorizar este nuevo equipo.
+                </div>
+            `}
+
+            <div id="device-conflict-feedback" class="hidden p-3 rounded-xl text-xs font-mono"></div>
+
+            <div class="flex flex-col sm:flex-row justify-end gap-2.5 pt-2">
+                <button type="button" id="btn-cancel-device-login" class="px-4 py-2.5 rounded-xl bg-[#06090e] border border-gray-700 text-xs font-bold text-gray-300">
+                    Cerrar Sesión Aquí
+                </button>
+                ${canSelfSwap ? `
+                    <button type="button" id="btn-replace-slot-device" class="px-5 py-2.5 rounded-xl bg-[#00e5ff] text-[#06090e] font-extrabold text-xs uppercase">
+                        Vincular Este Equipo y Cerrar el Anterior →
+                    </button>
+                ` : `
+                    <button type="button" id="btn-request-admin-device-reset" class="px-5 py-2.5 rounded-xl bg-[#ffbe0b] text-[#06090e] font-extrabold text-xs uppercase">
+                        Notificar al Administrador Maestro
+                    </button>
+                `}
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    document.getElementById("btn-cancel-device-login")?.addEventListener("click", () => {
+        secureSignOut("Inicio de sesión cancelado por límite de dispositivos.");
+    });
+
+    document.getElementById("btn-replace-slot-device")?.addEventListener("click", async (e) => {
+        const btn = e.currentTarget;
+        btn.disabled = true;
+        btn.textContent = "Vinculando...";
+
+        try {
+            const updatedDevices = {
+                ...registeredMap,
+                [slotKey]: {
+                    ...newDevice,
+                    vinculadoEn: newDevice.ultimoAcceso,
+                    reemplazoAnteriorId: existingDevice.deviceId
+                },
+                controlReemplazos: {
+                    mes: swapStats.mes,
+                    usados: (swapStats.usados || 0) + 1
+                },
+                maxDispositivosPermitidos: 2
+            };
+
+            await setDoc(doc(db, usersCollection, user.uid), {
+                dispositivosRegistrados: updatedDevices
+            }, { merge: true });
+
+            modal.remove();
+            startRealtimeDeviceWatchdog(user.uid, slotKey, newDevice.deviceId, newDevice.sessionToken);
+            renderProfileDevicesSummary(updatedDevices);
+
+            if (detectCurrentPageType() === "index") {
+                window.location.href = "dashboard.html";
+            }
+        } catch (err) {
+            btn.disabled = false;
+        }
+    });
+
+    document.getElementById("btn-request-admin-device-reset")?.addEventListener("click", async (e) => {
+        const btn = e.currentTarget;
+        btn.disabled = true;
+        try {
+            await setDoc(doc(db, usersCollection, user.uid), {
+                dispositivosRegistrados: {
+                    ...registeredMap,
+                    solicitudResetPendiente: {
+                        solicitadoEn: new Date().toISOString(),
+                        slotSolicitado: slotKey,
+                        nuevoDispositivo: newDevice
+                    }
+                }
+            }, { merge: true });
+
+            const fb = document.getElementById("device-conflict-feedback");
+            if (fb) {
+                fb.className = "p-3 rounded-xl border border-[#94de2d] bg-[#94de2d]/15 text-[#94de2d] text-xs font-mono";
+                fb.textContent = "✅ Solicitud enviada al Administrador Maestro.";
+                fb.classList.remove("hidden");
+            }
+        } catch (err) {
+            btn.disabled = false;
+        }
+    });
+}
+
+function renderProfileDevicesSummary(devicesMap = {}) {
+    const profileView = document.getElementById("view-profile");
+    if (!profileView) return;
+
+    let box = document.getElementById("profile-devices-security-card");
+    if (!box) {
+        box = document.createElement("div");
+        box.id = "profile-devices-security-card";
+        box.className = "bg-surface-container border border-primary/40 rounded-2xl p-6 space-y-4 mt-6";
+        profileView.appendChild(box);
+    }
+
+    const desktopSlot = devicesMap.desktop || null;
+    const mobileSlot = devicesMap.mobile || null;
+    const currentId = getOrCreateDeviceId();
+
+    box.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-surface-high pb-3">
+            <div>
+                <span class="text-[10px] font-mono text-primary uppercase font-extrabold">PROTECCIÓN ANTI-PRÉSTAMO • MÁXIMO 2 DISPOSITIVOS</span>
+                <h3 class="text-lg font-extrabold text-white mt-0.5">Mis Dispositivos Vinculados (1 PC + 1 Celular)</h3>
+            </div>
+            <span class="px-3 py-1 rounded-lg bg-secondary/15 border border-secondary/30 text-secondary font-mono text-xs font-bold">
+                ${devicesMap.isMaster ? "⚡ ADMIN MAESTRO (SIN LÍMITE)" : "1 Computadora + 1 Móvil"}
+            </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+            <div class="p-4 rounded-xl bg-surface border ${desktopSlot ? 'border-primary/50' : 'border-surface-high'} space-y-1">
+                <div class="flex items-center justify-between">
+                    <span class="text-primary font-extrabold">💻 SLOT 1 • COMPUTADORA (DESKTOP)</span>
+                    ${desktopSlot?.deviceId === currentId ? '<span class="text-secondary font-bold">● ACTIVO AQUÍ</span>' : ''}
+                </div>
+                ${desktopSlot ? `
+                    <p class="text-white font-bold">${desktopSlot.etiqueta}</p>
+                    <p class="text-gray-400 text-[11px]">ID: ${desktopSlot.deviceId}</p>
+                    <p class="text-gray-500 text-[10px]">Último acceso: ${desktopSlot.ultimoAccesoLegible || desktopSlot.ultimoAcceso}</p>
+                ` : `<p class="text-gray-400">Libre • Se registrará al abrir sesión en tu computadora.</p>`}
+            </div>
+
+            <div class="p-4 rounded-xl bg-surface border ${mobileSlot ? 'border-secondary/50' : 'border-surface-high'} space-y-1">
+                <div class="flex items-center justify-between">
+                    <span class="text-secondary font-extrabold">📱 SLOT 2 • TELÉFONO / CELULAR (MOBILE)</span>
+                    ${mobileSlot?.deviceId === currentId ? '<span class="text-secondary font-bold">● ACTIVO AQUÍ</span>' : ''}
+                </div>
+                ${mobileSlot ? `
+                    <p class="text-white font-bold">${mobileSlot.etiqueta}</p>
+                    <p class="text-gray-400 text-[11px]">ID: ${mobileSlot.deviceId}</p>
+                    <p class="text-gray-500 text-[10px]">Último acceso: ${mobileSlot.ultimoAccesoLegible || mobileSlot.ultimoAcceso}</p>
+                ` : `<p class="text-gray-400">Libre • Se registrará al abrir sesión en tu teléfono móvil.</p>`}
+            </div>
+        </div>
+    `;
+}
+
 // Exposición global controlada para interoperabilidad entre las 8 carpetas
 if (typeof window !== "undefined") {
     window.MakaiSecurityGuard = {
@@ -688,6 +1182,9 @@ if (typeof window !== "undefined") {
         enableExamAntiCheatGuard,
         disableExamAntiCheatGuard,
         secureSignOut,
-        showSecurityToast
+        showSecurityToast,
+        detectDeviceEnvironment,
+        getOrCreateDeviceId,
+        verifyAndRegisterUserDevice
     };
 }
