@@ -414,7 +414,8 @@ export function switchAdminSubTab(tabId = "all") {
         reactivos: document.getElementById("admin-questions-section") || document.getElementById("admin-form")?.closest(".grid") || document.getElementById("admin-form")?.parentElement,
         sinaptico: document.getElementById("admin-sinaptico-section"),
         materiales: document.getElementById("admin-materials-section"),
-        docentes: document.getElementById("admin-tutors-section")
+        docentes: document.getElementById("admin-tutors-section"),
+        accesos: document.getElementById("admin-access-devices-section")
     };
 
     Object.entries(sectionMap).forEach(([key, element]) => {
