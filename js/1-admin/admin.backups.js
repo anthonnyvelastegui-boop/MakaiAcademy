@@ -263,12 +263,16 @@ export async function downloadUsersExcelCSV() {
 
         const usersSnap = await getDocs(collection(db, COLLECTIONS.USERS));
 
-        const headers = [
+const headers = [
             "UID",
             "Titulo",
             "Nombre Completo",
             "Nickname",
-            "Carrera",
+            "Carrera Principal",
+            "Modalidad Ingreso",
+            "Carreras Habilitadas",
+            "Dispositivo 1 (PC Desktop)",
+            "Dispositivo 2 (Celular Mobile)",
             "Correo Principal",
             "Correo Respaldo",
             "Telefono",
@@ -297,6 +301,10 @@ export async function downloadUsersExcelCSV() {
         usersSnap.forEach(d => {
             const u = d.data();
             const comp = u.datosComprobante || {};
+            const devs = u.dispositivosRegistrados || {};
+            const habs = Array.isArray(u.carrerasHabilitadas) ? u.carrerasHabilitadas.join(", ") : (u.carrera || "medicina");
+            const pcInfo = devs.desktop ? `${devs.desktop.etiqueta || "PC"} (${devs.desktop.deviceId || ""})` : "Sin vincular";
+            const mobInfo = devs.mobile ? `${devs.mobile.etiqueta || "Móvil"} (${devs.mobile.deviceId || ""})` : "Sin vincular";
 
             const row = [
                 d.id,
@@ -304,6 +312,10 @@ export async function downloadUsersExcelCSV() {
                 u.nombre || "",
                 u.nickname || "",
                 u.carrera || "",
+                u.nivelIngreso || (u.carrera === "preuniversitario_salud" ? "preuniversitario" : "universitario"),
+                habs,
+                pcInfo,
+                mobInfo,
                 u.email || "",
                 u.emailRespaldo || "",
                 u.telefonoCompleto || "",
