@@ -142,7 +142,7 @@ function renderAdminPaymentsSection(adminView) {
                         <span>Bandeja de Verificación de Pagos y Activación PRO / VIP</span>
                     </h3>
                     <p class="text-xs text-gray-400 mt-1">
-                        Inspecciona capturas (JPG/PNG/PDF), detecta números de referencia duplicados y activa los planes <strong class="text-primary">Makai PRO</strong> ($17.99 / $139.99) o <strong class="text-secondary">Mentoría VIP</strong> ($49.99).
+                        Inspecciona capturas (JPG/PNG/PDF), detecta números de referencia duplicados y activa los planes <strong class="text-primary">Makai PRO</strong> ($18.60 / $144.75) o <strong class="text-secondary">Mentoría VIP</strong> ($49.99).
                     </p>
                 </div>
 
@@ -207,8 +207,8 @@ function renderAdminPaymentsSection(adminView) {
                     <label class="block text-[10px] font-mono text-gray-400 uppercase mb-1">Plan Solicitado</label>
                     <select id="payments-filter-plan" class="w-full bg-surface-container border border-surface-high rounded-lg px-3 py-2 text-xs text-white focus:border-primary focus:outline-none font-mono">
                         <option value="todos">Todos los planes</option>
-                        <option value="pro_anual">PRO Anual ($139.99)</option>
-                        <option value="pro_mensual">PRO Mensual ($17.99)</option>
+                        <option value="pro_anual">PRO Anual ($144.75)</option>
+                        <option value="pro_mensual">PRO Mensual ($18.60)</option>
                         <option value="vip">Mentoría Élite VIP ($49.99)</option>
                     </select>
                 </div>
@@ -492,7 +492,7 @@ function renderFilteredPaymentRows() {
         const catalogInfo = OFFICIAL_PLAN_CATALOG[planKey] || {
             label: item.planSolicitado || "PRO",
             level: planKey === "vip" ? "VIP" : "PRO",
-            expectedAmount: 17.99
+            expectedAmount: 18.60
         };
 
         const declaredAmount = parseFloat(String(item.montoDeclarado || "0").replace(",", "."));
@@ -541,6 +541,7 @@ function renderFilteredPaymentRows() {
                 <div class="text-white font-bold">${escapeHTML(item.estudianteNombre || "---")}</div>
                 <div class="text-[11px] text-primary break-all">${escapeHTML(item.estudianteEmail || "---")}</div>
                 <div class="text-[10px] text-gray-400 mt-0.5">${escapeHTML(item.estudianteTelefono || "Sin teléfono")}</div>
+                ${item.estudianteCarrera ? `<span class="inline-block mt-1 px-2 py-0.5 rounded bg-secondary/15 text-secondary text-[10px] font-bold uppercase">Área: ${escapeHTML(item.estudianteCarrera)}</span>` : ""}
             </td>
 
             <!-- 3. PLAN SOLICITADO Y MONTO -->
