@@ -37,12 +37,13 @@ const PAYMENT_ASSETS_PATHS = {
     SEALS_FOLDER: "assets/2-pagos-bancarios/sellos-financieros/"
 };
 
-// Catálogo de precios oficiales para auditoría de montos declarados
+// Catálogo de precios oficiales actualizados ($18.60 mensual y $144.75 anual con 35% de descuento)
 const OFFICIAL_PLAN_CATALOG = {
     basico: { label: "Plan Básico", level: "Básico", expectedAmount: 0.00 },
-    pro_mensual: { label: "Makai PRO Mensual", level: "PRO", expectedAmount: 17.99 },
-    pro_anual: { label: "Makai PRO Anual", level: "PRO", expectedAmount: 139.99 },
-    vip: { label: "Mentoría Élite VIP", level: "VIP", expectedAmount: 49.99 }
+    pro_mensual: { label: "Makai PRO Mensual", level: "PRO", expectedAmount: 18.60 },
+    pro_anual: { label: "Makai PRO Anual", level: "PRO", expectedAmount: 144.75 },
+    vip: { label: "Mentoría Élite VIP", level: "VIP", expectedAmount: 49.99 },
+    tesis_1a1: { label: "Vinculación Tesis 1 a 1", level: "PRO", expectedAmount: 10.00 }
 };
 
 // Estado interno del módulo de pagos
