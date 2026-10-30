@@ -130,26 +130,49 @@ async function loadTutorApplications() {
         snap.forEach(docSnap => {
             const data = docSnap.data();
             const tr = document.createElement("tr");
-            tr.className = "border-b border-surface-high hover:bg-surface/60";
+            tr.className = "border-b border-surface-high hover:bg-surface/60 align-top";
 
-            const isPending = !data.estado || data.estado.toLowerCase() === "pendiente";
+            const rawStatus = data.estado || data.estadoEvaluacion || "pendiente";
+            const isPending = rawStatus.toLowerCase().includes("pendiente");
+
+            const careerKey = data.carreraPrincipal || data.carrera || "medicina";
+            const careerLabel = data.carreraNombre || careerKey.toUpperCase();
+            const academicProfile = data.detalleGraduado?.tituloEspecialidad
+                || (data.detalleEstudiante ? `Estudiante (${data.detalleEstudiante.semestreActual || ""} • ${data.detalleEstudiante.meritoAyudantia || ""})` : "")
+                || data.tituloEspecialidad
+                || data.especialidad
+                || "Docente en Salud";
+
+            const subjectsList = Array.isArray(data.materiasQueDomina) && data.materiasQueDomina.length > 0
+                ? data.materiasQueDomina.slice(0, 4).join(", ") + (data.materiasQueDomina.length > 4 ? ` (+${data.materiasQueDomina.length - 4} más)` : "")
+                : "";
+
+            const contactPhone = data.telefonoWhatsapp || data.telefono || data.whatsappDirecto || "";
 
             tr.innerHTML = `
                 <td class="px-4 py-3">
                     <div class="text-white font-bold">${data.nombreCompleto || data.nombre || "---"}</div>
-                    <div class="text-[10px] text-gray-400">${data.createdAt || "---"}</div>
+                    <div class="text-[10px] text-primary font-bold">CI: ${data.cedula || "---"} • ${data.institucionOrigen || ""}</div>
+                    <div class="text-[10px] text-gray-400">${data.fechaPostulacionLegible || data.createdAt || "---"}</div>
                 </td>
-                <td class="px-4 py-3 text-secondary">${data.tituloEspecialidad || data.especialidad || "---"}</td>
-                <td class="px-4 py-3">${data.email || "---"}<br>${data.telefono || data.whatsappDirecto || ""}</td>
-                <td class="px-4 py-3 uppercase text-[10px] font-bold ${isPending ? "text-warning" : "text-primary"}">
-                    ${data.estado || "pendiente"}
+                <td class="px-4 py-3">
+                    <span class="px-2 py-0.5 rounded bg-primary/15 text-primary text-[10px] font-bold uppercase">${careerLabel}</span>
+                    <div class="text-secondary font-bold mt-1">${academicProfile}</div>
+                    ${subjectsList ? `<div class="text-[10px] text-gray-400 mt-0.5">Materias: ${subjectsList}</div>` : ""}
+                </td>
+                <td class="px-4 py-3">
+                    <div class="text-white">${data.email || "---"}</div>
+                    <div class="text-secondary font-bold">${contactPhone}</div>
+                </td>
+                <td class="px-4 py-3 uppercase text-[10px] font-bold ${isPending ? "text-warning" : "text-secondary"}">
+                    ${rawStatus}
                 </td>
                 <td class="px-4 py-3 flex flex-wrap gap-2">
-                    <button type="button" class="btn-activate-tutor px-2.5 py-1 rounded bg-secondary/20 text-secondary hover:bg-secondary hover:text-surface font-bold transition-all" data-id="${docSnap.id}" data-uid="${data.uid || docSnap.id}" data-rol="tutor_tesis">
-                        Activar Tesis
+                    <button type="button" class="btn-activate-tutor px-2.5 py-1.5 rounded-lg bg-secondary/20 border border-secondary/50 text-secondary hover:bg-secondary hover:text-surface font-bold transition-all" data-id="${docSnap.id}" data-uid="${data.uid || docSnap.id}" data-rol="tutor_tesis">
+                        ✓ Activar Tesis
                     </button>
-                    <button type="button" class="btn-activate-tutor px-2.5 py-1 rounded bg-primary/20 text-primary hover:bg-primary hover:text-surface font-bold transition-all" data-id="${docSnap.id}" data-uid="${data.uid || docSnap.id}" data-rol="docente_aula">
-                        Activar Aulas
+                    <button type="button" class="btn-activate-tutor px-2.5 py-1.5 rounded-lg bg-primary/20 border border-primary/50 text-primary hover:bg-primary hover:text-surface font-bold transition-all" data-id="${docSnap.id}" data-uid="${data.uid || docSnap.id}" data-rol="docente_aula">
+                        ✓ Activar Aulas
                     </button>
                 </td>
             `;
@@ -162,37 +185,42 @@ async function loadTutorApplications() {
                     const nuevoRol = targetBtn.getAttribute("data-rol");
                     const rolTexto = nuevoRol === "tutor_tesis" ? "Tutor Verificado de Tesis" : "Docente de Aulas Virtuales";
 
-                    if (!confirm(`¿Deseas activar a este candidato como ${rolTexto}? Esto actualizará sus permisos sin darle acceso a la Bóveda Admin.`)) {
+                    if (!confirm(`¿Deseas activar a ${data.nombreCompleto || "este candidato"} como ${rolTexto} en la carrera de ${careerLabel}?`)) {
                         return;
                     }
 
                     try {
-                        // 1. Actualizar rol en la colección "usuarios"
+                        // 1. Actualizar rol y asegurar que tenga habilitada su carrera en "usuarios"
                         await setDoc(doc(db, "usuarios", userUid), {
                             rol: nuevoRol,
+                            carrera: careerKey,
+                            carrerasHabilitadas: [careerKey],
+                            materiasDocenteAutorizadas: data.materiasQueDomina || [],
                             updatedAt: new Date().toISOString()
                         }, { merge: true });
 
-                        // 2. Marcar postulación como aprobada
+                        // 2. Marcar postulación como aprobada en "postulaciones_docentes"
                         await updateDoc(doc(db, "postulaciones_docentes", postulacionId), {
                             estado: "aprobado",
-                            rolAsignado: nuevoRol
+                            estadoEvaluacion: "aprobado",
+                            rolAsignado: nuevoRol,
+                            aprobadoEn: new Date().toISOString()
                         });
 
-                        // 3. Si es Tutor de Tesis, registrarlo también en "tutores_verificados" para el Marketplace
+                        // 3. Si es Tutor de Tesis, registrarlo también en "tutores_verificados"
                         if (nuevoRol === "tutor_tesis") {
                             await setDoc(doc(db, "tutores_verificados", userUid), {
                                 id: userUid,
                                 nombre: data.nombreCompleto || data.nombre || "Especialista Verificado",
-                                carrera: data.carrera || "medicina",
-                                carrerasCompatibles: data.carrerasCompatibles || [data.carrera || "medicina"],
-                                especialidad: data.tituloEspecialidad || data.especialidad || "Asesoría Metodológica y Bioestadística",
-                                universidadesExperiencia: data.universidadesExperiencia || ["Universidades del Ecuador"],
+                                carrera: careerKey,
+                                carrerasCompatibles: data.carrerasCompatibles || [careerKey],
+                                especialidad: academicProfile,
+                                universidadesExperiencia: [data.institucionOrigen || "Universidades del Ecuador"],
                                 tesisAprobadas: Number(data.tesisAprobadas) || 10,
                                 calificacion: 4.95,
                                 tarifaReferencialTutor: data.tarifaReferencialTutor || "$150 - $280 USD (Negociable directo con el tutor)",
                                 comisionMakaiUSD: 10,
-                                whatsappDirecto: (data.telefono || data.whatsappDirecto || "").replace(/\D/g, ""),
+                                whatsappDirecto: contactPhone.replace(/\D/g, ""),
                                 insignia: "TUTOR VERIFICADO MAKAI"
                             }, { merge: true });
                         }
@@ -206,6 +234,7 @@ async function loadTutorApplications() {
             });
 
             tbody.appendChild(tr);
+        });
         });
     } catch (error) {
         tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-danger">Error de permisos o colección vacía: ${error.message}</td></tr>`;
