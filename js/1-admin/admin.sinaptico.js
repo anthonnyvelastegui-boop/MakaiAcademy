@@ -86,6 +86,7 @@ const SINAPTICO_CURRICULUM = {
         }
     ],
     healthCareers11: [
+        { id: "preuniversitario_salud", nombre: "0. Preuniversitario General de Salud (Admisión)" },
         { id: "medicina", nombre: "1. Medicina Humana" },
         { id: "enfermeria", nombre: "2. Enfermería" },
         { id: "odontologia", nombre: "3. Odontología" },
@@ -100,8 +101,8 @@ const SINAPTICO_CURRICULUM = {
     ],
     academicLevels: [
         { id: "caces_oficial", nombre: "Examen Oficial CACES" },
-        { id: "preuniversitario", nombre: "Preuniversitario" },
-        { id: "nivelacion", nombre: "Nivelación Académica" },
+        { id: "preuniversitario", nombre: "Preuniversitario General de Salud" },
+        { id: "nivelacion", nombre: "Nivelación Académica (Semestre 0)" },
         { id: "semestre_1", nombre: "1er Semestre (Ciencias Básicas)" },
         { id: "semestre_2", nombre: "2do Semestre (Morfofunción)" },
         { id: "semestre_3", nombre: "3er Semestre (Fisiopatología / Farmacología)" },
@@ -112,7 +113,15 @@ const SINAPTICO_CURRICULUM = {
         { id: "semestre_8", nombre: "8vo Semestre (Materno-Infantil / Pediatría)" },
         { id: "semestre_9", nombre: "9no Semestre (Salud Pública / Gestión)" },
         { id: "semestre_10", nombre: "10mo Semestre (Integración Clínica)" },
-        { id: "internado_rotativo", nombre: "Internado Rotativo" }
+        { id: "internado_rotativo", nombre: "Internado Rotativo" },
+        { id: "titulacion_complexivo", nombre: "Examen Complexivo (Graduación)" }
+    ],
+    preuniversitarioSubjects: [
+        "Biología Celular y Molecular",
+        "Química General e Inorgánica",
+        "Química Orgánica Aplicada a la Salud",
+        "Anatomía y Fisiología Elemental",
+        "Terminología Médica y Razonamiento Clínico"
     ],
     universalSubjects: [
         "Anatomía e Histología",
@@ -182,6 +191,10 @@ function getCareersByScope(scope = "caces") {
  * @returns {Array<string>}
  */
 function getSubjectsForCareer(careerId, scope = "caces") {
+    if (careerId === "preuniversitario_salud") {
+        return SINAPTICO_CURRICULUM.preuniversitarioSubjects;
+    }
+
     const cacesMatch = (window.makaiData?.carreras || SINAPTICO_CURRICULUM.cacesCareers)
         .find(c => c.id === careerId);
 
@@ -190,10 +203,10 @@ function getSubjectsForCareer(careerId, scope = "caces") {
     }
 
     if (cacesMatch?.materias?.length) {
-        return [...new Set([...cacesMatch.materias, ...SINAPTICO_CURRICULUM.universalSubjects])];
+        return [...new Set([...SINAPTICO_CURRICULUM.preuniversitarioSubjects, ...cacesMatch.materias, ...SINAPTICO_CURRICULUM.universalSubjects])];
     }
 
-    return SINAPTICO_CURRICULUM.universalSubjects;
+    return [...new Set([...SINAPTICO_CURRICULUM.preuniversitarioSubjects, ...SINAPTICO_CURRICULUM.universalSubjects])];
 }
 
 /**
