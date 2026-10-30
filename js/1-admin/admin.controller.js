@@ -321,6 +321,11 @@ function renderAdminCommandHeader() {
                     <span class="material-symbols-outlined text-sm">school</span>
                     <span>6. Tutores y Tesis</span>
                 </button>
+                <button type="button" data-admin-tab="accesos" class="admin-subtab-btn px-3.5 py-2 rounded-xl text-xs font-extrabold bg-surface text-warning hover:text-white border border-warning/50 transition-all flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm">manage_accounts</span>
+                    <span>7. Carreras por Alumno y Dispositivos (1+1)</span>
+                    <span id="badge-pending-career-reqs" class="hidden px-1.5 py-0.5 rounded-full bg-danger text-white text-[10px] font-mono font-extrabold">0</span>
+                </button>
             </div>
         </div>
     `;
