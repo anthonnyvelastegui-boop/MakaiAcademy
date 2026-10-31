@@ -249,6 +249,70 @@ export async function downloadFullBackupJSON() {
 /**
  * Descarga la colección de usuarios con su expediente académico y bancario en .CSV.
  */
+/**
+ * Genera un UID institucional lógico y legible para reportes contables.
+ * Formato: MK-[CARRERA]-[AÑO]-[INICIALES]-[SUFIJO_UNICO]
+ */
+function buildLogicalStudentUID(u = {}, rawId = "") {
+    if (u.codigoEstudiante) return u.codigoEstudiante;
+
+    const careerMap = {
+        medicina: "MED",
+        enfermeria: "ENF",
+        odontologia: "ODO",
+        obstetricia: "OBS",
+        psicologia_clinica: "PSI",
+        nutricion: "NUT",
+        fisioterapia: "FIS",
+        laboratorio_clinico: "LAB",
+        imagenologia: "IMG",
+        bioquimica_farmacia: "BQF",
+        atencion_prehospitalaria: "APH",
+        preuniversitario_salud: "PRE"
+    };
+
+    const careerCode = careerMap[(u.carrera || "").toLowerCase()] || "GEN";
+    const year = (u.createdAt || "").slice(0, 4) || new Date().getFullYear();
+
+    const cleanName = String(u.nombre || u.primerNombre || "AL")
+        .replace(/^(Dr\.|Dra\.|Md\.|Lic\.|Est\.|Sr\.|Sra\.)\s*/i, "")
+        .trim();
+    const parts = cleanName.split(/\s+/).filter(Boolean);
+    const initials = parts.length >= 2
+        ? (parts[0][0] + parts[1][0]).toUpperCase()
+        : cleanName.slice(0, 2).toUpperCase().padEnd(2, "X");
+
+    const suffix = String(rawId || u.uid || "0000").slice(-4).toUpperCase();
+    return `MK-${careerCode}-${year}-${initials}-${suffix}`;
+}
+
+/**
+ * Genera un ID contable lógico para cada solicitud de pago bancaria.
+ * Formato: PAG-[AAAAMMDD]-[PLAN]-[ULTIMOS_4_COMPROBANTE]
+ */
+function buildLogicalPaymentID(p = {}, rawDocId = "") {
+    if (p.codigoSolicitud) return p.codigoSolicitud;
+
+    const rawDate = p.fechaComprobante || (p.createdAt ? p.createdAt.slice(0, 10) : new Date().toISOString().slice(0, 10));
+    const dateCompact = String(rawDate).replace(/-/g, "").slice(0, 8) || "20260000";
+
+    const planMap = {
+        pro_anual: "ANUAL",
+        pro_mensual: "MENSUAL",
+        vip: "VIP",
+        basico: "BASICO"
+    };
+    const planCode = planMap[(p.planSolicitado || "").toLowerCase()] || "PRO";
+
+    const refClean = String(p.numeroComprobante || "").replace(/\D/g, "").slice(-4);
+    const suffix = refClean || String(rawDocId || "0000").slice(-4).toUpperCase();
+
+    return `PAG-${dateCompact}-${planCode}-${suffix}`;
+}
+
+/**
+ * Descarga la colección de usuarios con su expediente académico y bancario en .CSV.
+ */
 export async function downloadUsersExcelCSV() {
     if (!verifyAdminAccess()) return;
 
@@ -263,9 +327,8 @@ export async function downloadUsersExcelCSV() {
 
         const usersSnap = await getDocs(collection(db, COLLECTIONS.USERS));
 
-const headers = [
-            "UID",
-            "Titulo",
+        const headers = [
+            "UID Estudiante (Logico)",
             "Nombre Completo",
             "Nickname",
             "Carrera Principal",
@@ -283,6 +346,9 @@ const headers = [
             "Plan Solicitado",
             "Metodo Pago",
             "Estado Pago",
+            "Fecha Activacion Plan",
+            "Fecha Vencimiento Plan",
+            "Dias Restantes Plan",
             "N_Comprobante",
             "Titular Cuenta",
             "Cedula/RUC Titular",
@@ -293,7 +359,8 @@ const headers = [
             "Promedio Global (%)",
             "Casos Usados Mes",
             "Correo Confirmado",
-            "Fecha Registro"
+            "Fecha Registro",
+            "UID Interno Firebase"
         ];
 
         const rows = [headers.join(";")];
@@ -306,10 +373,33 @@ const headers = [
             const pcInfo = devs.desktop ? `${devs.desktop.etiqueta || "PC"} (${devs.desktop.deviceId || ""})` : "Sin vincular";
             const mobInfo = devs.mobile ? `${devs.mobile.etiqueta || "Móvil"} (${devs.mobile.deviceId || ""})` : "Sin vincular";
 
+            // Limpiar prefijo de título si estuviera pegado o dejar el nombre limpio
+            const fullName = String(u.nombre || `${u.primerNombre || ""} ${u.apellido || ""}`).trim();
+            const logicalUID = buildLogicalStudentUID(u, d.id);
+
+            // Cálculo de días restantes si tiene fechaActivacionPlan
+            let fechaActivacionStr = u.fechaActivacionPlan ? u.fechaActivacionPlan.slice(0, 10) : "";
+            let fechaVencimientoStr = u.fechaVencimientoPlan ? u.fechaVencimientoPlan.slice(0, 10) : "";
+            let diasRestantesStr = "N/A";
+
+            if (u.fechaActivacionPlan && (u.subscriptionLevel === "PRO" || u.subscriptionLevel === "VIP")) {
+                const startMs = new Date(u.fechaActivacionPlan).getTime();
+                const planKey = (u.planActivo || u.planSolicitado || "pro_anual").toLowerCase();
+                const totalDays = planKey === "pro_mensual" || planKey === "vip" ? 30 : 365;
+                const endMs = u.fechaVencimientoPlan
+                    ? new Date(u.fechaVencimientoPlan).getTime()
+                    : startMs + totalDays * 86400000;
+
+                if (!fechaVencimientoStr) {
+                    fechaVencimientoStr = new Date(endMs).toISOString().slice(0, 10);
+                }
+                const diffDays = Math.ceil((endMs - Date.now()) / 86400000);
+                diasRestantesStr = diffDays > 0 ? `${diffDays} dias` : "VENCIDO (0 dias)";
+            }
+
             const row = [
-                d.id,
-                u.titulo || "",
-                u.nombre || "",
+                logicalUID,
+                fullName,
                 u.nickname || "",
                 u.carrera || "",
                 u.nivelIngreso || (u.carrera === "preuniversitario_salud" ? "preuniversitario" : "universitario"),
@@ -326,6 +416,9 @@ const headers = [
                 u.planSolicitado || "basico",
                 u.metodoPagoPreferido || "ninguno",
                 u.estadoPago || "activo_gratis",
+                fechaActivacionStr,
+                fechaVencimientoStr,
+                diasRestantesStr,
                 comp.numeroComprobante || "",
                 comp.titularCuenta || "",
                 comp.cedulaTitular || "",
@@ -336,13 +429,13 @@ const headers = [
                 typeof u.globalAverage === "number" ? u.globalAverage.toFixed(2) : "0.00",
                 u.casesUsedThisMonth ?? 0,
                 u.correoConfirmadoMakai ? "SI" : "NO",
-                u.createdAt || ""
+                u.createdAt || "",
+                d.id
             ].map(escapeCSVCell);
 
             rows.push(row.join(";"));
         });
 
-        // \uFEFF (BOM) garantiza que Microsoft Excel reconozca tildes y caracteres UTF-8 automáticamente
         const blob = new Blob(["\uFEFF" + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
         const url = URL.createObjectURL(blob);
 
@@ -387,8 +480,8 @@ export async function downloadPaymentsExcelCSV() {
         const paymentsSnap = await getDocs(collection(db, COLLECTIONS.PAYMENTS));
 
         const headers = [
-            "ID Solicitud",
-            "UID Estudiante",
+            "ID Solicitud (Logico)",
+            "UID Estudiante (Logico)",
             "Nombre Estudiante",
             "Correo Estudiante",
             "Telefono",
@@ -402,16 +495,29 @@ export async function downloadPaymentsExcelCSV() {
             "Fecha Comprobante",
             "Fecha/Hora Envio Exacta",
             "Estado Verificacion",
-            "Fecha Aprobacion"
+            "Fecha Aprobacion",
+            "Fecha Vencimiento Plan",
+            "UID Interno Firebase"
         ];
 
         const rows = [headers.join(";")];
 
         paymentsSnap.forEach(d => {
             const p = d.data();
+            const logicalPaymentId = buildLogicalPaymentID(p, d.id);
+            const logicalStudentUid = buildLogicalStudentUID(
+                {
+                    nombre: p.estudianteNombre,
+                    carrera: p.estudianteCarrera,
+                    createdAt: p.createdAt,
+                    uid: p.uid
+                },
+                p.uid || d.id
+            );
+
             const row = [
-                d.id,
-                p.uid || "",
+                logicalPaymentId,
+                logicalStudentUid,
                 p.estudianteNombre || "",
                 p.estudianteEmail || "",
                 p.estudianteTelefono || "",
@@ -425,7 +531,9 @@ export async function downloadPaymentsExcelCSV() {
                 p.fechaComprobante || "",
                 p.fechaHoraEnvioExacta || p.createdAt || "",
                 p.estado || "pendiente",
-                p.aprobadoEn || ""
+                p.aprobadoEn || "",
+                p.fechaVencimientoPlan || "",
+                p.uid || ""
             ].map(escapeCSVCell);
 
             rows.push(row.join(";"));
@@ -452,7 +560,6 @@ export async function downloadPaymentsExcelCSV() {
         }
     }
 }
-
 // ============================================================================
 // 6. RESTAURACIÓN DE RESPALDO .JSON HACIA CLOUD FIRESTORE
 // ============================================================================
