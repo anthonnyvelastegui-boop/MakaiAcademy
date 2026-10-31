@@ -125,14 +125,20 @@ export async function initAdmin() {
     const adminView = ensureAdminViewContainer();
     if (!adminView) return;
 
-    // 1. Renderizar la Cabecera de Mando, KPIs y Selector de 6 Sub-Pestañas
+    // 1. Construir el Menú Lateral Izquierdo de Administrador + Conmutador Bóveda Usuario / Admin
+    setupAdminLeftSidebarWorkspace();
+
+    // 2. Renderizar la Cabecera de Mando y KPIs en tiempo real
     renderAdminCommandHeader();
 
-    // 2. Inicializar los 6 subcomponentes de forma aislada (si uno falla, los demás cargan igual)
+    // 3. Inicializar los 7 subcomponentes de js/1-admin/ de forma aislada
     await initSubmodulesSafely();
 
-    // 3. Cargar métricas globales de Firestore
+    // 4. Cargar métricas globales de Firestore
     await refreshAdminKPIs();
+
+    // 5. Arrancar directamente en Modo Administrador (o restaurar el último modo elegido en la sesión)
+    setAdminWorkspaceMode(currentWorkspaceMode);
 
     adminControllerInitialized = true;
 }
@@ -146,14 +152,16 @@ async function initSubmodulesSafely() {
         questionsMod,
         sinapticoMod,
         materialsMod,
-        tutorsMod
+        tutorsMod,
+        usersMod
     ] = await Promise.all([
         safeImportSubmodule("./admin.backups.js"),
         safeImportSubmodule("./admin.payments.js"),
         safeImportSubmodule("./admin.questions.js"),
         safeImportSubmodule("./admin.sinaptico.js"),
         safeImportSubmodule("./admin.materials.js"),
-        safeImportSubmodule("./admin.tutors.js")
+        safeImportSubmodule("./admin.tutors.js"),
+        safeImportSubmodule("./admin.users.js")
     ]);
 
     loadedSubmodules.backups = backupsMod;
@@ -162,6 +170,7 @@ async function initSubmodulesSafely() {
     loadedSubmodules.sinaptico = sinapticoMod;
     loadedSubmodules.materials = materialsMod;
     loadedSubmodules.tutors = tutorsMod;
+    loadedSubmodules.users = usersMod;
 
     // 1. Bóveda de Respaldos
     try {
@@ -209,15 +218,17 @@ async function initSubmodulesSafely() {
         }
     } catch (e) { console.warn("Error en admin.tutors:", e); }
 
-    // Si por caché o ruta no se inyectó #admin-tutors-section, activar respaldo integrado
     if (!document.getElementById("admin-tutors-section")) {
         initAdminTutorsFallback();
     }
 
-    // 7. Inicializar Centro de Control de Carreras Habilitadas y Dispositivos (1 PC + 1 Móvil)
-    initAdminAccessAndDevicesManager();
+    // 7. Carreras por Alumno, Suscripciones y Dispositivos (1+1) -> admin.users.js
+    try {
+        if (typeof usersMod?.initAdminUsers === "function") {
+            usersMod.initAdminUsers();
+        }
+    } catch (e) { console.warn("Error en admin.users:", e); }
 }
-
 // ============================================================================
 // 3. CABECERA TÁCTICA, KPIS EN TIEMPO REAL Y NAVEGACIÓN DE SUB-PESTAÑAS
 // ============================================================================
