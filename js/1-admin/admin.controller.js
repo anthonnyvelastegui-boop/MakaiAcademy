@@ -30,11 +30,13 @@ const loadedSubmodules = {
     questions: null,
     sinaptico: null,
     materials: null,
-    tutors: null
+    tutors: null,
+    users: null
 };
 
 let adminControllerInitialized = false;
 let currentAdminSubTab = "all";
+let currentWorkspaceMode = sessionStorage.getItem("makai_admin_workspace_mode") || "admin"; // "admin" | "user"
 
 const SAFE_COLLECTIONS = {
     USERS: COLLECTIONS?.USERS || "usuarios",
