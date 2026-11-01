@@ -1182,60 +1182,212 @@
                 }
             }
 
-            // =================================================================
-            // 1. CATÁLOGO DE LAS 11 CARRERAS (CON INDICADOR EXACTO DE INTERNADO)
+           // =================================================================
+            // 1. CATÁLOGO DE LAS 11 CARRERAS (SINCRONIZADO CON BANCO DE PREGUNTAS)
             // =================================================================
             const UNIVERSITY_CAREERS = [
-                { id: "medicina", num: "01", nombre: "Medicina Humana", icon: "stethoscope", semestres: 10, tieneInternado: true, desc: "Preuniversitario, Nivelación, 1° a 10° Semestre, Internado Rotativo y Titulación." },
-                { id: "enfermeria", num: "02", nombre: "Enfermería", icon: "medical_information", semestres: 7, tieneInternado: true, desc: "Proceso de Atención de Enfermería (PAE), Semestres Clínicos, Internado Rotativo y Titulación." },
-                { id: "odontologia", num: "03", nombre: "Odontología", icon: "dentistry", semestres: 10, tieneInternado: false, desc: "Anatomía Dental, Endodoncia, Periodoncia, Cirugía Oral, Clínicas Integrales y Titulación." },
-                { id: "obstetricia", num: "04", nombre: "Obstetricia y Puericultura", icon: "pregnant_woman", semestres: 7, tieneInternado: true, desc: "Control Prenatal, Claves Obstétricas MSP, Internado Rotativo Materno y Titulación." },
-                { id: "nutricion", num: "05", nombre: "Nutrición y Dietética", icon: "nutrition", semestres: 8, tieneInternado: true, desc: "Evaluación Nutricional ABCD, Dietoterapia, Internado Rotativo y Titulación." },
-                { id: "fisioterapia", num: "06", nombre: "Fisioterapia y Rehabilitación", icon: "physical_therapy", semestres: 8, tieneInternado: false, desc: "Biomecánica, Kinesiología, Rehabilitación Neurológica/Musculoesquelética y Titulación." },
-                { id: "laboratorio", num: "07", nombre: "Laboratorio Clínico", icon: "biotech", semestres: 8, tieneInternado: false, desc: "Hematología, Bioquímica Clínica, Microbiología Diagnóstica, Biología Molecular y Titulación." },
-                { id: "imagenologia", num: "08", nombre: "Imagenología y Radiología", icon: "radiology", semestres: 8, tieneInternado: false, desc: "Anatomía Radiológica, Rayos X, Tomografía (TC), Resonancia (RMN) y Titulación." },
-                { id: "farmacia", num: "09", nombre: "Bioquímica y Farmacia", icon: "science", semestres: 9, tieneInternado: false, desc: "Química Farmacéutica, Farmacología Clínica, Toxicología Analítica, Farmacia Hospitalaria y Titulación." },
-                { id: "psicologia_clinica", num: "10", nombre: "Psicología Clínica", icon: "psychology", semestres: 8, tieneInternado: false, desc: "Psicopatología DSM-5/CIE-11, Neuropsicología, Psicodiagnóstico, Intervención y Titulación." },
-                { id: "paramedicina", num: "11", nombre: "Atención Prehospitalaria y Emergencias", icon: "ambulance", semestres: 8, tieneInternado: false, desc: "Soporte Vital BLS/ACLS, Trauma Prehospitalario (PHTLS), Triaje START y Titulación." }
+                { id: "medicina", firestoreId: "medicina", num: "01", nombre: "Medicina Humana", icon: "stethoscope", semestres: 10, tieneInternado: true, desc: "Preuniversitario, Nivelación, 1.° a 10.° Semestre, Internado Rotativo y Titulación." },
+                { id: "enfermeria", firestoreId: "enfermeria", num: "02", nombre: "Enfermería", icon: "medical_information", semestres: 7, tieneInternado: true, desc: "Proceso de Atención de Enfermería (PAE: NANDA-NIC-NOC), 1.° a 7.° Semestre, Internado Rotativo y Titulación." },
+                { id: "odontologia", firestoreId: "odontologia", num: "03", nombre: "Odontología", icon: "dentistry", semestres: 10, tieneInternado: false, desc: "Anatomía Dental, Biomateriales, Endodoncia, Periodoncia, Cirugía Maxilofacial, Clínicas Integrales y Titulación." },
+                { id: "obstetricia", firestoreId: "obstetricia", num: "04", nombre: "Obstetricia y Puericultura", icon: "pregnant_woman", semestres: 7, tieneInternado: true, desc: "Control Prenatal, Claves Obstétricas MSP, Score MAMÁ, Internado Rotativo Materno y Titulación." },
+                { id: "nutricion", firestoreId: "nutricion", num: "05", nombre: "Nutrición y Dietética", icon: "nutrition", semestres: 8, tieneInternado: true, desc: "Bromatología, Evaluación ABCD, Dietoterapia Clínica, Soporte Enteral/Parenteral, Internado y Titulación." },
+                { id: "fisioterapia", firestoreId: "fisioterapia", num: "06", nombre: "Fisioterapia y Rehabilitación", icon: "physical_therapy", semestres: 8, tieneInternado: false, desc: "Biomecánica, Goniometría, Agentes Físicos, Cinesiterapia, Rehabilitación Neurológica/Traumatológica y Titulación." },
+                { id: "laboratorio_clinico", firestoreId: "laboratorio_clinico", num: "07", nombre: "Laboratorio Clínico", icon: "biotech", semestres: 8, tieneInternado: false, desc: "Hematología, Bioquímica Clínica, Bacteriología, Parasitología, Banco de Sangre, Biología Molecular y Titulación." },
+                { id: "imagenologia", firestoreId: "imagenologia", num: "08", nombre: "Imagenología y Radiología", icon: "radiology", semestres: 8, tieneInternado: false, desc: "Anatomía Multiplanar, Radioprotección, Rayos X, Tomografía (TC), Resonancia (RMN), Ecografía Doppler y Titulación." },
+                { id: "bioquimica_farmacia", firestoreId: "bioquimica_farmacia", num: "09", nombre: "Bioquímica y Farmacia", icon: "science", semestres: 9, tieneInternado: false, desc: "Química Farmacéutica, Farmacología Clínica, Tecnología Farmacéutica, Farmacia Hospitalaria, Toxicología y Titulación." },
+                { id: "psicologia_clinica", firestoreId: "psicologia_clinica", num: "10", nombre: "Psicología Clínica", icon: "psychology", semestres: 8, tieneInternado: false, desc: "Psicopatología DSM-5-TR/CIE-11, Psicometría, Neuropsicología, Psicodiagnóstico, Psicoterapia TCC y Titulación." },
+                { id: "atencion_prehospitalaria", firestoreId: "atencion_prehospitalaria", num: "11", nombre: "Atención Prehospitalaria y Emergencias", icon: "ambulance", semestres: 8, tieneInternado: false, desc: "Soporte Vital BLS/ACLS/PALS, Trauma Prehospitalario (PHTLS), Manejo de Vía Aérea, Triaje START y Titulación." }
             ];
 
             // =================================================================
-            // 2. MATERIAS UNIVERSALES POR NIVEL Y MODALIDADES DE TITULACIÓN
+            // 2. MALLAS CURRICULARES POR CARRERA Y SEMESTRE (ECUADOR CES)
             // =================================================================
-            const SUBJECTS_BY_LEVEL = {
-                preuniversitario: [
-                    "Biología Celular y Molecular",
-                    "Química General e Inorgánica",
-                    "Química Orgánica Aplicada a la Salud",
-                    "Anatomía y Fisiología Elemental",
-                    "Terminología Médica y Razonamiento Clínico"
-                ],
-                nivelacion: [
-                    "Morfofisiología Básica I",
-                    "Bioquímica Médica Elemental",
-                    "Biofísica Aplicada",
-                    "Salud, Sociedad y Bioética",
-                    "Metodología de la Investigación Científica"
-                ],
-                sem_1: ["Anatomía Humana Descriptiva I", "Histología General", "Embriología Humana y Genética", "Biología Molecular", "Bioestadística Descriptiva"],
-                sem_2: ["Anatomía Neurovascular II", "Fisiología Humana General", "Bioquímica Clínica y Metabolismo", "Histología por Sistemas", "Salud Pública y Atención Primaria (MAIS-FCI)"],
-                sem_3: ["Microbiología Médica y Virología", "Parasitología y Micología Clínica", "Fisiopatología General I", "Inmunología Clínica", "Anatomía Patológica General"],
-                sem_4: ["Semiología y Propedéutica Clínica I", "Fisiopatología de Sistemas II", "Farmacología Básica", "Interpretación de Laboratorio Clínico", "Epidemiología Clínica"],
-                sem_5: ["Semiología Avanzada y Diagnóstico", "Medicina Interna I (Cardiología, Neumología)", "Farmacología Clínica y Terapéutica", "Imagenología Diagnóstica", "Psicología Médica"],
-                sem_6: ["Medicina Interna II (Nefrología, Gastroenterología, Endocrino)", "Infectología y Medicina Tropical", "Nutrición Clínica y Dietoterapia", "Dermatología Clínica", "Psiquiatría y Salud Mental"],
-                sem_7: ["Cirugía General y Abdomen Agudo", "Traumatología y Ortopedia", "Anestesiología y Reanimación", "Otorrinolaringología y Oftalmología", "Urología Clínica"],
-                sem_8: ["Ginecología y Salud Reproductiva", "Obstetricia y Claves Obstétricas MSP", "Pediatría Clínica", "Neonatología y Reanimación Neonatal", "AIEPI Clínico y Vacunación MSP"],
-                sem_9: ["Urgencias Médicas y Cuidados Críticos (UCI)", "Toxicología Clínica", "Geriatría y Cuidados Paliativos", "Medicina Legal y Deontología", "Administración y Gerencia Hospitalaria"],
-                sem_10: ["Integración Clínica Avanzada", "Casos Clínicos Complejos Multidisciplinarios", "Auditoría en Salud y Bioética", "Diseño de Protocolos de Investigación"],
-                internado: ["Rotación de Medicina Interna", "Rotación de Pediatría", "Rotación de Ginecología y Obstetricia", "Rotación de Cirugía y Emergencias", "Rotación Comunitaria y Atención Primaria MSP"],
-                titulacion_complexivo: [
-                    "Eje 1 Complexivo: Ciencias Básicas y Preclínicas Integradas",
-                    "Eje 2 Complexivo: Diagnóstico Clínico y Razonamiento Sindrómico",
-                    "Eje 3 Complexivo: Terapéutica, Urgencias y Protocolos GPC-MSP",
-                    "Eje 4 Complexivo: Salud Pública, Epidemiología, Bioética y Gestión",
-                    "Eje 5 Complexivo: Resolución de Casos Prácticos de Fin de Carrera"
-                ]
+            const COMPLEXIVO_AXES = [
+                "Eje 1 Complexivo: Ciencias Básicas y Preclínicas Integradas",
+                "Eje 2 Complexivo: Diagnóstico Clínico y Razonamiento Sindrómico",
+                "Eje 3 Complexivo: Terapéutica, Protocolos y Guías del MSP",
+                "Eje 4 Complexivo: Salud Pública, Epidemiología, Bioética y Gestión",
+                "Eje 5 Complexivo: Resolución de Casos Prácticos de Fin de Carrera"
+            ];
+
+            const PREUNI_COMMON_SUBJECTS = [
+                "Biología Celular y Molecular",
+                "Química General e Inorgánica",
+                "Química Orgánica Aplicada a la Salud",
+                "Anatomía y Fisiología Elemental",
+                "Física Aplicada a Ciencias de la Salud",
+                "Terminología Médica y Razonamiento Clínico-Verbal"
+            ];
+
+            const SUBJECTS_BY_CAREER_AND_LEVEL = {
+                preuniversitario_salud: {
+                    preuniversitario: PREUNI_COMMON_SUBJECTS,
+                    nivelacion: ["Biología Celular Médica", "Química Médica", "Morfofisiología Elemental", "Biofísica Aplicada", "Metodología de la Investigación y Salud"]
+                },
+                medicina: {
+                    preuniversitario: PREUNI_COMMON_SUBJECTS,
+                    nivelacion: ["Biología Celular Médica", "Química Médica", "Morfofisiología Elemental", "Biofísica Aplicada", "Metodología de la Investigación y Salud"],
+                    semestre_1: ["Anatomía Humana Descriptiva I", "Histología General I", "Embriología Humana", "Biología Molecular", "Bioquímica I"],
+                    semestre_2: ["Anatomía Humana II y Neuroanatomía", "Histología por Sistemas II", "Fisiología Humana I", "Bioquímica Clínica y Nutrición II", "Salud Pública y Atención Primaria (MAIS-FCI)"],
+                    semestre_3: ["Fisiología Humana II", "Microbiología Médica y Virología", "Parasitología y Micología Médica", "Inmunología Básica y Clínica", "Genética Médica"],
+                    semestre_4: ["Anatomía Patológica General y Especial", "Fisiopatología I", "Farmacología Básica", "Psicología Médica", "Bioestadística y Epidemiología Clínica"],
+                    semestre_5: ["Semiología Médica y Propedéutica Clínica", "Fisiopatología de Sistemas II", "Farmacología Clínica y Terapéutica", "Imagenología Diagnóstica", "Interpretación de Laboratorio Clínico"],
+                    semestre_6: ["Medicina Interna I (Cardiología y Neumología)", "Infectología y Medicina Tropical", "Dermatología Clínica", "Gastroenterología", "Salud Pública y Vigilancia Epidemiológica"],
+                    semestre_7: ["Medicina Interna II (Nefrología, Endocrinología y Reumatología)", "Neurología Clínica", "Hematología y Oncología", "Psiquiatría y Salud Mental", "Nutrición Clínica"],
+                    semestre_8: ["Cirugía General y Abdomen Agudo", "Traumatología y Ortopedia", "Anestesiología y Reanimación", "Otorrinolaringología y Oftalmología", "Urología Clínica"],
+                    semestre_9: ["Ginecología y Salud Reproductiva", "Obstetricia y Claves Obstétricas MSP", "Pediatría Clínica y Puericultura", "Neonatología y Reanimación Neonatal", "AIEPI Clínico y Esquema PAI"],
+                    semestre_10: ["Urgencias Médicas y Cuidados Críticos (UCI)", "Toxicología Clínica", "Geriatría y Cuidados Paliativos", "Medicina Legal y Deontología Médica", "Administración y Gerencia Hospitalaria"],
+                    internado_rotativo: ["Rotación de Medicina Interna", "Rotación de Cirugía General", "Rotación de Pediatría y Neonatología", "Rotación de Ginecología y Obstetricia", "Rotación Comunitaria y Atención Primaria MSP"],
+                    titulacion_complexivo: COMPLEXIVO_AXES
+                },
+                enfermeria: {
+                    preuniversitario: PREUNI_COMMON_SUBJECTS,
+                    nivelacion: ["Biología Aplicada a Enfermería", "Química General y Orgánica", "Morfofisiología Elemental", "Introducción a la Salud Pública", "Comunicación y Metodología de Estudio"],
+                    semestre_1: ["Anatomía y Fisiología Humana (Morfofunción I)", "Bioquímica y Nutrición Básica", "Bases Teóricas y Epistemológicas de Enfermería", "Salud Pública y Modelo MAIS-FCI", "Bioseguridad y Primeros Auxilios"],
+                    semestre_2: ["Morfofunción II y Fisiopatología General", "Microbiología y Parasitología Aplicada", "Fundamentos de Enfermería y Procedimientos Básicos", "Proceso de Atención de Enfermería (PAE: NANDA-NIC-NOC)", "Socioantropología e Interculturalidad en Salud"],
+                    semestre_3: ["Semiología y Valoración Clínica de Enfermería", "Farmacología General y Cálculo/Dilución de Dosis", "Enfermería Comunitaria I y Promoción de la Salud", "Bioestadística y Epidemiología en Enfermería", "Dietoterapia y Nutrición Clínica"],
+                    semestre_4: ["Enfermería Clínico-Quirúrgica del Adulto I", "Farmacología Clínica Aplicada", "Enfermería Familiar y Comunitaria II (Estrategia ENI / PAI)", "Ética, Bioética y Legislación en Enfermería", "Educación para la Salud"],
+                    semestre_5: ["Enfermería Clínico-Quirúrgica del Adulto II", "Enfermería Perioperatoria e Instrumentación Quirúrgica", "Enfermería Gerontológica y del Adulto Mayor", "Cuidados Paliativos y Manejo del Dolor", "Metodología de la Investigación en Enfermería"],
+                    semestre_6: ["Enfermería Ginecológica y Obstétrica (Claves y Score MAMÁ)", "Enfermería Neonatal", "Enfermería Pediátrica y del Adolescente (AIEPI)", "Enfermería en Salud Mental y Psiquiatría", "Calidad de Atención y Seguridad del Paciente"],
+                    semestre_7: ["Enfermería en Urgencias, Emergencias y Desastres", "Enfermería en Cuidados Críticos y Terapia Intensiva (UCI)", "Administración, Liderazgo y Gerencia de Servicios de Enfermería", "Diseño de Trabajo de Titulación", "Auditoría y Gestión Hospitalaria"],
+                    internado_rotativo: ["Rotación Clínico-Quirúrgica Hospitalaria", "Rotación Materno-Infantil y Pediátrica", "Rotación de Emergencias y Cuidados Críticos", "Rotación Comunitaria y Atención Primaria MSP"],
+                    titulacion_complexivo: COMPLEXIVO_AXES
+                },
+                odontologia: {
+                    preuniversitario: PREUNI_COMMON_SUBJECTS,
+                    nivelacion: ["Biología Celular", "Química General y Orgánica", "Anatomía Elemental", "Física Aplicada", "Morfología Dental Introductoria"],
+                    semestre_1: ["Anatomía Humana de Cabeza y Cuello", "Embriología e Histología General", "Bioquímica Estomatológica", "Bioseguridad y Ergonomía Odontológica", "Salud Pública y Odontología Preventiva"],
+                    semestre_2: ["Anatomía Dental y Morfología Oclusal", "Histología y Embriología Bucodental", "Fisiología Humana y Estomatognática", "Microbiología e Inmunología Oral", "Cariología"],
+                    semestre_3: ["Patología General y Bucal I", "Biomateriales y Materiales Dentales I", "Farmacología General y Terapéutica Odontológica", "Oclusión y Trastornos Temporomandibulares (ATM)", "Epidemiología Estomatológica"],
+                    semestre_4: ["Semiología y Diagnóstico Clínico Estomatológico", "Radiología e Imagenología Bucofacial", "Anestesiología Odontológica", "Materiales Dentales II y Preclínica de Operatoria", "Patología Bucal II"],
+                    semestre_5: ["Operatoria Dental Clínica I", "Periodoncia I", "Endodoncia Preclínica y Clínica I", "Cirugía Bucal I (Exodoncia Simple)", "Medicina Interna Aplicada a la Odontología"],
+                    semestre_6: ["Operatoria Dental y Estética II", "Periodoncia II e Implantología Básica", "Endodoncia Clínica II", "Cirugía Bucal II (Exodoncia Compleja y Retenidos)", "Prótesis Total Preclínica"],
+                    semestre_7: ["Rehabilitación Oral: Prótesis Fija I", "Rehabilitación Oral: Prótesis Parcial Removible", "Cirugía Dentoalveolar y Patología Quirúrgica", "Odontopediatría I", "Ortodoncia y Ortopedia Maxilar I"],
+                    semestre_8: ["Odontopediatría Clínica II", "Ortodoncia Preventiva e Interceptiva II", "Rehabilitación Oral Integrada II", "Urgencias Médicas en el Consultorio Odontológico", "Metodología de la Investigación"],
+                    semestre_9: ["Clínica Integral del Adulto I", "Clínica Integral Pediátrica", "Cirugía Maxilofacial y Traumatología Facial", "Odontología Hospitalaria y Pacientes Especiales", "Gerencia y Administración de Consultorios"],
+                    semestre_10: ["Clínica Integral del Adulto II", "Odontología Legal, Forense y Bioética", "Salud Pública y Vinculación Comunitaria", "Trabajo de Titulación Odontológica"],
+                    titulacion_complexivo: COMPLEXIVO_AXES
+                },
+                obstetricia: {
+                    preuniversitario: PREUNI_COMMON_SUBJECTS,
+                    nivelacion: ["Biología Celular", "Química Médica", "Morfofisiología Básica", "Salud Sexual Introductoria", "Metodología de la Investigación"],
+                    semestre_1: ["Anatomía Humana y Pelviperineal", "Embriología y Genética Reproductiva", "Histología General y del Aparato Reproductor", "Bioquímica y Nutrición Materna", "Salud Pública y Atención Primaria (MAIS-FCI)"],
+                    semestre_2: ["Fisiología Humana y Materno-Fetal", "Microbiología, Parasitología e Infecciones Perinatales (TORCH/ITS)", "Psicología Evolutiva y de la Reproducción", "Educación Prenatal y Psicoprofilaxis Obstétrica", "Bioseguridad"],
+                    semestre_3: ["Semiología General y Obstétrica", "Fisiopatología General y Reproductiva", "Farmacología General y Obstétrica", "Clínica Prenatal de Bajo Riesgo", "Bioestadística y Epidemiología Materna"],
+                    semestre_4: ["Clínica del Parto, Alumbramiento y Puerperio Fisiológico", "Monitoreo Fetal Electrónico y Ecografía Obstétrica Básica", "Ginecología Infanto-Juvenil y del Adulto I", "Lactancia Materna y Puericultura", "Salud Intercultural y Parto Humanizado"],
+                    semestre_5: ["Ginecología II, Climaterio y Patología Cervical/Mamaria", "Planificación Familiar y Anticoncepción Normativa MSP", "Neonatología Inmediata y Reanimación Neonatal", "Laboratorio Clínico Perinatal", "Bioética y Legislación Materno-Perinatal"],
+                    semestre_6: ["Patología Obstétrica y Alto Riesgo Obstétrico I", "Claves Obstétricas del MSP (Roja, Azul, Amarilla) y Score MAMÁ", "Medicina Interna Aplicada a la Gestación", "Enfermedades Infecciosas en el Embarazo", "Investigación Clínica"],
+                    semestre_7: ["Alto Riesgo Obstétrico II y Cuidados Críticos Maternos", "Procedimientos Quirúrgicos e Instrumentación en Centro Obstétrico", "Violencia de Género y Obstetricia Forense", "Gerencia de Servicios Materno-Infantiles", "Trabajo de Titulación"],
+                    internado_rotativo: ["Rotación de Centro Obstétrico y Sala de Partos", "Rotación de Alto Riesgo Obstétrico y Hospitalización", "Rotación de Ginecología y Planificación Familiar", "Rotación de Neonatología y Puerperio", "Rotación Comunitaria y Control Prenatal MSP"],
+                    titulacion_complexivo: COMPLEXIVO_AXES
+                },
+                nutricion: {
+                    preuniversitario: PREUNI_COMMON_SUBJECTS,
+                    nivelacion: ["Biología Celular", "Química General e Inorgánica", "Morfofisiología Básica", "Introducción a la Nutrición Humana", "Matemática y Bioestadística Básica"],
+                    semestre_1: ["Anatomía y Fisiología del Sistema Digestivo y Endocrino", "Química Orgánica de los Alimentos", "Bases de la Nutrición Humana y Macronutrientes", "Socioantropología Alimentaria", "Salud Pública"],
+                    semestre_2: ["Bioquímica Metabólica y Nutricional", "Bromatología y Composición de Alimentos", "Microbiología y Parasitología de los Alimentos", "Micronutrientes (Vitaminas y Minerales)", "Técnica Dietética y Culinaria I"],
+                    semestre_3: ["Evaluación del Estado Nutricional (Antropometría y ABCD)", "Nutrición en el Ciclo de Vida (Embarazo, Lactancia, Adulto Mayor)", "Técnica Dietética II y Cálculo de Dietas", "Higiene, Inocuidad Alimentaria y Normativa ARCSA/HACCP", "Bioestadística"],
+                    semestre_4: ["Fisiopatología Aplicada a la Nutrición", "Tecnología y Conservación de Alimentos", "Farmacología e Interacción Fármaco-Nutriente", "Psicología de la Alimentación y Trastornos de la Conducta Alimentaria", "Epidemiología Nutricional"],
+                    semestre_5: ["Dietoterapia del Adulto I (Patologías Digestivas y Metabólicas)", "Dietoterapia en Obesidad, Diabetes y Síndrome Metabólico", "Educación y Consejería Nutricional", "Nutrición Comunitaria I y Seguridad Alimentaria", "Bioética"],
+                    semestre_6: ["Dietoterapia del Adulto II (Renal, Cardiovascular, Hepática y Oncológica)", "Dietoterapia Pediátrica y Manejo de Desnutrición Crónica Infantil (DCI)", "Nutrición Materno-Infantil y Lactancia", "Nutrición Comunitaria II y Programas MSP", "Investigación en Nutrición"],
+                    semestre_7: ["Soporte Nutricional Clínico (Nutrición Enteral y Parenteral)", "Nutrición en el Paciente Crítico y Quirúrgico", "Nutrición Aplicada al Deporte y Cineantropometría", "Administración de Servicios de Alimentación y Dietética Hospitalaria I", "Diseño de Titulación"],
+                    semestre_8: ["Gerencia y Auditoría de Servicios de Alimentación II", "Políticas Públicas, Soberanía Alimentaria y Etiquetado Nutricional", "Nutrigenómica y Alimentos Funcionales", "Práctica Integradora de Nutrición Clínica", "Trabajo de Titulación"],
+                    internado_rotativo: ["Rotación de Nutrición Clínica Hospitalaria", "Rotación de Soporte Nutricional y Pediatría", "Rotación de Gestión de Servicios de Alimentación", "Rotación de Nutrición Comunitaria MSP"],
+                    titulacion_complexivo: COMPLEXIVO_AXES
+                },
+                fisioterapia: {
+                    preuniversitario: PREUNI_COMMON_SUBJECTS,
+                    nivelacion: ["Biología Celular", "Física y Biofísica del Movimiento", "Anatomía Elemental", "Introducción a la Fisioterapia", "Comunicación Científica"],
+                    semestre_1: ["Anatomía Descriptiva y Funcional del Aparato Locomotor", "Fisiología Humana General", "Histología y Tejido Conectivo", "Fundamentos de Fisioterapia y Kinesiología", "Salud Pública y Discapacidad"],
+                    semestre_2: ["Neuroanatomía Funcional", "Biomecánica Clínica y Análisis del Movimiento", "Fisiología del Ejercicio y Contracción Muscular", "Desarrollo Psicomotor", "Psicología de la Rehabilitación"],
+                    semestre_3: ["Evaluación Funcional, Goniometría y Examen Muscular", "Semiología y Diagnóstico Fisioterapéutico (CIF)", "Agentes Físicos I (Termoterapia, Crioterapia e Hidroterapia)", "Patología General y Musculoesquelética", "Imagenología Musculoesquelética"],
+                    semestre_4: ["Cinesiterapia Activa, Pasiva y Ejercicio Terapéutico", "Agentes Físicos II (Electroterapia, Ultrasonido y Láser)", "Terapia Manual Ortopédica I y Masoterapia", "Farmacología Aplicada a Rehabilitación", "Bioestadística"],
+                    semestre_5: ["Fisioterapia Traumatológica y Ortopédica", "Rehabilitación Reumatológica y Manejo del Dolor", "Terapia Manual II y Liberación Miofascial", "Órtesis, Prótesis y Ayudas Técnicas", "Metodología de la Investigación"],
+                    semestre_6: ["Fisioterapia y Rehabilitación Neurológica del Adulto", "Fisioterapia Neurológica Pediátrica y Estimulación Temprana", "Reeducación Postural Global y Marcha", "Fisioterapia en Amputados", "Bioética y Legislación"],
+                    semestre_7: ["Fisioterapia Cardiorrespiratoria y Rehabilitación Pulmonar/UCI", "Fisioterapia Deportiva y Readaptación Funcional", "Fisioterapia del Suelo Pélvico y Uroginecológica", "Fisioterapia Comunitaria y Rehabilitación Basada en la Comunidad (RBC)", "Diseño de Titulación"],
+                    semestre_8: ["Fisioterapia Geriátrica y Prevención de Caídas", "Ergonomía y Salud Ocupacional", "Administración y Gestión de Centros de Rehabilitación", "Clínica Integradora de Fisioterapia", "Trabajo de Titulación"],
+                    titulacion_complexivo: COMPLEXIVO_AXES
+                },
+                laboratorio_clinico: {
+                    preuniversitario: PREUNI_COMMON_SUBJECTS,
+                    nivelacion: ["Biología Celular", "Química General e Inorgánica", "Matemática Aplicada", "Morfofisiología Elemental", "Introducción al Laboratorio Clínico"],
+                    semestre_1: ["Química Orgánica y Analítica Cuantitativa", "Anatomía e Histología Humana", "Bioseguridad y Manejo de Desechos Biológicos", "Instrumentación y Equipos de Laboratorio", "Salud Pública"],
+                    semestre_2: ["Bioquímica Clínica I (Carbohidratos, Lípidos y Proteínas)", "Fase Preanalítica y Flebotomía / Toma de Muestras", "Fisiología y Fisiopatología Humana", "Biología Molecular Básica", "Bioestadística"],
+                    semestre_3: ["Hematología Clínica I (Serie Roja y Blanca)", "Uroanálisis, Coprología y Líquidos Biológicos (LCR, Sinovial, Pleural)", "Bioquímica Clínica II (Enzimología, Renal, Hepático y Electrolitos)", "Inmunología Básica", "Epidemiología"],
+                    semestre_4: ["Microbiología y Bacteriología Clínica I", "Parasitología Clínica I (Protozoos y Helmintos)", "Inmunoserología Diagnóstica", "Endocrinología y Marcadores Tumorales/Cardíacos", "Fisiopatología de Sistemas"],
+                    semestre_5: ["Hematología Especial II (Leucemias y Trastornos Mieloproliferativos)", "Hemostasia, Coagulación y Trombosis", "Bacteriología Clínica II y Antibiograma (Resistencia Antimicrobiana)", "Parasitología Tisular II", "Metodología de la Investigación"],
+                    semestre_6: ["Medicina Transfusional y Banco de Sangre (Inmunohematología)", "Virología Clínica y Diagnóstico Serológico", "Micología Médica", "Toxicología Analítica y Monitoreo de Fármacos", "Bioética"],
+                    semestre_7: ["Diagnóstico Molecular (PCR, qPCR y Secuenciación)", "Genética y Citogenética Clínica", "Técnicas Histológicas y Citopatología", "Vigilancia Epidemiológica y Laboratorio de Salud Pública (INSPI)", "Diseño de Titulación"],
+                    semestre_8: ["Gestión y Aseguramiento de la Calidad en Laboratorio (Norma ISO 15189)", "Auditoría, Acreditación y Administración de Laboratorios", "Correlación Clínico-Patológica de Casos Complejos", "Trabajo de Titulación"],
+                    titulacion_complexivo: COMPLEXIVO_AXES
+                },
+                imagenologia: {
+                    preuniversitario: PREUNI_COMMON_SUBJECTS,
+                    nivelacion: ["Física General y Electromagnetismo", "Biología Celular", "Anatomía Elemental", "Matemática Aplicada", "Introducción a la Imagenología"],
+                    semestre_1: ["Anatomía Humana Descriptiva y Topográfica", "Física de las Radiaciones Ionizantes", "Fisiología Humana", "Cuidados de Enfermería y Primeros Auxilios en Radiología", "Bioseguridad"],
+                    semestre_2: ["Anatomía Radiológica y Multiplanar I", "Radiología Convencional I (Esqueleto Apendicular y Tórax)", "Radiobiología y Protección Radiológica / Dosimetría", "Procesamiento Digital de Imágenes (CR/DR)", "Salud Pública"],
+                    semestre_3: ["Anatomía Radiológica Multiplanar II (Neuroanatomía y Abdomen)", "Radiología Convencional II (Cráneo, Columna y Pelvis)", "Estudios Radiológicos Especiales y Medios de Contraste", "Fisiopatología y Semiología Radiológica", "Radiología Dental y Maxilofacial"],
+                    semestre_4: ["Tomografía Computarizada (TC) I: Física, Protocolos de Cráneo y Tórax", "Ecografía Diagnóstica General I (Abdominal y Pélvica)", "Radiología Pediátrica y Neonatal", "Farmacología de Medios de Contraste y Reacciones Adversas", "Bioestadística"],
+                    semestre_5: ["Tomografía Computarizada (TC) II: Abdomen, Angio-TC y Reconstrucción 3D", "Mamografía, Control de Calidad y Clasificación BI-RADS", "Densitometría Ósea", "Ecografía Obstétrica y Musculoesquelética II", "Metodología de la Investigación"],
+                    semestre_6: ["Resonancia Magnética Nuclear (RMN) I: Física, Secuencias y Neuroimagen", "Ecografía Vascular Doppler", "Radiología de Urgencias y Trauma (FAST)", "Patología por Sistemas en Imagenología", "Bioética y Legislación Radiológica"],
+                    semestre_7: ["Resonancia Magnética Nuclear (RMN) II: Musculoesquelética, Corporal y Cardio-RM", "Radiología Vascular e Intervencionista (Hemodinamia)", "Medicina Nuclear (Gammagrafía, SPECT y PET-CT)", "Diseño de Titulación"],
+                    semestre_8: ["Fundamentos de Radioterapia Oncológica y Braquiterapia", "Gestión de Servicios de Imagenología, Sistemas RIS/PACS y Teleradiología", "Control de Calidad de Equipos Radiológicos", "Trabajo de Titulación"],
+                    titulacion_complexivo: COMPLEXIVO_AXES
+                },
+                bioquimica_farmacia: {
+                    preuniversitario: PREUNI_COMMON_SUBJECTS,
+                    nivelacion: ["Química General", "Biología Celular", "Matemática y Cálculo Básico", "Física Aplicada", "Introducción a las Ciencias Farmacéuticas"],
+                    semestre_1: ["Química Inorgánica Farmacéutica", "Anatomía e Histología Humana", "Biología Molecular y Celular", "Cálculo y Bioestadística", "Bioseguridad en Laboratorios Químicos"],
+                    semestre_2: ["Química Orgánica I", "Química Analítica Cualitativa y Cuantitativa", "Fisiología Humana", "Física Farmacéutica", "Salud Pública y Epidemiología"],
+                    semestre_3: ["Química Orgánica II (Síntesis y Reacciones)", "Análisis Instrumental (HPLC, Espectrofotometría, Cromatografía)", "Fisicoquímica Farmacéutica", "Botánica Farmacéutica", "Microbiología General"],
+                    semestre_4: ["Bioquímica General y Metabólica", "Fisiopatología Humana", "Farmacognosia y Fitoquímica (Productos Naturales)", "Microbiología y Parasitología Farmacéutica", "Inmunología"],
+                    semestre_5: ["Farmacología Básica y Molecular I", "Química Farmacéutica y Medicinal I (Diseño de Fármacos y Clasificación ATC)", "Bioquímica Clínica y Diagnóstico de Laboratorio", "Biotecnología Farmacéutica", "Metodología de la Investigación"],
+                    semestre_6: ["Farmacología Clínica y Terapéutica II", "Química Farmacéutica II", "Tecnología Farmacéutica I (Formas Sólidas y Polvos)", "Hematología y Análisis Clínico", "Bioética"],
+                    semestre_7: ["Tecnología Farmacéutica II (Formas Líquidas, Semisólidas y Estériles)", "Biofarmacia y Farmacocinética Clínica", "Bromatología y Análisis de Alimentos", "Tecnología Cosmética y Dermofarmacia", "Control de Calidad de Medicamentos (USP/BP)"],
+                    semestre_8: ["Farmacia Clínica y Hospitalaria (Unidosis y Mezclas IV)", "Toxicología Analítica, Clínica y Forense", "Farmacovigilancia y Tecnovigilancia", "Aseguramiento de Calidad y Buenas Prácticas de Manufactura (BPM)", "Diseño de Titulación"],
+                    semestre_9: ["Atención Farmacéutica y Seguimiento Farmacoterapéutico (Método Dáder)", "Legislación Farmacéutica, Regulación Sanitaria (ARCSA) y Cuadro Nacional de Medicamentos (CNMB)", "Administración y Marketing Farmacéutico", "Trabajo de Titulación"],
+                    titulacion_complexivo: COMPLEXIVO_AXES
+                },
+                psicologia_clinica: {
+                    preuniversitario: PREUNI_COMMON_SUBJECTS,
+                    nivelacion: ["Fundamentos e Historia de la Psicología", "Biología Humana", "Epistemología de las Ciencias de la Salud", "Comunicación Académica", "Metodología de Estudio"],
+                    semestre_1: ["Bases Biológicas de la Conducta y Psicofisiología", "Procesos Psicológicos Básicos (Atención, Percepción, Memoria)", "Teorías y Sistemas Psicológicos", "Socioantropología de la Salud", "Estadística Aplicada a la Psicología"],
+                    semestre_2: ["Neuroanatomía y Neurofisiología Clínica", "Psicología del Desarrollo (Infancia y Adolescencia)", "Psicología del Desarrollo (Adultez y Vejez)", "Procesos Cognitivos Superiores (Pensamiento y Lenguaje)", "Entrevista Psicológica y Observación Clínica"],
+                    semestre_3: ["Semiología Psiquiátrica y Psicopatología General I", "Teorías de la Personalidad y Trastornos de Personalidad", "Neuropsicología Básica", "Psicología Social y Comunitaria", "Psicometría y Construcción de Pruebas"],
+                    semestre_4: ["Psicopatología Especial II (DSM-5-TR y CIE-11)", "Técnicas de Evaluación Psicológica y Pruebas Proyectivas/Objetivas", "Psicopatología Infantil y del Adolescente", "Sexualidad Humana y Disfunciones Sexuales", "Metodología de la Investigación Cuantitativa y Cualitativa"],
+                    semestre_5: ["Psicodiagnóstico Clínico e Integración de Informes", "Evaluación y Rehabilitación Neuropsicológica", "Modelos Psicoterapéuticos (Enfoque Sistémico y Humanista)", "Psicología de la Salud y Enfermedades Crónicas", "Deontología y Bioética en Psicología"],
+                    semestre_6: ["Psicoterapia Cognitivo-Conductual (TCC) y Terapias de Tercera Generación", "Psicoterapia de Orientación Psicodinámica", "Intervención Clínica en Niños y Adolescentes", "Psicoterapia Familiar y de Pareja", "Salud Mental Comunitaria y Normativa MSP"],
+                    semestre_7: ["Intervención en Crisis, Emergencias, Desastres y Riesgo Suicida", "Prevención y Tratamiento de Adicciones / Consumo Problemático", "Psicofarmacología Aplicada para Psicólogos Clínicos", "Psicogerontología Clínica", "Diseño de Trabajo de Titulación"],
+                    semestre_8: ["Psicología Clínica Hospitalaria y Cuidados Paliativos", "Psicología Forense, Peritaje y Violencia de Género", "Supervisión de Casos Clínicos Integrados", "Trabajo de Titulación"],
+                    titulacion_complexivo: COMPLEXIVO_AXES
+                },
+                atencion_prehospitalaria: {
+                    preuniversitario: PREUNI_COMMON_SUBJECTS,
+                    nivelacion: ["Biología Humana", "Química y Física Aplicada", "Anatomía Elemental", "Introducción a los Sistemas de Emergencias Médicas (SEM)", "Acondicionamiento Físico y Bioseguridad"],
+                    semestre_1: ["Anatomía Humana Topográfica y de Urgencias", "Fisiología Humana Aplicada a la Emergencia", "Soporte Vital Básico (BLS) y DEA", "Bioseguridad, Cinemática del Trauma y Evaluación de la Escena", "Comunicaciones Médicas y Sistema Integrado ECU-911"],
+                    semestre_2: ["Semiología y Valoración Primaria/Secundaria del Paciente Crítico (XABCDE)", "Manejo Básico y Avanzado de la Vía Aérea y Ventilación Mecánica de Transporte", "Fisiopatología del Shock y Fluidoterapia / Accesos Vasculares e Intraóseos", "Inmovilización, Empaquetamiento y Extricación Vehicular", "Psicología de la Emergencia y Primeros Auxilios Psicológicos"],
+                    semestre_3: ["Farmacología de Urgencias y Cálculo de Infusiones Vasoactivas", "Electrocardiografía Básica y Arritmias en Urgencias", "Emergencias Respiratorias y Neurológicas Prehospitalarias", "Manejo Prehospitalario del Trauma I (TEC y Trauma Raquimedular)", "Epidemiología y Bioestadística del Trauma"],
+                    semestre_4: ["Soporte Vital Cardiovascular Avanzado (ACLS) y Síndrome Coronario Agudo", "Emergencias Metabólicas, Endócrinas y Ambientales", "Manejo Prehospitalario del Trauma II (Tórax, Abdomen, Pelvis y Quemados - PHTLS)", "Toxicología Clínica de Urgencias y Envenenamientos", "Ética, Legislación Médica y Cadena de Custodia"],
+                    semestre_5: ["Emergencias Quirúrgicas y Abdomen Agudo Prehospitalario", "Tácticas de Rescate Urbano, Vertical y en Espacios Confinados", "Manejo de Hemorragias Exanguinantes (Stop the Bleed) y Transfusión Prehospitalaria", "Emergencias Psiquiátricas y Paciente Agitado", "Metodología de la Investigación"],
+                    semestre_6: ["Emergencias Obstétricas, Parto Expulsivo y Claves Obstétricas MSP", "Soporte Vital Avanzado Pediátrico (PALS) y Reanimación Neonatal (NRP)", "Emergencias Geriátricas y Paciente Polifarmacia", "Ecografía Focalizada en Trauma y Emergencias (E-FAST)", "Salud Pública"],
+                    semestre_7: ["Gestión de Riesgos, Desastres e Incidentes con Múltiples Víctimas (Triaje START / META)", "Materiales Peligrosos (MatPel / HAZMAT) y Riesgos NRBQ", "Medicina Táctica (TECC / TCCC)", "Transporte Sanitario Terrestre, Aéreo (Aeromedicina) y Evacuación Crítica", "Diseño de Titulación"],
+                    semestre_8: ["Cuidados Intensivos durante el Transporte Interhospitalario", "Gerencia de Servicios de Emergencias Médicas y Auditoría", "Simulación Integrada de Casos Críticos Prehospitalarios", "Trabajo de Titulación"],
+                    titulacion_complexivo: COMPLEXIVO_AXES
+                }
             };
+
+            // Compatibilidad directa para cualquier referencia antigua y obtención por carrera/semestre
+            const SUBJECTS_BY_LEVEL = SUBJECTS_BY_CAREER_AND_LEVEL.medicina;
+
+            function getSubjectsForCareerAndLevel(careerId, levelId) {
+                const normCareer = normalizeCareerKey(careerId);
+                const normalizedLevel = String(levelId || "semestre_1")
+                    .replace(/^sem_(\d+)$/, "semestre_$1")
+                    .replace(/^internado$/, "internado_rotativo");
+
+                const careerMap = SUBJECTS_BY_CAREER_AND_LEVEL[normCareer] || SUBJECTS_BY_CAREER_AND_LEVEL.medicina;
+                return careerMap[normalizedLevel] || careerMap.semestre_1 || PREUNI_COMMON_SUBJECTS;
+            }
 
             const VERIFIED_THESIS_TUTORS = [
                 {
@@ -1262,68 +1414,89 @@
             ];
 
             // =================================================================
-            // 3. CATÁLOGO DE LAS 4 CARRERAS OFICIALES CACES
+            // 3. CATÁLOGO OFICIAL CACES (SINCRONIZADO CON BANCO DE PREGUNTAS)
             // =================================================================
             const CACES_OFFICIAL_CAREERS = [
                 {
                     id: "medicina",
                     codigo: "CACES-MED",
                     nombre: "Medicina Humana",
-                    desc: "Examen Oficial de Habilitación Profesional para Médicos Generales.",
+                    desc: "Examen Oficial de Habilitación Profesional (EHEP - CACES) para Médicos Generales.",
                     materias: [
-                        "Medicina Interna",
-                        "Pediatría",
-                        "Ginecología y Obstetricia",
-                        "Cirugía General",
-                        "Salud Pública y Bioética",
-                        "Salud Mental y Urgencias Críticas"
+                        "Medicina Interna (Cardiología, Neumología, Nefrología, Gastro, Endocrino, Neuro, Infecto)",
+                        "Pediatría y Neonatología (AIEPI, Crecimiento, Vacunación PAI y Patologías Prevalentes)",
+                        "Ginecología y Obstetricia (Control Prenatal, Claves Obstétricas MSP, Score MAMÁ y Parto)",
+                        "Cirugía General, Trauma y Abdomen Agudo",
+                        "Urgencias, Emergencias y Cuidados Críticos",
+                        "Salud Mental y Psiquiatría Comunitaria",
+                        "Salud Pública, Epidemiología, MAIS-FCI y Bioética Médica"
                     ]
                 },
                 {
                     id: "enfermeria",
                     codigo: "CACES-ENF",
                     nombre: "Enfermería",
-                    desc: "Proceso de Atención de Enfermería (PAE), NANDA/NIC/NOC, Clínico-Quirúrgica y Comunitaria.",
+                    desc: "Proceso de Atención de Enfermería (PAE: NANDA-NIC-NOC), Clínico-Quirúrgica, Materno-Infantil y Comunitaria.",
                     materias: [
-                        "Enfermería Clínico-Quirúrgica",
-                        "Enfermería Materno-Infantil y Pediátrica",
-                        "Enfermería Comunitaria y Epidemiología",
-                        "Fundamentos y Proceso de Enfermería (PAE)",
-                        "Administración y Bioética en Enfermería",
-                        "Urgencias y Cuidados Críticos"
+                        "Bases Conceptuales y Proceso de Atención de Enfermería (PAE: NANDA, NIC, NOC)",
+                        "Enfermería Clínico-Quirúrgica del Adulto y Adulto Mayor",
+                        "Enfermería Materno-Infantil, Neonatal y del Adolescente",
+                        "Enfermería Familiar, Comunitaria, Intercultural y Estrategia Nacional de Inmunizaciones (ENI)",
+                        "Enfermería en Urgencias, Emergencias y Cuidados Críticos (UCI)",
+                        "Salud Mental y Psiquiatría en Enfermería",
+                        "Administración, Gestión de Calidad, Seguridad del Paciente y Bioética",
+                        "Investigación, Epidemiología y Educación para la Salud"
                     ]
                 },
                 {
                     id: "obstetricia",
                     codigo: "CACES-OBS",
                     nombre: "Obstetricia",
-                    desc: "Control prenatal, Claves Obstétricas MSP (Roja, Azul, Amarilla), parto y perinatología.",
+                    desc: "Control prenatal, Claves Obstétricas MSP (Roja, Azul, Amarilla), Score MAMÁ, parto y perinatología.",
                     materias: [
-                        "Obstetricia Fisiológica y Alto Riesgo",
-                        "Claves Obstétricas y Emergencias MSP",
-                        "Ginecología y Salud Sexual Reproductiva",
-                        "Neonatología y Perinatología",
-                        "Farmacología Obstétrica",
-                        "Salud Pública Materna y Normativa"
+                        "Obstetricia Fisiológica, Control Prenatal y Psicoprofilaxis",
+                        "Alto Riesgo Obstétrico y Patología Gestacional",
+                        "Claves Obstétricas del MSP (Roja, Azul, Amarilla) y Score MAMÁ",
+                        "Atención del Parto, Puerperio y Lactancia Materna",
+                        "Ginecología, Salud Sexual/Reproductiva y Planificación Familiar",
+                        "Neonatología Inmediata y Reanimación Neonatal",
+                        "Farmacología Gíneco-Obstétrica",
+                        "Salud Pública Materno-Perinatal, Vigilancia Epidemiológica y Bioética"
                     ]
                 },
                 {
                     id: "odontologia",
                     codigo: "CACES-ODO",
                     nombre: "Odontología",
-                    desc: "Patología bucal, endodoncia, periodoncia, cirugía maxilofacial, rehabilitación y bioseguridad.",
+                    desc: "Patología bucal, endodoncia, periodoncia, cirugía maxilofacial, rehabilitación oral y bioseguridad.",
                     materias: [
-                        "Patología Bucal y Diagnóstico",
-                        "Endodoncia y Operatoria Dental",
-                        "Periodoncia y Cirugía Maxilofacial",
-                        "Rehabilitación Oral y Prótesis",
-                        "Odontopediatría y Ortodoncia",
-                        "Farmacología y Salud Pública Odontológica"
+                        "Patología Bucal, Semiología y Diagnóstico Clínico-Radiológico",
+                        "Cirugía Oral y Maxilofacial",
+                        "Endodoncia Clínica y Traumatología Dental",
+                        "Periodoncia y Medicina Periodontal",
+                        "Operatoria Dental, Cariología y Biomateriales",
+                        "Rehabilitación Oral y Prótesis (Fija, Removible y Total)",
+                        "Odontopediatría y Ortodoncia Preventiva/Interceptiva",
+                        "Farmacología Odontológica, Anestesiología, Bioseguridad y Salud Pública"
+                    ]
+                },
+                {
+                    id: "psicologia_clinica",
+                    codigo: "CACES-PSI",
+                    nombre: "Psicología Clínica (Interés Público)",
+                    desc: "Evaluación de Habilitación Profesional CACES: Psicopatología DSM-5-TR/CIE-11, Psicodiagnóstico e Intervención.",
+                    materias: [
+                        "Psicopatología y Sistemas Diagnósticos (DSM-5-TR / CIE-11)",
+                        "Evaluación Psicológica, Psicometría y Psicodiagnóstico Clínico",
+                        "Modelos de Intervención Psicoterapéutica y Psicoterapia Basada en Evidencia",
+                        "Intervención en Crisis, Primeros Auxilios Psicológicos y Riesgo Suicida",
+                        "Neuropsicología Clínica y Rehabilitación Cognitiva",
+                        "Salud Mental Comunitaria, Normativa MSP y Deontología Profesional"
                     ]
                 }
             ];
 
-           // Mapa de normalización entre los IDs de registro.html / index.html y el catálogo del Dashboard
+            // Mapa de normalización unificado (Soporta claves cortas y claves completas de Firestore)
             const CAREER_ID_NORMALIZER = {
                 preuniversitario_salud: "preuniversitario_salud",
                 medicina: "medicina",
@@ -1332,14 +1505,15 @@
                 obstetricia: "obstetricia",
                 nutricion: "nutricion",
                 fisioterapia: "fisioterapia",
-                laboratorio_clinico: "laboratorio",
-                laboratorio: "laboratorio",
+                laboratorio_clinico: "laboratorio_clinico",
+                laboratorio: "laboratorio_clinico",
                 imagenologia: "imagenologia",
-                bioquimica_farmacia: "farmacia",
-                farmacia: "farmacia",
+                bioquimica_farmacia: "bioquimica_farmacia",
+                farmacia: "bioquimica_farmacia",
                 psicologia_clinica: "psicologia_clinica",
-                atencion_prehospitalaria: "paramedicina",
-                paramedicina: "paramedicina"
+                psicologia: "psicologia_clinica",
+                atencion_prehospitalaria: "atencion_prehospitalaria",
+                paramedicina: "atencion_prehospitalaria"
             };
 
             function normalizeCareerKey(rawKey) {
@@ -1348,7 +1522,6 @@
                 return CAREER_ID_NORMALIZER[clean] || "medicina";
             }
 
-            // Leer el perfil clasificado que guardamos al registrarse o iniciar sesión
             function loadClassifiedUserConfig() {
                 try {
                     const raw = localStorage.getItem("makai_classified_profile");
@@ -1388,21 +1561,20 @@
 
             const initialUserConfig = loadClassifiedUserConfig();
 
-            // Estado interactivo local (Salta directamente al Paso 2 de su carrera o al Modo Preuniversitario sin mostrar las 11 carreras)
             const uiState = {
                 userPrimaryCareer: initialUserConfig.primaryCareer,
                 userEnabledCareers: initialUserConfig.enabledCareers,
                 isMasterUser: initialUserConfig.isMaster,
-                carreraStep: initialUserConfig.primaryCareer === "preuniversitario_salud" ? 2 : 2,
+                carreraStep: 2,
                 selectedUnivCareer: initialUserConfig.primaryCareer,
                 selectedUnivLevel: null,
-                cacesStep: ["medicina", "enfermeria", "odontologia", "obstetricia"].includes(initialUserConfig.primaryCareer) ? 2 : 1,
-                selectedCacesCareer: ["medicina", "enfermeria", "odontologia", "obstetricia"].includes(initialUserConfig.primaryCareer) ? initialUserConfig.primaryCareer : null,
+                cacesStep: ["medicina", "enfermeria", "odontologia", "obstetricia", "psicologia_clinica"].includes(initialUserConfig.primaryCareer) ? 2 : 1,
+                selectedCacesCareer: ["medicina", "enfermeria", "odontologia", "obstetricia", "psicologia_clinica"].includes(initialUserConfig.primaryCareer) ? initialUserConfig.primaryCareer : null,
                 expandedCacesSubject: null,
                 showCacesDifficultyLevels: false,
                 activeMaterialCareer: initialUserConfig.primaryCareer === "preuniversitario_salud" ? "medicina" : initialUserConfig.primaryCareer,
-                activeMaterialLevel: "Nivelación Académica",
-                activeMaterialSubject: "Morfofisiología Básica I",
+                activeMaterialLevel: "Nivelación Universitaria",
+                activeMaterialSubject: "Biología Celular Médica",
                 activeMaterialCategoryFilter: "all",
                 openReaderDoc: null,
                 readerNightMode: false,
@@ -1433,7 +1605,6 @@
                     if (headerPill) headerPill.textContent = careerObj.nombre;
                 }
 
-                // Si tiene más de 1 área habilitada por el Admin Maestro, mostrar el selector rápido en el Header
                 if (switcher) {
                     if (uiState.userEnabledCareers.length > 1 || uiState.isMasterUser) {
                         const list = uiState.isMasterUser
@@ -1452,7 +1623,6 @@
                     }
                 }
 
-                // Sincronizar también la sección de Perfil (#view-profile)
                 const profileTitle = document.getElementById("profile-current-career-title");
                 const profileBadge = document.getElementById("profile-level-badge");
                 const profileList = document.getElementById("profile-enabled-careers-list");
@@ -1490,29 +1660,42 @@
             }
 
             function getLevelsForCareer(careerObj) {
+                const careerId = careerObj.id;
+                const careerMap = SUBJECTS_BY_CAREER_AND_LEVEL[careerId] || SUBJECTS_BY_CAREER_AND_LEVEL.medicina;
+
                 const levels = [
-                    { id: "preuniversitario", tag: "Admisión", nombre: "Preuniversitario", tipo: "standard", desc: "Biología, Química, Anatomía preliminar y Razonamiento." },
-                    { id: "nivelacion", tag: "Semestre 0", nombre: "Nivelación Académica", tipo: "standard", desc: "Morfofisiología, Bioquímica básica y bases universitarias." }
+                    { id: "preuniversitario", tag: "Admisión", nombre: "Preuniversitario", tipo: "standard", desc: "Biología, Química, Anatomía elemental, Física y Razonamiento." },
+                    { id: "nivelacion", tag: "Semestre 0", nombre: "Nivelación Universitaria", tipo: "standard", desc: (careerMap.nivelacion || []).slice(0, 3).join(", ") + "..." }
                 ];
+
                 const maxSem = Math.min(careerObj.semestres || 8, 10);
                 for (let i = 1; i <= maxSem; i++) {
+                    const semKey = "semestre_" + i;
+                    const semSubjects = careerMap[semKey] || [];
+                    const previewDesc = semSubjects.length > 0
+                        ? semSubjects.slice(0, 3).join(", ") + (semSubjects.length > 3 ? "..." : "")
+                        : `Asignaturas oficiales de ${i}.° semestre de ${careerObj.nombre}.`;
+
                     levels.push({
-                        id: "sem_" + i,
+                        id: semKey,
                         tag: "Nivel " + i,
-                        nombre: i + "° Semestre",
+                        nombre: i + ".° Semestre",
                         tipo: "standard",
-                        desc: "Asignaturas universales y troncales de " + i + "° semestre."
+                        desc: previewDesc
                     });
                 }
+
                 if (careerObj.tieneInternado) {
+                    const rotSubjects = careerMap.internado_rotativo || [];
                     levels.push({
-                        id: "internado",
+                        id: "internado_rotativo",
                         tag: "Etapa Hospitalaria",
                         nombre: "Internado Rotativo",
                         tipo: "internado",
-                        desc: "Rotaciones clínicas hospitalarias e integración profesional."
+                        desc: rotSubjects.length > 0 ? rotSubjects.slice(0, 3).join(", ") + "..." : "Rotaciones clínicas hospitalarias y comunitarias MSP."
                     });
                 }
+
                 levels.push({
                     id: "titulacion_tesis",
                     tag: "Opción de Graduación 1",
@@ -1531,7 +1714,7 @@
             }
 
             // =================================================================
-            // RENDERIZADO OPTIMIZADO DE CARRERA Y PREUNIVERSITARIO EXCLUSIVO
+            // RENDERIZADO OPTIMIZADO DE CARRERA Y PREUNIVERSITARIO POR SEMESTRE
             // =================================================================
             function renderCarreraFlow() {
                 const root = document.getElementById("carrera-flow-container");
@@ -1543,32 +1726,28 @@
                 document.getElementById("makai-carrera-dynamic-root")?.remove();
                 syncPersonalizedMenusAndHeader();
 
-                // =============================================================
                 // CASO A: ESTUDIANTE REGISTRADO EN PREUNIVERSITARIO DE SALUD
-                // Despliega netamente el menú de Preuniversitario + las 11 bases vocacionales
-                // =============================================================
                 if (uiState.selectedUnivCareer === "preuniversitario_salud" && uiState.carreraStep !== 1) {
                     if (badge) badge.textContent = "● MÓDULO EXCLUSIVO • PREUNIVERSITARIO GENERAL DE SALUD";
                     if (title) title.textContent = "Preuniversitario General de Ciencias de la Salud";
                     if (subtitle) subtitle.textContent = "Tronco común de admisión universitaria y bases vocacionales de las 11 carreras de salud (Puedes cambiar de modalidad en tu Perfil).";
 
-                    const preuniSubjects = SUBJECTS_BY_LEVEL.preuniversitario;
-                    const nivelacionSubjects = SUBJECTS_BY_LEVEL.nivelacion;
+                    const preuniSubjects = PREUNI_COMMON_SUBJECTS;
+                    const nivelacionSubjects = SUBJECTS_BY_CAREER_AND_LEVEL.preuniversitario_salud.nivelacion;
 
                     root.innerHTML = `
-                        <!-- Barra de Estado Preuniversitario -->
                         <div class="flex flex-wrap items-center justify-between gap-3 bg-surface-container border border-primary/40 rounded-2xl p-4">
                             <div class="flex items-center gap-2.5">
                                 <span class="px-3 py-1 rounded-lg bg-primary/15 border border-primary/30 text-primary font-mono text-xs font-extrabold">
                                     🎓 MODO PREUNIVERSITARIO ACTIVO
                                 </span>
                                 <span class="text-xs text-gray-300">
-                                    Sin semestres clínicos ni distractores • Enfocado 100% en tu ingreso universitario
+                                    Enfocado 100% en tu ingreso universitario a Ciencias de la Salud
                                 </span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <button type="button"
-                                        onclick="window.MakaiDashboardUI.startSubjectExam('preuniversitario', 'Simulacro General de Admisión en Salud (50 Preg.)', 'tutor')"
+                                        onclick="window.MakaiDashboardUI.startSubjectExam('preuniversitario_salud', 'Simulacro General de Admisión en Salud', 'tutor')"
                                         class="px-4 py-2 rounded-xl bg-primary text-surface font-extrabold text-xs uppercase tracking-wider hover:bg-opacity-90 transition-all shadow-[0_0_15px_rgba(0,229,255,0.3)]">
                                     ⚡ Simulacro General de Admisión
                                 </button>
@@ -1580,10 +1759,9 @@
                             </div>
                         </div>
 
-                        <!-- Bloque 1: Tronco Común de Admisión Preuniversitaria -->
                         <div class="space-y-3">
                             <h3 class="text-xs font-mono uppercase tracking-wider text-primary font-extrabold">
-                                1. TRONCO COMÚN DE ADMISIÓN UNIVERSITARIA EN SALUD (5 ASIGNATURAS BASE)
+                                1. TRONCO COMÚN DE ADMISIÓN UNIVERSITARIA EN SALUD (${preuniSubjects.length} ASIGNATURAS BASE)
                             </h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 ${preuniSubjects.map((subj, idx) => `
@@ -1595,7 +1773,7 @@
                                         </div>
                                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3 border-t border-surface-high">
                                             <button type="button"
-                                                    onclick="window.MakaiDashboardUI.startSubjectExam('preuniversitario', '${subj}', 'tutor')"
+                                                    onclick="window.MakaiDashboardUI.startSubjectExam('preuniversitario_salud', '${subj}', 'tutor')"
                                                     class="py-2.5 px-3 rounded-xl bg-primary text-surface font-extrabold text-xs flex items-center justify-center gap-1.5">
                                                 <span class="material-symbols-outlined text-sm">quiz</span>
                                                 <span>Simulador</span>
@@ -1607,7 +1785,7 @@
                                                 <span>Sináptico</span>
                                             </button>
                                             <button type="button"
-                                                    onclick="window.MakaiDashboardUI.openMaterialsForSubject('medicina', 'Preuniversitario de Salud', '${subj}')"
+                                                    onclick="window.MakaiDashboardUI.openMaterialsForSubject('preuniversitario_salud', 'Preuniversitario de Salud', '${subj}')"
                                                     class="py-2.5 px-3 rounded-xl bg-surface border border-warning/60 text-warning hover:bg-warning hover:text-surface font-extrabold text-xs flex items-center justify-center gap-1.5">
                                                 <span class="material-symbols-outlined text-sm">menu_book</span>
                                                 <span>Materiales</span>
@@ -1618,7 +1796,6 @@
                             </div>
                         </div>
 
-                        <!-- Bloque 2: Nivelación Universitaria (Semestre 0) -->
                         <div class="space-y-3 pt-2">
                             <h3 class="text-xs font-mono uppercase tracking-wider text-secondary font-extrabold">
                                 2. MÓDULOS DE NIVELACIÓN DE CARRERA (SEMESTRE 0 DE CIENCIAS DE LA SALUD)
@@ -1632,7 +1809,7 @@
                                         </div>
                                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3 border-t border-surface-high">
                                             <button type="button"
-                                                    onclick="window.MakaiDashboardUI.startSubjectExam('nivelacion', '${subj}', 'tutor')"
+                                                    onclick="window.MakaiDashboardUI.startSubjectExam('medicina', '${subj}', 'tutor')"
                                                     class="py-2 px-3 rounded-xl bg-secondary text-surface font-extrabold text-xs">
                                                 Simulador
                                             </button>
@@ -1642,7 +1819,7 @@
                                                 Sináptico
                                             </button>
                                             <button type="button"
-                                                    onclick="window.MakaiDashboardUI.openMaterialsForSubject('medicina', 'Nivelación de Salud', '${subj}')"
+                                                    onclick="window.MakaiDashboardUI.openMaterialsForSubject('medicina', 'Nivelación Universitaria', '${subj}')"
                                                     class="py-2 px-3 rounded-xl bg-surface border border-warning/60 text-warning hover:bg-warning hover:text-surface font-extrabold text-xs">
                                                 Guías PDF
                                             </button>
@@ -1652,7 +1829,6 @@
                             </div>
                         </div>
 
-                        <!-- Bloque 3: Explorador Vocacional de Preuniversitario para las 11 Carreras -->
                         <div class="space-y-3 pt-2">
                             <h3 class="text-xs font-mono uppercase tracking-wider text-warning font-extrabold">
                                 3. ORIENTACIÓN E INTRODUCCIÓN PREUNIVERSITARIA A LAS 11 CARRERAS DE SALUD
@@ -1685,9 +1861,7 @@
                     return;
                 }
 
-                // =============================================================
-                // PASO 1 (SOLO SI EL ADMIN O EL USUARIO CON MÚLTIPLES CARRERAS PULSA CAMBIAR ÁREA)
-                // =============================================================
+                // PASO 1: SELECTOR DE CARRERAS HABILITADAS
                 if (uiState.carreraStep === 1 || !uiState.selectedUnivCareer) {
                     const allowedCareersList = uiState.isMasterUser
                         ? UNIVERSITY_CAREERS
@@ -1749,18 +1923,15 @@
                     return;
                 }
 
-                // =============================================================
                 // CASO B: ENTRADA DIRECTA A SU CARRERA UNIVERSITARIA ELEGIDA
-                // (Despliega directamente Medicina/Enfermería/etc., sus semestres, preuniversitario y titulación)
-                // =============================================================
-                const careerObj = UNIVERSITY_CAREERS.find(c => c.id === uiState.selectedUnivCareer) || UNIVERSITY_CAREERS[0];
+                const careerObj = UNIVERSITY_CAREERS.find(c => c.id === normalizeCareerKey(uiState.selectedUnivCareer)) || UNIVERSITY_CAREERS[0];
                 const levels = getLevelsForCareer(careerObj);
                 const hasMultipleAllowed = uiState.isMasterUser || uiState.userEnabledCareers.length > 1;
 
                 if (uiState.carreraStep === 2 || !uiState.selectedUnivLevel) {
                     if (badge) badge.textContent = `● MI CARRERA ACTIVA • ${careerObj.nombre.toUpperCase()}`;
                     if (title) title.textContent = `${careerObj.nombre} — Tus Semestres, Preuniversitario y Titulación`;
-                    if (subtitle) subtitle.textContent = "Selecciona directamente tu semestre actual, etapa preuniversitaria o modalidad de graduación sin distracciones de otras carreras.";
+                    if (subtitle) subtitle.textContent = "Selecciona directamente tu semestre actual, etapa preuniversitaria o modalidad de graduación con la malla oficial de tu carrera.";
 
                     const academicLevels = levels.filter(l => l.tipo === "standard" || l.tipo === "internado");
 
@@ -1771,7 +1942,7 @@
                                     ÁREA ${careerObj.num} • ${careerObj.nombre.toUpperCase()}
                                 </span>
                                 <span class="text-xs text-gray-400 font-mono">
-                                    Panel optimizado para tu carrera
+                                    Malla oficial sincronizada por semestre
                                 </span>
                             </div>
 
@@ -1931,9 +2102,10 @@
                     return;
                 }
 
+                // PASO 3: MATERIAS ESPECÍFICAS DEL SEMESTRE Y DE LA CARRERA ELEGIDA
                 const levelObj = levels.find(l => l.id === uiState.selectedUnivLevel) || levels[0];
                 const isComplexivo = levelObj.id === "titulacion_complexivo";
-                const subjects = SUBJECTS_BY_LEVEL[levelObj.id] || SUBJECTS_BY_LEVEL.sem_1;
+                const subjects = getSubjectsForCareerAndLevel(careerObj.id, levelObj.id);
 
                 if (badge) {
                     badge.textContent = isComplexivo
@@ -1944,7 +2116,7 @@
                 if (subtitle) {
                     subtitle.textContent = isComplexivo
                         ? "Entrenamiento intensivo por ejes integradores para aprobar el Examen Complexivo de grado a la primera."
-                        : "Selecciona la materia para practicar en el Simulador Clínico, repasar en Sináptico v4.4 o abrir Materiales de Estudio.";
+                        : `Asignaturas oficiales de ${levelObj.nombre} para la carrera de ${careerObj.nombre}.`;
                 }
 
                 root.innerHTML = `
@@ -1983,7 +2155,7 @@
                                         </span>
                                         <h4 class="text-base font-extrabold text-white mt-1">${subj}</h4>
                                         <p class="text-xs text-gray-400 mt-1">
-                                            Banco de reactivos, tarjetas de memorización y materiales de estudio (PDFs, GPC e infografías).
+                                            Banco de reactivos sincronizado con Firestore, tarjetas Sináptico v4.4 y materiales 1D.
                                         </p>
                                     </div>
                                     <span class="material-symbols-outlined text-primary">clinical_notes</span>
@@ -2686,67 +2858,131 @@
             }
 
             // =================================================================
-            // BANCO DE REACTIVOS (CLÍNICOS, PSICOMÉTRICOS E IDIOMAS B2)
+            // BANCO DE REACTIVOS CONECTADO A CLOUD FIRESTORE (preguntas_caces)
             // =================================================================
-            function startSubjectExam(careerId, subjectName, mode = "tutor") {
+            async function startSubjectExam(careerId, subjectName, mode = "tutor") {
                 openView("view-simulator");
+                const normCareer = normalizeCareerKey(careerId);
                 const contextEl = document.getElementById("exam-context");
                 if (contextEl) {
-                    contextEl.textContent = `${careerId.toUpperCase()} • ${subjectName} • Modo ${mode.toUpperCase()}`;
+                    contextEl.textContent = `${normCareer.toUpperCase()} • ${subjectName} • Modo ${mode.toUpperCase()}`;
                 }
 
-                const isPsychometric = subjectName.toLowerCase().includes("psicom") || subjectName.toLowerCase().includes("razonamiento") || subjectName.toLowerCase().includes("personalidad");
-                const isLanguage = subjectName.toLowerCase().includes("inglés") || subjectName.toLowerCase().includes("alemán") || subjectName.toLowerCase().includes("italiano");
+                const qTextEl = document.getElementById("q-text");
+                const optsContainer = document.getElementById("q-options");
+                const rationalBox = document.getElementById("q-rational");
+
+                if (qTextEl) qTextEl.textContent = "Sincronizando reactivos de esta ruta curricular desde Cloud Firestore...";
+                if (optsContainer) optsContainer.innerHTML = "";
+                rationalBox?.classList.add("hidden");
+
+                // Crear o limpiar el visor de Imagen Clínica dentro del simulador
+                let imgContainer = document.getElementById("q-clinical-image-box");
+                if (!imgContainer && qTextEl && qTextEl.parentNode) {
+                    imgContainer = document.createElement("div");
+                    imgContainer.id = "q-clinical-image-box";
+                    imgContainer.className = "hidden mb-6 p-3 rounded-2xl bg-surface border border-primary/40 text-center";
+                    imgContainer.innerHTML = `
+                        <img id="q-clinical-image-el" src="" alt="Imagen Clínica del Caso" class="max-h-64 mx-auto rounded-xl object-contain" />
+                        <span class="block text-[10px] font-mono text-primary mt-1.5">🖼️ Evidencia / Imagen Clínica Adjunta al Reactivo</span>
+                    `;
+                    qTextEl.parentNode.insertBefore(imgContainer, qTextEl.nextSibling);
+                }
 
                 let casesPool = [];
 
-                if (isPsychometric) {
-                    casesPool = [
-                        {
-                            enunciado: `[PRUEBA PSICOMÉTRICA HOSPITALARIA • ${subjectName}] En una guardia de urgencias ingresan 4 pacientes simultáneamente y una solución debe diluirse en proporción 1:4 a partir de una ampolla de 200 mg en 10 ml. Si la serie lógica de triaje asigna prioridad exponencial (2, 6, 18, 54...), ¿cuál es el siguiente valor de la secuencia y cuántos mg hay por cada ml tras diluir?`,
-                            dificultad: "Alta",
-                            opciones: {
-                                A: "Siguiente valor: 162 • Concentración diluida: 5 mg/ml",
-                                B: "Siguiente valor: 108 • Concentración diluida: 10 mg/ml",
-                                C: "Siguiente valor: 162 • Concentración diluida: 20 mg/ml",
-                                D: "Siguiente valor: 144 • Concentración diluida: 4 mg/ml"
-                            },
-                            respuestaCorrecta: "A",
-                            racional: "La serie geométrica multiplica por 3 cada término (54 × 3 = 162). Al diluir 200 mg en un volumen total de 40 ml (proporción 1:4), quedan 200 mg / 40 ml = 5 mg/ml."
+                // 1. Consultar primero las preguntas reales guardadas en Cloud Firestore (preguntas_caces)
+                try {
+                    const { db, collection, getDocs } = await import("./js/2-core/firebase.service.js");
+                    const snap = await getDocs(collection(db, "preguntas_caces"));
+                    const firestoreMatches = [];
+                    const careerFallbackMatches = [];
+
+                    const cleanTargetSubject = String(subjectName || "").trim().toLowerCase();
+                    const isGlobalSimulation =
+                        cleanTargetSubject.includes("simulacro") ||
+                        cleanTargetSubject.includes("todas las materias") ||
+                        cleanTargetSubject.includes("nivel 1") ||
+                        cleanTargetSubject.includes("nivel 2") ||
+                        cleanTargetSubject.includes("nivel 3") ||
+                        cleanTargetSubject.includes("nivel 4");
+
+                    snap.forEach(docSnap => {
+                        const data = docSnap.data();
+                        // Ignorar preguntas ocultas o que estén en la Papelera de Reciclaje
+                        if (data.enPapelera === true || data.visible === false) return;
+
+                        const qCareer = normalizeCareerKey(data.carrera || "medicina");
+                        const qSubject = String(data.materia || "").trim().toLowerCase();
+
+                        if (qCareer === normCareer) {
+                            careerFallbackMatches.push({ id: docSnap.id, ...data });
+                            if (isGlobalSimulation || qSubject === cleanTargetSubject || qSubject.includes(cleanTargetSubject) || cleanTargetSubject.includes(qSubject)) {
+                                firestoreMatches.push({ id: docSnap.id, ...data });
+                            }
                         }
-                    ];
-                } else if (isLanguage) {
-                    casesPool = [
-                        {
-                            enunciado: `[MEDICAL LANGUAGE B2 • ${subjectName}] During the clinical history taking (Anamnesis / Arzt-Patienten-Gespräch), a 58-year-old patient reports sudden shortness of breath (Dyspnea / Atemnot / Dispnea) and crushing chest pain radiating to the left arm. Which of the following expressions is the most accurate B2-level clinical communication to ask about pain onset and precipitating factors?`,
-                            dificultad: "Nivel B2",
-                            opciones: {
-                                A: "When exactly did the pain start, and were you exerting yourself when it came on? / Wann genau haben die Schmerzen angefangen?",
-                                B: "Why you have pain in chest now?",
-                                C: "Take this pill and go home tomorrow.",
-                                D: "Your heart is broken since yesterday."
-                            },
-                            respuestaCorrecta: "A",
-                            racional: "En las certificaciones médicas B2 (OET, FSP Alemania y SSM Italia), se evalúa el uso de preguntas abiertas y precisas con registro formal-empático (indagando inicio exacto y desencadenantes al esfuerzo)."
-                        }
-                    ];
-                } else {
-                    casesPool = (window.makaiData && Array.isArray(window.makaiData.semillaCasos) && window.makaiData.semillaCasos.length > 0)
-                        ? window.makaiData.semillaCasos
-                        : [
+                    });
+
+                    if (firestoreMatches.length > 0) {
+                        casesPool = firestoreMatches;
+                    } else if (isGlobalSimulation && careerFallbackMatches.length > 0) {
+                        casesPool = careerFallbackMatches;
+                    }
+                } catch (err) {
+                    console.warn("Aviso al consultar preguntas_caces en Firestore:", err);
+                }
+
+                // 2. Si aún no se han subido preguntas en esa materia en Firestore, usar respaldo demostrativo
+                if (casesPool.length === 0) {
+                    const isPsychometric = subjectName.toLowerCase().includes("psicom") || subjectName.toLowerCase().includes("razonamiento") || subjectName.toLowerCase().includes("personalidad");
+                    const isLanguage = subjectName.toLowerCase().includes("inglés") || subjectName.toLowerCase().includes("alemán") || subjectName.toLowerCase().includes("italiano");
+
+                    if (isPsychometric) {
+                        casesPool = [
                             {
-                                enunciado: `Paciente acude a evaluación clínica correspondiente al área de ${subjectName}. Presenta signos vitales con TA 162/108 mmHg, FC 104 lpm y clínica aguda. Según las Guías de Práctica Clínica (GPC-MSP), ¿cuál es la conducta diagnóstica y terapéutica prioritaria?`,
-                                dificultad: "Media",
+                                enunciado: `[PRUEBA PSICOMÉTRICA HOSPITALARIA • ${subjectName}] En una guardia de urgencias ingresan 4 pacientes simultáneamente y una solución debe diluirse en proporción 1:4 a partir de una ampolla de 200 mg en 10 ml. Si la serie lógica de triaje asigna prioridad exponencial (2, 6, 18, 54...), ¿cuál es el siguiente valor de la secuencia y cuántos mg hay por cada ml tras diluir?`,
+                                dificultad: "Alta",
                                 opciones: {
-                                    A: "Estabilización hemodinámica inicial, monitorización multiparámetro y aplicación del protocolo GPC-MSP específico",
-                                    B: "Alta domiciliaria con control por consulta externa en 7 días",
-                                    C: "Conducta expectante sin solicitar exámenes complementarios",
-                                    D: "Uso de antibioticoterapia empírica sin foco infeccioso demostrado"
+                                    A: "Siguiente valor: 162 • Concentración diluida: 5 mg/ml",
+                                    B: "Siguiente valor: 108 • Concentración diluida: 10 mg/ml",
+                                    C: "Siguiente valor: 162 • Concentración diluida: 20 mg/ml",
+                                    D: "Siguiente valor: 144 • Concentración diluida: 4 mg/ml"
                                 },
                                 respuestaCorrecta: "A",
-                                racional: "Los protocolos del MSP y la matriz de evaluación CACES priorizan siempre la estabilización inicial y la aplicación secuencial de la Guía de Práctica Clínica vigente."
+                                racional: "La serie geométrica multiplica por 3 cada término (54 × 3 = 162). Al diluir 200 mg en un volumen total de 40 ml (proporción 1:4), quedan 200 mg / 40 ml = 5 mg/ml."
                             }
                         ];
+                    } else if (isLanguage) {
+                        casesPool = [
+                            {
+                                enunciado: `[MEDICAL LANGUAGE B2 • ${subjectName}] During the clinical history taking (Anamnesis / Arzt-Patienten-Gespräch), a 58-year-old patient reports sudden shortness of breath (Dyspnea / Atemnot / Dispnea) and crushing chest pain radiating to the left arm. Which of the following expressions is the most accurate B2-level clinical communication to ask about pain onset and precipitating factors?`,
+                                dificultad: "Nivel B2",
+                                opciones: {
+                                    A: "When exactly did the pain start, and were you exerting yourself when it came on? / Wann genau haben die Schmerzen angefangen?",
+                                    B: "Why you have pain in chest now?",
+                                    C: "Take this pill and go home tomorrow.",
+                                    D: "Your heart is broken since yesterday."
+                                },
+                                respuestaCorrecta: "A",
+                                racional: "En las certificaciones médicas B2 (OET, FSP Alemania y SSM Italia), se evalúa el uso de preguntas abiertas y precisas con registro formal-empático (indagando inicio exacto y desencadenantes al esfuerzo)."
+                            }
+                        ];
+                    } else {
+                        casesPool = [
+                            {
+                                enunciado: `[Reactivo Demostrativo • ${subjectName}] Paciente acude a valoración correspondiente al módulo de ${subjectName} (${normCareer.toUpperCase()}). Presenta signos vitales con TA 162/108 mmHg, FC 104 lpm y cuadro agudo. Según los protocolos oficiales del MSP y estándares de acreditación CACES, ¿cuál es la conducta diagnóstica y terapéutica prioritaria?`,
+                                dificultad: "Media",
+                                opciones: {
+                                    A: "Estabilización inicial, monitorización multiparámetro y aplicación secuencial de la Guía de Práctica Clínica (GPC-MSP) correspondiente",
+                                    B: "Alta domiciliaria sin realizar valoración complementaria",
+                                    C: "Conducta expectante sin registro en historia clínica",
+                                    D: "Administración empírica de fármacos sin indicación clínica documentada"
+                                },
+                                respuestaCorrecta: "A",
+                                racional: "Los protocolos del MSP y la evaluación oficial del CACES priorizan siempre la estabilización inicial y la aplicación secuencial de la Guía de Práctica Clínica vigente. (Puedes agregar más reactivos específicos para esta asignatura desde Bóveda Admin ➔ Banco de Preguntas)."
+                            }
+                        ];
+                    }
                 }
 
                 let currentIndex = 0;
@@ -2757,23 +2993,34 @@
                     document.getElementById("q-difficulty").textContent = `Dificultad: ${q.dificultad || "Media"}`;
                     document.getElementById("q-text").textContent = q.enunciado;
 
-                    const rationalBox = document.getElementById("q-rational");
-                    rationalBox.classList.add("hidden");
+                    // Mostrar u ocultar imagen clínica adjunta si existe
+                    const imgBox = document.getElementById("q-clinical-image-box");
+                    const imgEl = document.getElementById("q-clinical-image-el");
+                    const imgSrc = q.imagenBase64 || q.imagenUrl || "";
+                    if (imgBox && imgEl) {
+                        if (imgSrc) {
+                            imgEl.src = imgSrc;
+                            imgBox.classList.remove("hidden");
+                        } else {
+                            imgEl.removeAttribute("src");
+                            imgBox.classList.add("hidden");
+                        }
+                    }
 
-                    const optsContainer = document.getElementById("q-options");
+                    rationalBox.classList.add("hidden");
                     optsContainer.innerHTML = "";
 
                     ["A", "B", "C", "D"].forEach(letter => {
                         const btn = document.createElement("button");
                         btn.type = "button";
                         btn.className = "w-full text-left p-4 rounded-xl bg-surface border border-surface-high hover:border-primary text-xs sm:text-sm text-gray-200 flex items-start gap-3 transition-all";
-                        btn.innerHTML = `<span class="font-mono font-extrabold text-primary">${letter}.</span><span class="flex-1">${q.opciones[letter]}</span>`;
+                        btn.innerHTML = `<span class="font-mono font-extrabold text-primary">${letter}.</span><span class="flex-1">${q.opciones?.[letter] || "---"}</span>`;
                         btn.addEventListener("click", () => {
                             const isCorrect = letter === q.respuestaCorrecta;
                             btn.className = isCorrect
                                 ? "w-full text-left p-4 rounded-xl bg-secondary/20 border-2 border-secondary text-xs sm:text-sm text-white font-bold flex items-start gap-3"
                                 : "w-full text-left p-4 rounded-xl bg-danger/20 border-2 border-danger text-xs sm:text-sm text-white font-bold flex items-start gap-3";
-                            document.getElementById("q-rational-text").textContent = q.racional;
+                            document.getElementById("q-rational-text").textContent = q.racional || "Sin racional registrado.";
                             rationalBox.classList.remove("hidden");
                         });
                         optsContainer.appendChild(btn);
@@ -2795,7 +3042,6 @@
                     exitBtn.onclick = () => openView("view-launcher");
                 }
             }
-
             function openSinapticoForSubject(careerId, subjectName) {
                 openView("view-spaced");
                 const catEl = document.getElementById("fc-category");
