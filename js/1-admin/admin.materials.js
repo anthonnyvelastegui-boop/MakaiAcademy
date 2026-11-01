@@ -1,9 +1,9 @@
 // ============================================================================
 // ARCHIVO: js/1-admin/admin.materials.js
 // DESCRIPCIÓN: Gestor Maestro de Materiales de Estudio 1D, Guías Clínicas (GPC),
-//              Libros PDF, Infografías, Algoritmos y Micro-Videos con Cascada
-//              Curricular Oficial por Semestre, Verificador de Rutas assets/,
-//              Importador JSON con Ruta Forzada y Papelera de Reciclaje.
+//              Libros PDF, Infografías y Micro-Videos con Cascada Curricular
+//              por Semestre, Creador de Categorías Personalizadas, Selector
+//              Directo de Rutas en Bóveda assets/ y Papelera de Reciclaje.
 // PROYECTO: MakaiAcademy (Proyecto ALICIZATION) - makai-academy-f8039
 // ============================================================================
 
@@ -31,6 +31,7 @@ import {
 
 // Colección oficial en Cloud Firestore
 const MATERIALS_COLLECTION = COLLECTIONS?.MATERIALS || "materiales_estudio";
+const CUSTOM_CATEGORIES_STORAGE_KEY = "makai_custom_material_categories_v1";
 
 // ============================================================================
 // 1. MAPA CURRICULAR OFICIAL DEL ECUADOR (SINCRONIZADO CON BANCO Y SINÁPTICO)
@@ -458,14 +459,40 @@ const CURRICULUM_MAP = {
     }
 };
 
-const ASSET_SUBFOLDERS = {
-    "guias-pdf": "assets/5-multimedia-1d/guias-pdf/",
-    "infografias-y-algoritmos": "assets/5-multimedia-1d/infografias-y-algoritmos/",
-    "micro-videos-1d": "assets/5-multimedia-1d/micro-videos-1d/",
-    "atlas-visual": "assets/4-banco-clinico/atlas-visual/",
-    "electrocardiografia": "assets/4-banco-clinico/electrocardiografia/",
-    "imagenologia": "assets/4-banco-clinico/imagenologia/"
-};
+// ============================================================================
+// 2. CATÁLOGO AMPLIADO DE CATEGORÍAS + CARPETAS DE LA BÓVEDA ASSETS/
+// ============================================================================
+
+const BASE_MATERIAL_CATEGORIES = [
+    { id: "guias-pdf", label: "📄 Guía de Práctica Clínica (GPC) / Normativa MSP", defaultFolder: "assets/5-multimedia-1d/guias-pdf/" },
+    { id: "libros-tratados", label: "📚 Libro Base / Tratado Clínico PDF", defaultFolder: "assets/5-multimedia-1d/guias-pdf/" },
+    { id: "resumenes-fichas", label: "⚡ Resumen / Mapa de Guardia (1-Hoja)", defaultFolder: "assets/5-multimedia-1d/infografias-y-algoritmos/" },
+    { id: "infografias-y-algoritmos", label: "🧠 Infografía / Algoritmo Diagnóstico", defaultFolder: "assets/5-multimedia-1d/infografias-y-algoritmos/" },
+    { id: "micro-videos-1d", label: "🎬 Micro-Video Explicativo 1D (3-5 min)", defaultFolder: "assets/5-multimedia-1d/micro-videos-1d/" },
+    { id: "presentaciones-clases", label: "🖥️ Diapositivas / Presentación de Cátedra", defaultFolder: "assets/8-multimedia-aulas/portadas-clases/" },
+    { id: "articulos-papers", label: "🔬 Artículo Científico / Paper / Revisión", defaultFolder: "assets/5-multimedia-1d/guias-pdf/" },
+    { id: "vademecum-dosis", label: "💊 Vademécum / Tabla Farmacológica y Dosis", defaultFolder: "assets/5-multimedia-1d/guias-pdf/" },
+    { id: "atlas-visual", label: "🔎 Atlas Visual Clínico y Láminas", defaultFolder: "assets/4-banco-clinico/atlas-visual/" },
+    { id: "electrocardiografia", label: "📈 Electrocardiografía (Tiras y Guías ECG)", defaultFolder: "assets/4-banco-clinico/electrocardiografia/" },
+    { id: "imagenologia", label: "🩻 Imagenología (Rayos X, TAC, RMN, Eco)", defaultFolder: "assets/4-banco-clinico/imagenologia/" },
+    { id: "plantillas-tesis", label: "🎓 Plantilla / Guía de Tesis e Investigación", defaultFolder: "assets/9-multimedia-titulacion/plantillas-tesis/" },
+    { id: "guias-complexivo", label: "🏛️ Compendio de Examen Complexivo", defaultFolder: "assets/9-multimedia-titulacion/guias-complexivo/" }
+];
+
+const OFFICIAL_VAULT_FOLDERS = [
+    { path: "assets/5-multimedia-1d/guias-pdf/", label: "📁 assets/5-multimedia-1d/guias-pdf/ (Guías, Libros y PDFs)" },
+    { path: "assets/5-multimedia-1d/infografias-y-algoritmos/", label: "📁 assets/5-multimedia-1d/infografias-y-algoritmos/ (Mapas, Fichas e Infografías)" },
+    { path: "assets/5-multimedia-1d/micro-videos-1d/", label: "📁 assets/5-multimedia-1d/micro-videos-1d/ (Micro-Videos y Animaciones)" },
+    { path: "assets/4-banco-clinico/atlas-visual/", label: "📁 assets/4-banco-clinico/atlas-visual/ (Atlas Clínico y Láminas)" },
+    { path: "assets/4-banco-clinico/electrocardiografia/", label: "📁 assets/4-banco-clinico/electrocardiografia/ (Electrocardiografía)" },
+    { path: "assets/4-banco-clinico/imagenologia/", label: "📁 assets/4-banco-clinico/imagenologia/ (Imagenología: RX, TAC, RMN)" },
+    { path: "assets/8-multimedia-aulas/portadas-clases/", label: "📁 assets/8-multimedia-aulas/portadas-clases/ (Materiales de Aulas y Clases)" },
+    { path: "assets/9-multimedia-titulacion/plantillas-tesis/", label: "📁 assets/9-multimedia-titulacion/plantillas-tesis/ (Plantillas de Tesis)" },
+    { path: "assets/9-multimedia-titulacion/guias-complexivo/", label: "📁 assets/9-multimedia-titulacion/guias-complexivo/ (Guías de Complexivo)" },
+    { path: "assets/10-multimedia-profesionales/tratados-posgrado/", label: "📁 assets/10-multimedia-profesionales/tratados-posgrado/ (Posgrado y Especialidad)" },
+    { path: "assets/10-multimedia-profesionales/herramientas-rural/", label: "📁 assets/10-multimedia-profesionales/herramientas-rural/ (Año de Salud Rural MSP)" },
+    { path: "custom", label: "✏️ Escribir otra ruta de carpeta personalizada..." }
+];
 
 // Estado interno del módulo de materiales
 let materialsCache = [];
@@ -473,7 +500,7 @@ let editingMaterialId = null;
 let activeCatalogTab = "active"; // "active" | "trash"
 
 // ============================================================================
-// 2. VALIDACIÓN DE SEGURIDAD Y PROCESAMIENTO DE ARCHIVOS
+// 3. GESTIÓN DE CATEGORÍAS PERSONALIZADAS Y VALIDACIÓN DE ACCESO
 // ============================================================================
 
 function verifyAdminAccess() {
@@ -491,6 +518,52 @@ function verifyAdminAccess() {
     return true;
 }
 
+function getCustomCategories() {
+    try {
+        const raw = localStorage.getItem(CUSTOM_CATEGORIES_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function saveCustomCategories(list) {
+    try {
+        localStorage.setItem(CUSTOM_CATEGORIES_STORAGE_KEY, JSON.stringify(list));
+    } catch (e) {
+        console.warn("No se pudo guardar la categoría personalizada en localStorage:", e);
+    }
+}
+
+function getAllMaterialCategories() {
+    const customList = getCustomCategories();
+    const map = new Map();
+    BASE_MATERIAL_CATEGORIES.forEach(c => map.set(c.id, c));
+    customList.forEach(c => {
+        if (c && c.id && c.label) {
+            map.set(c.id, c);
+        }
+    });
+    // Incluir también cualquier categoría personalizada que ya venga dentro de documentos de Firestore
+    materialsCache.forEach(m => {
+        if (m.categoria && !map.has(m.categoria)) {
+            map.set(m.categoria, {
+                id: m.categoria,
+                label: `🏷️ ${m.categoriaLabel || m.categoria}`,
+                defaultFolder: m.carpetaDestino || "assets/5-multimedia-1d/guias-pdf/"
+            });
+        }
+    });
+    return Array.from(map.values());
+}
+
+function getDefaultFolderForCategory(categoryId) {
+    const all = getAllMaterialCategories();
+    const found = all.find(c => c.id === categoryId);
+    return found?.defaultFolder || "assets/5-multimedia-1d/guias-pdf/";
+}
+
 /**
  * Procesa archivos ligeros (PDF <= 750 KB o Imágenes JPG/PNG/WEBP comprimidas) a Base64.
  */
@@ -501,7 +574,7 @@ async function processMaterialFileToBase64(file) {
         if (file.size > 750 * 1024) {
             throw new Error(
                 "El archivo PDF directo supera los 750 KB para Firestore. " +
-                "Para guías o libros pesados, súbelos a 'assets/5-multimedia-1d/guias-pdf/' o a Firebase Storage y pega su ruta o URL."
+                "Para guías o libros pesados, elige el modo 'Ruta en Bóveda assets/' o 'URL Cloud' para enlazarlo sin límite de peso."
             );
         }
         return await new Promise((resolve, reject) => {
@@ -535,11 +608,11 @@ async function processMaterialFileToBase64(file) {
         });
     }
 
-    throw new Error("Formato directo no soportado. Usa PDF (<=750 KB), JPG, PNG, WEBP o enlaza mediante Ruta Assets / URL Cloud.");
+    throw new Error("Formato directo no soportado. Usa PDF (<=750 KB), JPG, PNG, WEBP o enlaza mediante Ruta en Bóveda assets/ o URL Cloud.");
 }
 
 // ============================================================================
-// 3. INICIALIZADOR PRINCIPAL E INTERFAZ DEL GESTOR DE MATERIALES 1D
+// 4. INICIALIZADOR PRINCIPAL E INTERFAZ DEL GESTOR DE MATERIALES 1D
 // ============================================================================
 
 export async function initAdminMaterials() {
@@ -576,7 +649,7 @@ function renderMaterialsSectionUI(section) {
                         <span>Gestor de Materiales de Estudio, Guías Clínicas (GPC), Infografías y Micro-Videos 1D</span>
                     </h3>
                     <p class="text-xs text-gray-400 mt-0.5">
-                        Sincronizado semestre por semestre con las 11 Carreras Universitarias, Preuniversitario, CACES Oficial y la carpeta <code class="text-secondary font-mono">assets/5-multimedia-1d/</code>.
+                        Sincronizado semestre por semestre con las 11 Carreras Universitarias, Preuniversitario, CACES Oficial y las carpetas de tu bóveda <code class="text-secondary font-mono">assets/</code>.
                     </p>
                 </div>
 
@@ -681,20 +754,41 @@ function renderMaterialsSectionUI(section) {
                     </div>
                 </div>
 
-                <!-- FILA 3: CATEGORÍA (SUBCARPETA ASSETS), CANDADO DEL PLAN Y VISIBILIDAD -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-[11px] font-mono text-secondary uppercase mb-1 font-bold">
-                            8. Categoría / Subcarpeta en Bóveda Assets *
-                        </label>
-                        <select id="mat-category" required class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2.5 text-xs text-white focus:border-secondary focus:outline-none">
-                            <option value="guias-pdf">📄 Guía Clínica / Libro PDF (assets/5-multimedia-1d/guias-pdf/)</option>
-                            <option value="infografias-y-algoritmos">🧠 Infografía / Mapa 1-Hoja (assets/5-multimedia-1d/infografias-y-algoritmos/)</option>
-                            <option value="micro-videos-1d">🎬 Micro-Video 1D (3-5 min) (assets/5-multimedia-1d/micro-videos-1d/)</option>
-                            <option value="atlas-visual">🔬 Atlas Visual Clínico (assets/4-banco-clinico/atlas-visual/)</option>
-                            <option value="electrocardiografia">📈 Electrocardiografía (assets/4-banco-clinico/electrocardiografia/)</option>
-                            <option value="imagenologia">🩻 Imagenología / RX / TAC (assets/4-banco-clinico/imagenologia/)</option>
-                        </select>
+                <!-- FILA 3: CATEGORÍA (CON CREADOR DE CATEGORÍAS PROPIAS), CANDADO DEL PLAN Y VISIBILIDAD -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between gap-2">
+                            <label class="block text-[11px] font-mono text-secondary uppercase font-bold">
+                                8. Categoría del Material *
+                            </label>
+                            <button type="button" id="btn-toggle-new-category" class="px-2 py-0.5 rounded-lg bg-secondary/15 border border-secondary/50 text-secondary hover:bg-secondary hover:text-surface text-[10px] font-mono font-extrabold transition-all">
+                                ➕ Crear Categoría
+                            </button>
+                        </div>
+                        <select id="mat-category" required class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2.5 text-xs text-white focus:border-secondary focus:outline-none"></select>
+
+                        <!-- CREADOR INLINE DE NUEVA CATEGORÍA PERSONALIZADA -->
+                        <div id="mat-new-category-box" class="hidden bg-surface-container border border-secondary/50 rounded-xl p-3 space-y-2.5">
+                            <div class="text-[10px] font-mono text-secondary uppercase font-extrabold">
+                                ✨ Crear Nueva Categoría Personalizada
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-mono text-gray-400 mb-1">Nombre visible de la categoría:</label>
+                                <input type="text" id="mat-custom-cat-name" placeholder="Ej: 📋 Protocolos de Guardia UCI" class="w-full bg-surface border border-surface-high rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-secondary focus:outline-none" />
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-mono text-gray-400 mb-1">Carpeta por defecto en assets/ (opcional):</label>
+                                <input type="text" id="mat-custom-cat-folder" value="assets/5-multimedia-1d/guias-pdf/" class="w-full bg-surface border border-surface-high rounded-lg px-2.5 py-1.5 text-[11px] text-gray-200 font-mono focus:border-secondary focus:outline-none" />
+                            </div>
+                            <div class="flex items-center justify-end gap-2">
+                                <button type="button" id="btn-cancel-new-category" class="px-2.5 py-1 rounded-lg bg-surface text-gray-400 hover:text-white text-[10px] font-mono">
+                                    Cancelar
+                                </button>
+                                <button type="button" id="btn-save-new-category" class="px-3 py-1 rounded-lg bg-secondary text-surface font-extrabold text-[10px] font-mono">
+                                    ✓ Guardar y Seleccionar
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <div>
@@ -703,7 +797,7 @@ function renderMaterialsSectionUI(section) {
                         </label>
                         <select id="mat-plan" required class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2.5 text-xs text-white focus:border-primary focus:outline-none">
                             <option value="Básico">🔓 Plan Básico ($0 - Abierto / Demo)</option>
-                            <option value="PRO">💎 Makai PRO ($17.99 / $139.99)</option>
+                            <option value="PRO">💎 Makai PRO ($18.60 / $144.75)</option>
                             <option value="VIP">👑 Mentoría Élite VIP ($49.99)</option>
                         </select>
                     </div>
@@ -719,16 +813,16 @@ function renderMaterialsSectionUI(section) {
                     </div>
                 </div>
 
-                <!-- FILA 4: ORIGEN DEL ARCHIVO HÍBRIDO + PROBADOR EN VIVO -->
-                <div class="bg-surface border border-surface-high rounded-2xl p-4 space-y-3">
+                <!-- FILA 4: 11. ORIGEN Y SELECCIÓN DE RUTA DEL DOCUMENTO -->
+                <div class="bg-surface border border-surface-high rounded-2xl p-4 space-y-3.5">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <div>
                             <span class="text-xs font-extrabold text-white flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-primary text-base">folder_managed</span>
-                                <span>11. Origen del Archivo (Ruta en <code class="text-primary font-mono">assets/</code>, URL Externa o Subida Directa desde tu PC)</span>
+                                <span class="material-symbols-outlined text-primary text-base">folder_open</span>
+                                <span>11. Origen del Archivo y Selección de Ruta para el Documento</span>
                             </span>
                             <p class="text-[11px] text-gray-400">
-                                Verifica que la ruta exista con el botón de prueba o sube el archivo directamente desde tu computadora.
+                                Elige la carpeta destino dentro de <code class="text-primary font-mono">assets/</code> donde irá el documento, o cárgale un enlace externo / archivo directo desde tu PC.
                             </p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
@@ -747,28 +841,47 @@ function renderMaterialsSectionUI(section) {
                         </div>
                     </div>
 
+                    <!-- SELECTOR DE CARPETA / RUTA DESTINO EN ASSETS/ (COMÚN PARA MODO RUTA Y MODO SUBIDA PC) -->
+                    <div id="mat-folder-selector-wrap" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-mono text-primary uppercase mb-1 font-bold">
+                                Elegir Carpeta / Ruta Destino del Documento en <code class="text-primary">assets/</code>:
+                            </label>
+                            <select id="mat-vault-folder-select" class="w-full bg-surface-container border border-surface-high rounded-xl px-3 py-2 text-xs text-secondary font-mono focus:border-primary focus:outline-none"></select>
+                        </div>
+                        <div id="mat-custom-folder-box" class="hidden">
+                            <label class="block text-[10px] font-mono text-warning uppercase mb-1 font-bold">
+                                Escribe tu ruta de carpeta personalizada:
+                            </label>
+                            <input type="text" id="mat-custom-folder-input" placeholder="assets/5-multimedia-1d/mi-nueva-carpeta/" class="w-full bg-surface-container border border-warning/50 rounded-xl px-3 py-2 text-xs text-white font-mono focus:border-warning focus:outline-none" />
+                        </div>
+                    </div>
+
                     <!-- MODO 1: RUTA EN CARPETA ASSETS/ -->
                     <div id="mat-source-assets-box" class="space-y-2">
-                        <div class="grid grid-cols-1 md:grid-cols-12 gap-2">
-                            <input type="text" id="mat-asset-prefix" readonly value="assets/5-multimedia-1d/guias-pdf/" class="md:col-span-5 bg-surface-container border border-surface-high rounded-xl px-3 py-2 text-xs text-secondary font-mono" />
-                            <input type="text" id="mat-asset-filename" placeholder="nombre-del-archivo.pdf (o pega la ruta completa)" class="md:col-span-5 bg-surface-container border border-surface-high rounded-xl px-3 py-2 text-xs text-white font-mono focus:border-primary focus:outline-none" />
-                            <button type="button" id="btn-mat-test-resource" class="md:col-span-2 px-3 py-2 rounded-xl bg-surface-container border border-primary text-primary hover:bg-primary hover:text-surface text-xs font-extrabold transition-all">
-                                🔍 Probar Ruta
-                            </button>
+                        <label class="block text-[10px] font-mono text-gray-400 uppercase">
+                            Nombre del Documento o Seleccionar desde tu PC para capturar su nombre:
+                        </label>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" id="mat-asset-filename" placeholder="Ej: gpc-preeclampsia.pdf (o selecciónalo con el botón de al lado)" class="flex-1 bg-surface-container border border-surface-high rounded-xl px-3.5 py-2 text-xs text-white font-mono focus:border-primary focus:outline-none" />
+                            <label class="cursor-pointer px-4 py-2 rounded-xl bg-surface-container border border-primary/50 text-primary hover:bg-primary hover:text-surface text-xs font-mono font-extrabold flex items-center justify-center gap-1.5 transition-all whitespace-nowrap">
+                                <span class="material-symbols-outlined text-sm">attach_file</span>
+                                <span>📄 Elegir documento de mi PC</span>
+                                <input type="file" id="mat-asset-file-picker" class="hidden" />
+                            </label>
                         </div>
-                        <p class="text-[11px] text-gray-400 font-mono">
-                            Ruta final generada: <strong id="mat-asset-preview" class="text-primary">assets/5-multimedia-1d/guias-pdf/guia-ejemplo.pdf</strong>
-                        </p>
+                        <div class="bg-surface-container border border-surface-high rounded-xl px-3.5 py-2 text-[11px] text-gray-300 font-mono flex flex-wrap items-center justify-between gap-2">
+                            <span>📌 Ruta completa asignada al documento:</span>
+                            <strong id="mat-asset-preview" class="text-primary break-all">assets/5-multimedia-1d/guias-pdf/documento.pdf</strong>
+                        </div>
                     </div>
 
                     <!-- MODO 2: URL EXTERNA O FIREBASE STORAGE -->
-                    <div id="mat-source-url-box" class="hidden space-y-2">
-                        <div class="flex gap-2">
-                            <input type="url" id="mat-external-url" placeholder="https://firebasestorage.googleapis.com/... o enlace directo al PDF / Micro-Video MP4/WebM" class="flex-1 bg-surface-container border border-surface-high rounded-xl px-3.5 py-2 text-xs text-white font-mono focus:border-secondary focus:outline-none" />
-                            <button type="button" id="btn-mat-test-url" class="px-3.5 py-2 rounded-xl bg-surface-container border border-secondary text-secondary hover:bg-secondary hover:text-surface text-xs font-extrabold transition-all">
-                                🔍 Probar URL
-                            </button>
-                        </div>
+                    <div id="mat-source-url-box" class="hidden space-y-1.5">
+                        <label class="block text-[10px] font-mono text-secondary uppercase font-bold">
+                            Enlace Directo al Documento PDF o Micro-Video en la Nube:
+                        </label>
+                        <input type="url" id="mat-external-url" placeholder="https://firebasestorage.googleapis.com/... o enlace directo al PDF / Video MP4" class="w-full bg-surface-container border border-surface-high rounded-xl px-3.5 py-2 text-xs text-white font-mono focus:border-secondary focus:outline-none" />
                         <p class="text-[10px] text-gray-400">
                             Ideal para libros PDF pesados o Micro-Videos alojados en <code class="text-primary">makai-academy-f8039.firebasestorage.app</code>.
                         </p>
@@ -776,18 +889,13 @@ function renderMaterialsSectionUI(section) {
 
                     <!-- MODO 3: SUBIDA DIRECTA EN BASE64 DESDE TU PC -->
                     <div id="mat-source-upload-box" class="hidden space-y-1.5">
+                        <label class="block text-[10px] font-mono text-warning uppercase font-bold">
+                            Selecciona el Archivo desde tu PC para guardarlo en Firestore + Ruta elegida arriba:
+                        </label>
                         <input type="file" id="mat-file-upload" accept=".pdf,image/jpeg,image/png,image/webp" class="w-full text-xs text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-extrabold file:bg-warning file:text-surface cursor-pointer" />
                         <p class="text-[10px] text-gray-400">
-                            Comprime automáticamente Infografías / Mapas de 1 Hoja (JPG/PNG/WEBP) o adjunta resúmenes en PDF ($\le 750\text{ KB}$) directamente en Firestore y les asigna su ruta en <code class="text-primary">assets/</code>.
+                            Comprime automáticamente Infografías / Mapas de 1 Hoja (JPG/PNG/WEBP) o adjunta resúmenes en PDF ($\le 750\text{ KB}$) directamente en Firestore dentro de la ruta de carpeta seleccionada arriba.
                         </p>
-                    </div>
-
-                    <!-- Caja de estado de verificación del recurso -->
-                    <div id="mat-resource-verify-box" class="hidden bg-surface-container border border-surface-high rounded-xl p-3 text-xs font-mono flex items-center justify-between gap-3">
-                        <span id="mat-resource-verify-status"></span>
-                        <button type="button" id="btn-mat-open-test-tab" class="px-3 py-1 rounded-lg bg-primary/15 border border-primary/40 text-primary hover:bg-primary hover:text-surface font-bold text-[11px]">
-                            ↗ Abrir en Pestaña
-                        </button>
                     </div>
                 </div>
 
@@ -818,7 +926,7 @@ function renderMaterialsSectionUI(section) {
                         <span>Importación Masiva de Materiales y Guías por Lotes (.JSON) con Ruta Garantizada</span>
                     </h4>
                     <p class="text-xs text-gray-400 mt-0.5">
-                        Con el candado inferior activo, todos los materiales del lote JSON se guardarán en el Ámbito, Carrera, Semestre y Materia seleccionados arriba.
+                        Con el candado inferior activo, todos los materiales del lote JSON se guardarán en el Ámbito, Carrera, Semestre, Materia y Carpeta seleccionados arriba.
                     </p>
                 </div>
                 <div class="flex flex-wrap gap-2">
@@ -871,7 +979,7 @@ function renderMaterialsSectionUI(section) {
                         <span>Catálogo de Materiales de Estudio en Cloud Firestore</span>
                     </h4>
                     <p class="text-xs text-gray-400 mt-0.5">
-                        Filtra por ámbito, carrera, semestre, categoría, visibilidad o plan. Cambia la visibilidad o el plan en 1 clic, o restaura desde la Papelera.
+                        Filtra por ámbito, carrera, semestre, categoría (incluyendo tus categorías personalizadas), visibilidad o plan.
                     </p>
                 </div>
 
@@ -921,12 +1029,6 @@ function renderMaterialsSectionUI(section) {
                     <label class="block text-[10px] font-mono text-gray-400 uppercase mb-1">Categoría / Formato</label>
                     <select id="filter-mat-category" class="w-full bg-surface-container border border-surface-high rounded-xl px-3 py-2 text-xs text-white focus:border-primary focus:outline-none">
                         <option value="all">Todas las Categorías</option>
-                        <option value="guias-pdf">📄 Guías Clínicas y PDFs</option>
-                        <option value="infografias-y-algoritmos">🧠 Infografías y Algoritmos</option>
-                        <option value="micro-videos-1d">🎬 Micro-Videos 1D</option>
-                        <option value="atlas-visual">🔬 Atlas Visual</option>
-                        <option value="electrocardiografia">📈 Electrocardiografía</option>
-                        <option value="imagenologia">🩻 Imagenología</option>
                     </select>
                 </div>
 
@@ -975,14 +1077,139 @@ function renderMaterialsSectionUI(section) {
         </div>
     `;
 
+    populateCategorySelectors();
+    populateVaultFolderSelector();
     populateCascadingMaterialCareers();
     populateMaterialFilterDropdowns();
     updateAssetPathPreview();
 }
 
 // ============================================================================
-// 4. CASCADA CURRICULAR ESTRICTA POR SEMESTRE Y VERIFICADOR DE ARCHIVOS
+// 5. POBLADO DE CATEGORÍAS (BASE + PERSONALIZADAS), CARPETAS Y CASCADA
 // ============================================================================
+
+function populateCategorySelectors(selectedCatId = null) {
+    const catSelect = document.getElementById("mat-category");
+    const filterCatSelect = document.getElementById("filter-mat-category");
+    const allCategories = getAllMaterialCategories();
+
+    if (catSelect) {
+        const currentVal = selectedCatId || catSelect.value || "guias-pdf";
+        catSelect.innerHTML = allCategories
+            .map(c => `<option value="${escapeHTML(c.id)}">${escapeHTML(c.label)}</option>`)
+            .join("");
+        if (allCategories.some(c => c.id === currentVal)) {
+            catSelect.value = currentVal;
+        }
+    }
+
+    if (filterCatSelect) {
+        const currentFilter = filterCatSelect.value || "all";
+        filterCatSelect.innerHTML = `<option value="all">Todas las Categorías</option>` +
+            allCategories
+                .map(c => `<option value="${escapeHTML(c.id)}">${escapeHTML(c.label)}</option>`)
+                .join("");
+        if (currentFilter === "all" || allCategories.some(c => c.id === currentFilter)) {
+            filterCatSelect.value = currentFilter;
+        }
+    }
+}
+
+function populateVaultFolderSelector(selectedFolderPath = null) {
+    const folderSelect = document.getElementById("mat-vault-folder-select");
+    const customBox = document.getElementById("mat-custom-folder-box");
+    const customInput = document.getElementById("mat-custom-folder-input");
+    if (!folderSelect) return;
+
+    // Agregar también cualquier carpeta personalizada creada por el usuario en sus categorías
+    const customCats = getCustomCategories();
+    const folderOptions = [...OFFICIAL_VAULT_FOLDERS];
+
+    customCats.forEach(c => {
+        if (c.defaultFolder && !folderOptions.some(f => f.path === c.defaultFolder)) {
+            folderOptions.splice(folderOptions.length - 1, 0, {
+                path: c.defaultFolder,
+                label: `📁 ${c.defaultFolder} (${c.label})`
+            });
+        }
+    });
+
+    folderSelect.innerHTML = folderOptions
+        .map(f => `<option value="${escapeHTML(f.path)}">${escapeHTML(f.label)}</option>`)
+        .join("");
+
+    if (selectedFolderPath) {
+        const exists = folderOptions.some(f => f.path === selectedFolderPath && f.path !== "custom");
+        if (exists) {
+            folderSelect.value = selectedFolderPath;
+            customBox?.classList.add("hidden");
+        } else {
+            folderSelect.value = "custom";
+            customBox?.classList.remove("hidden");
+            if (customInput) customInput.value = selectedFolderPath;
+        }
+    }
+}
+
+function getSelectedVaultFolderPrefix() {
+    const folderSelect = document.getElementById("mat-vault-folder-select");
+    const customInput = document.getElementById("mat-custom-folder-input");
+
+    if (!folderSelect) return "assets/5-multimedia-1d/guias-pdf/";
+
+    if (folderSelect.value === "custom") {
+        let customPath = (customInput?.value || "assets/5-multimedia-1d/guias-pdf/").trim().replace(/\\/g, "/");
+        if (!customPath.endsWith("/")) customPath += "/";
+        return customPath;
+    }
+
+    return folderSelect.value || "assets/5-multimedia-1d/guias-pdf/";
+}
+
+function createNewCustomCategory() {
+    const nameInput = document.getElementById("mat-custom-cat-name");
+    const folderInput = document.getElementById("mat-custom-cat-folder");
+    const box = document.getElementById("mat-new-category-box");
+
+    const rawName = (nameInput?.value || "").trim();
+    if (!rawName) {
+        alert("Escribe un nombre para tu nueva categoría.");
+        return;
+    }
+
+    // Generar un ID limpio sin tildes ni espacios
+    const slugId = rawName
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || `cat-${Date.now()}`;
+
+    let cleanFolder = (folderInput?.value || `assets/5-multimedia-1d/${slugId}/`).trim().replace(/\\/g, "/");
+    if (!cleanFolder.endsWith("/")) cleanFolder += "/";
+
+    const customList = getCustomCategories();
+    const existingIdx = customList.findIndex(c => c.id === slugId);
+    const newCatObj = {
+        id: slugId,
+        label: rawName.startsWith("🏷️") || /^[^\w\s]/.test(rawName) ? rawName : `🏷️ ${rawName}`,
+        defaultFolder: cleanFolder
+    };
+
+    if (existingIdx >= 0) {
+        customList[existingIdx] = newCatObj;
+    } else {
+        customList.push(newCatObj);
+    }
+
+    saveCustomCategories(customList);
+    populateCategorySelectors(slugId);
+    populateVaultFolderSelector(cleanFolder);
+    updateAssetPathPreview();
+
+    if (nameInput) nameInput.value = "";
+    box?.classList.add("hidden");
+}
 
 function populateCascadingMaterialCareers(selectedCareer = null) {
     const scopeEl = document.getElementById("mat-scope");
@@ -1070,8 +1297,9 @@ function updateMaterialLiveRouteBanner() {
     const catVal = categorySelect?.value || "guias-pdf";
     const planText = planSelect?.value || "Básico";
     const visText = visibleSelect?.value === "false" ? "Oculto" : "Visible";
+    const folderPrefix = getSelectedVaultFolderPrefix();
 
-    const routeSummary = `${scope} ➔ ${careerText} ➔ ${levelText} ➔ ${subjectText} [${catVal} • Plan ${planText} • ${visText}]`;
+    const routeSummary = `${scope} ➔ ${careerText} ➔ ${levelText} ➔ ${subjectText} [${catVal} • ${folderPrefix} • Plan ${planText} • ${visText}]`;
 
     const previewEl = document.getElementById("mat-route-preview-text");
     if (previewEl) previewEl.textContent = routeSummary;
@@ -1104,74 +1332,27 @@ function populateMaterialFilterDropdowns() {
 }
 
 function updateAssetPathPreview() {
-    const categoryEl = document.getElementById("mat-category");
-    const prefixEl = document.getElementById("mat-asset-prefix");
     const filenameEl = document.getElementById("mat-asset-filename");
     const previewEl = document.getElementById("mat-asset-preview");
+    if (!filenameEl || !previewEl) return;
 
-    if (!categoryEl || !prefixEl || !filenameEl || !previewEl) return;
-
-    const prefix = ASSET_SUBFOLDERS[categoryEl.value] || "assets/5-multimedia-1d/guias-pdf/";
-    prefixEl.value = prefix;
-
+    const prefix = getSelectedVaultFolderPrefix();
     const rawVal = filenameEl.value.trim();
-    const cleanFileName = rawVal
-        ? rawVal.split("/").pop().replace(/\s+/g, "-")
-        : "guia-ejemplo.pdf";
 
-    previewEl.textContent = `${prefix}${cleanFileName}`;
+    if (rawVal.startsWith("assets/")) {
+        previewEl.textContent = rawVal.replace(/\s+/g, "-");
+    } else {
+        const cleanFileName = rawVal
+            ? rawVal.split("/").pop().replace(/\s+/g, "-")
+            : "documento.pdf";
+        previewEl.textContent = `${prefix}${cleanFileName}`;
+    }
+
     updateMaterialLiveRouteBanner();
 }
 
-/**
- * Prueba en tiempo real si el archivo en assets/ o la URL externa responde correctamente.
- */
-async function testMaterialResourceAvailability(targetUrl) {
-    const box = document.getElementById("mat-resource-verify-box");
-    const statusEl = document.getElementById("mat-resource-verify-status");
-    const openBtn = document.getElementById("btn-mat-open-test-tab");
-
-    if (!box || !statusEl || !targetUrl) return;
-
-    box.classList.remove("hidden");
-    statusEl.className = "text-warning font-extrabold";
-    statusEl.textContent = `⏳ Verificando disponibilidad de: ${targetUrl}...`;
-
-    if (openBtn) {
-        openBtn.onclick = () => window.open(targetUrl, "_blank");
-    }
-
-    if (/\.(png|jpg|jpeg|webp|gif|svg)$/i.test(targetUrl)) {
-        const probe = new Image();
-        probe.onload = () => {
-            statusEl.className = "text-secondary font-extrabold";
-            statusEl.textContent = `✅ Imagen encontrada y verificada en: ${targetUrl}`;
-        };
-        probe.onerror = () => {
-            statusEl.className = "text-danger font-extrabold";
-            statusEl.textContent = `⚠️ Aún no se encuentra la imagen en "${targetUrl}". Súbela a esa carpeta de GitHub o usa 'Subir desde mi PC'.`;
-        };
-        probe.src = targetUrl;
-        return;
-    }
-
-    try {
-        const resp = await fetch(targetUrl, { method: "HEAD" });
-        if (resp.ok) {
-            statusEl.className = "text-secondary font-extrabold";
-            statusEl.textContent = `✅ Recurso verificado correctamente (HTTP ${resp.status}): ${targetUrl}`;
-        } else {
-            statusEl.className = "text-danger font-extrabold";
-            statusEl.textContent = `⚠️ El archivo aún no existe en "${targetUrl}" (HTTP ${resp.status}). Verifica el nombre o súbelo a esa carpeta.`;
-        }
-    } catch (e) {
-        statusEl.className = "text-primary font-bold";
-        statusEl.textContent = `ℹ️ Ruta asignada: ${targetUrl} (Pulsa 'Abrir en Pestaña' para comprobar la visualización).`;
-    }
-}
-
 // ============================================================================
-// 5. EVENTOS DEL MÓDULO
+// 6. EVENTOS DEL MÓDULO
 // ============================================================================
 
 function bindMaterialsEvents() {
@@ -1182,32 +1363,58 @@ function bindMaterialsEvents() {
     document.getElementById("mat-plan")?.addEventListener("change", updateMaterialLiveRouteBanner);
     document.getElementById("mat-visible")?.addEventListener("change", updateMaterialLiveRouteBanner);
 
-    document.getElementById("mat-category")?.addEventListener("change", updateAssetPathPreview);
+    // Al cambiar la categoría, sugerir automáticamente su carpeta correspondiente en el selector de ruta
+    document.getElementById("mat-category")?.addEventListener("change", (e) => {
+        const suggestedFolder = getDefaultFolderForCategory(e.target.value);
+        populateVaultFolderSelector(suggestedFolder);
+        updateAssetPathPreview();
+    });
+
+    // Botones para crear nueva categoría personalizada desde el formulario
+    document.getElementById("btn-toggle-new-category")?.addEventListener("click", () => {
+        const box = document.getElementById("mat-new-category-box");
+        box?.classList.toggle("hidden");
+        document.getElementById("mat-custom-cat-name")?.focus();
+    });
+
+    document.getElementById("btn-cancel-new-category")?.addEventListener("click", () => {
+        document.getElementById("mat-new-category-box")?.classList.add("hidden");
+    });
+
+    document.getElementById("btn-save-new-category")?.addEventListener("click", createNewCustomCategory);
+
+    // Selector de carpeta en Bóveda assets/
+    document.getElementById("mat-vault-folder-select")?.addEventListener("change", (e) => {
+        const isCustom = e.target.value === "custom";
+        document.getElementById("mat-custom-folder-box")?.classList.toggle("hidden", !isCustom);
+        updateAssetPathPreview();
+    });
+
+    document.getElementById("mat-custom-folder-input")?.addEventListener("input", updateAssetPathPreview);
     document.getElementById("mat-asset-filename")?.addEventListener("input", updateAssetPathPreview);
 
+    // Selector de archivo desde PC para tomar automáticamente el nombre limpio dentro de la ruta elegida
+    document.getElementById("mat-asset-file-picker")?.addEventListener("change", (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const safeName = file.name.trim().replace(/\s+/g, "-");
+        const filenameEl = document.getElementById("mat-asset-filename");
+        if (filenameEl) {
+            filenameEl.value = safeName;
+            updateAssetPathPreview();
+        }
+    });
+
+    // Alternar modo de origen (Ruta assets / URL Cloud / Subir desde PC)
     document.querySelectorAll('input[name="mat-source-mode"]').forEach(radio => {
         radio.addEventListener("change", () => {
             const mode = getSelectedSourceMode();
             document.getElementById("mat-source-assets-box")?.classList.toggle("hidden", mode !== "assets");
             document.getElementById("mat-source-url-box")?.classList.toggle("hidden", mode !== "url");
             document.getElementById("mat-source-upload-box")?.classList.toggle("hidden", mode !== "upload");
-            document.getElementById("mat-resource-verify-box")?.classList.add("hidden");
+            // Mostrar el selector de carpeta de assets tanto en modo "assets" como en modo "upload"
+            document.getElementById("mat-folder-selector-wrap")?.classList.toggle("hidden", mode === "url");
         });
-    });
-
-    document.getElementById("btn-mat-test-resource")?.addEventListener("click", () => {
-        updateAssetPathPreview();
-        const path = document.getElementById("mat-asset-preview")?.textContent || "";
-        testMaterialResourceAvailability(path);
-    });
-
-    document.getElementById("btn-mat-test-url")?.addEventListener("click", () => {
-        const url = document.getElementById("mat-external-url")?.value.trim() || "";
-        if (!url) {
-            alert("Ingresa primero una URL para probar.");
-            return;
-        }
-        testMaterialResourceAvailability(url);
     });
 
     document.getElementById("admin-materials-form")?.addEventListener("submit", saveStudyMaterial);
@@ -1278,7 +1485,7 @@ function switchMaterialsCatalogTab(tab) {
 }
 
 // ============================================================================
-// 6. LECTURA, FILTRADO Y RENDERIZADO CON VISIBILIDAD, PLAN Y PAPELERA
+// 7. LECTURA, FILTRADO Y RENDERIZADO CON VISIBILIDAD, PLAN Y PAPELERA
 // ============================================================================
 
 export async function loadStudyMaterials() {
@@ -1314,6 +1521,8 @@ export async function loadStudyMaterials() {
 
         materialsCache.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
 
+        // Refrescar selectores de categorías por si hay categorías nuevas en Firestore
+        populateCategorySelectors();
         updateMaterialsCounters();
         renderMaterialsTable();
     } catch (err) {
@@ -1375,7 +1584,7 @@ function getFilteredMaterials() {
         if (planFilter !== "all" && (item.planRequerido || "Básico") !== planFilter) return false;
 
         if (searchQuery) {
-            const haystack = `${item.titulo || ""} ${item.codigo || ""} ${item.materia || ""} ${item.descripcion || ""}`.toLowerCase();
+            const haystack = `${item.titulo || ""} ${item.codigo || ""} ${item.materia || ""} ${item.categoria || ""} ${item.descripcion || ""}`.toLowerCase();
             if (!haystack.includes(searchQuery)) return false;
         }
 
@@ -1410,6 +1619,7 @@ function renderMaterialsTable() {
         return;
     }
 
+    const categoriesMap = new Map(getAllMaterialCategories().map(c => [c.id, c.label]));
     tbody.innerHTML = "";
 
     filtered.forEach(item => {
@@ -1420,6 +1630,7 @@ function renderMaterialsTable() {
 
         const isVisible = item.visible !== false;
         const plan = item.planRequerido || "Básico";
+        const catDisplay = categoriesMap.get(item.categoria) || item.categoriaLabel || item.categoria || "guias-pdf";
 
         const tr = document.createElement("tr");
         tr.className = `transition-colors ${!isVisible ? "bg-surface/40 opacity-75" : "hover:bg-surface/60"}`;
@@ -1451,11 +1662,11 @@ function renderMaterialsTable() {
 
             <!-- 3. CATEGORÍA Y RUTA DEL ARCHIVO -->
             <td class="px-4 py-3.5 align-top">
-                <span class="px-2 py-0.5 rounded bg-surface-high text-primary border border-primary/30 text-[10px] uppercase font-bold">
-                    ${escapeHTML(item.categoria || "guias-pdf")}
+                <span class="px-2 py-0.5 rounded bg-surface-high text-primary border border-primary/30 text-[10px] font-bold">
+                    ${escapeHTML(catDisplay)}
                 </span>
-                <div class="text-[10px] text-gray-400 truncate max-w-[220px] mt-1.5" title="${escapeHTML(item.recursoUrl || "")}">
-                    ${item.archivoBase64 ? "📎 Subido directo en Firestore + Ruta" : escapeHTML(item.recursoUrl || "---")}
+                <div class="text-[10px] text-gray-400 truncate max-w-[230px] mt-1.5" title="${escapeHTML(item.recursoUrl || "")}">
+                    ${item.archivoBase64 ? `📎 Subido directo (${escapeHTML(item.recursoUrl || "Firestore")})` : escapeHTML(item.recursoUrl || "---")}
                 </div>
             </td>
 
@@ -1519,7 +1730,7 @@ function renderMaterialsTable() {
 }
 
 // ============================================================================
-// 7. GUARDADO, EDICIÓN, VISIBILIDAD, PLAN Y PAPELERA (CRUD)
+// 8. GUARDADO, EDICIÓN, VISIBILIDAD, PLAN Y PAPELERA (CRUD)
 // ============================================================================
 
 export async function saveStudyMaterial(e) {
@@ -1537,12 +1748,15 @@ export async function saveStudyMaterial(e) {
     const titulo = document.getElementById("mat-title")?.value.trim() || "";
     const codigo = document.getElementById("mat-code")?.value.trim() || "";
     const metaInfo = document.getElementById("mat-meta")?.value.trim() || "";
-    const categoria = document.getElementById("mat-category")?.value || "guias-pdf";
+    const categoriaSelect = document.getElementById("mat-category");
+    const categoria = categoriaSelect?.value || "guias-pdf";
+    const categoriaLabel = categoriaSelect?.options[categoriaSelect.selectedIndex]?.text || categoria;
     const planRequerido = document.getElementById("mat-plan")?.value || "Básico";
     const visible = document.getElementById("mat-visible")?.value !== "false";
     const descripcion = document.getElementById("mat-description")?.value.trim() || "";
     const sourceMode = getSelectedSourceMode();
 
+    const carpetaDestino = getSelectedVaultFolderPrefix();
     let recursoUrl = "";
     let archivoBase64 = null;
     let archivoTipo = null;
@@ -1551,15 +1765,17 @@ export async function saveStudyMaterial(e) {
         if (submitBtn) submitBtn.disabled = true;
         if (submitText) submitText.textContent = "Guardando en Firestore...";
 
-        const prefix = ASSET_SUBFOLDERS[categoria] || "assets/5-multimedia-1d/guias-pdf/";
-
         if (sourceMode === "assets") {
             const rawFilename = document.getElementById("mat-asset-filename")?.value.trim() || "";
             if (!rawFilename) {
-                throw new Error("Escribe el nombre del archivo ubicado en la subcarpeta de assets/.");
+                throw new Error("Escribe el nombre del documento o selecciónalo con el botón '📄 Elegir documento de mi PC'.");
             }
-            const cleanFilename = rawFilename.split("/").pop().replace(/\s+/g, "-");
-            recursoUrl = `${prefix}${cleanFilename}`;
+            if (rawFilename.startsWith("assets/")) {
+                recursoUrl = rawFilename.replace(/\s+/g, "-");
+            } else {
+                const cleanFilename = rawFilename.split("/").pop().replace(/\s+/g, "-");
+                recursoUrl = `${carpetaDestino}${cleanFilename}`;
+            }
         } else if (sourceMode === "url") {
             recursoUrl = document.getElementById("mat-external-url")?.value.trim() || "";
             if (!recursoUrl) {
@@ -1572,14 +1788,14 @@ export async function saveStudyMaterial(e) {
                 archivoBase64 = await processMaterialFileToBase64(file);
                 archivoTipo = file.type;
                 const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, "-");
-                recursoUrl = `${prefix}${safeName}`;
+                recursoUrl = `${carpetaDestino}${safeName}`;
             } else if (editingMaterialId) {
                 const existing = materialsCache.find(m => m.id === editingMaterialId);
                 archivoBase64 = existing?.archivoBase64 || null;
                 archivoTipo = existing?.archivoTipo || null;
                 recursoUrl = existing?.recursoUrl || "";
             } else {
-                throw new Error("Selecciona un archivo PDF (<=750 KB) o imagen para adjuntar desde tu PC.");
+                throw new Error("Selecciona un archivo PDF (<=750 KB) o imagen para subir desde tu PC.");
             }
         }
 
@@ -1594,6 +1810,8 @@ export async function saveStudyMaterial(e) {
             titulo,
             codigo,
             categoria,
+            categoriaLabel,
+            carpetaDestino,
             planRequerido,
             visible,
             enPapelera: false,
@@ -1614,7 +1832,7 @@ export async function saveStudyMaterial(e) {
             payload.createdAt = nowIso;
             payload.creadoPor = adminEmail;
             await addDoc(collection(db, MATERIALS_COLLECTION), payload);
-            alert(`✅ Nuevo material guardado en [${ambito.toUpperCase()} > ${carrera} > ${nivel} > ${materia}].`);
+            alert(`✅ Nuevo material guardado en [${ambito.toUpperCase()} > ${carrera} > ${nivel} > ${materia}]\nRuta asignada: ${recursoUrl}`);
         }
 
         resetMaterialsForm();
@@ -1652,10 +1870,7 @@ export function editStudyMaterial(materialId) {
     document.getElementById("mat-code").value = item.codigo || "";
     document.getElementById("mat-meta").value = item.metaInfo || "";
 
-    const categoryEl = document.getElementById("mat-category");
-    if (categoryEl) {
-        categoryEl.value = item.categoria || "guias-pdf";
-    }
+    populateCategorySelectors(item.categoria || "guias-pdf");
 
     document.getElementById("mat-plan").value = item.planRequerido || "Básico";
     document.getElementById("mat-visible").value = item.visible === false ? "false" : "true";
@@ -1668,13 +1883,22 @@ export function editStudyMaterial(materialId) {
         radio.dispatchEvent(new Event("change"));
     }
 
-    if (mode === "assets") {
-        const prefix = ASSET_SUBFOLDERS[item.categoria] || "";
-        const filename = (item.recursoUrl || "").replace(prefix, "");
-        document.getElementById("mat-asset-filename").value = filename;
+    // Extraer carpeta y nombre de archivo si viene de assets/
+    const rawUrl = item.recursoUrl || "";
+    if (mode !== "url") {
+        let detectedFolder = item.carpetaDestino || getDefaultFolderForCategory(item.categoria);
+        let detectedFilename = rawUrl;
+        if (rawUrl.includes("/")) {
+            const lastSlash = rawUrl.lastIndexOf("/");
+            detectedFolder = rawUrl.substring(0, lastSlash + 1);
+            detectedFilename = rawUrl.substring(lastSlash + 1);
+        }
+        populateVaultFolderSelector(detectedFolder);
+        const filenameEl = document.getElementById("mat-asset-filename");
+        if (filenameEl) filenameEl.value = detectedFilename;
         updateAssetPathPreview();
-    } else if (mode === "url") {
-        document.getElementById("mat-external-url").value = item.recursoUrl || "";
+    } else {
+        document.getElementById("mat-external-url").value = rawUrl;
     }
 
     updateMaterialLiveRouteBanner();
@@ -1707,9 +1931,11 @@ function resetMaterialsForm() {
         defaultRadio.dispatchEvent(new Event("change"));
     }
 
+    populateCategorySelectors("guias-pdf");
+    populateVaultFolderSelector("assets/5-multimedia-1d/guias-pdf/");
     populateCascadingMaterialCareers();
     updateAssetPathPreview();
-    document.getElementById("mat-resource-verify-box")?.classList.add("hidden");
+    document.getElementById("mat-new-category-box")?.classList.add("hidden");
 
     const modeBadge = document.getElementById("mat-form-mode-badge");
     if (modeBadge) {
@@ -1844,7 +2070,7 @@ async function emptyMaterialsTrash() {
 }
 
 // ============================================================================
-// 8. IMPORTACIÓN MASIVA (.JSON), PRE-VALIDADOR Y VISOR DE PREVISUALIZACIÓN
+// 9. IMPORTACIÓN MASIVA (.JSON), PRE-VALIDADOR Y VISOR DE PREVISUALIZACIÓN
 // ============================================================================
 
 function insertSampleMaterialsBatchJSON() {
@@ -1854,7 +2080,7 @@ function insertSampleMaterialsBatchJSON() {
     const materia = document.getElementById("mat-subject")?.value || "General";
     const categoria = document.getElementById("mat-category")?.value || "guias-pdf";
     const plan = document.getElementById("mat-plan")?.value || "Básico";
-    const prefix = ASSET_SUBFOLDERS[categoria] || "assets/5-multimedia-1d/guias-pdf/";
+    const prefix = getSelectedVaultFolderPrefix();
 
     const sample = [
         {
@@ -1890,6 +2116,7 @@ function validateMaterialsBatchJSON(showBox = true) {
     const formSubject = document.getElementById("mat-subject")?.value || "General";
     const formCategory = document.getElementById("mat-category")?.value || "guias-pdf";
     const formPlan = document.getElementById("mat-plan")?.value || "Básico";
+    const formFolderPrefix = getSelectedVaultFolderPrefix();
 
     const rawText = textarea?.value?.trim() || "";
     if (!rawText) {
@@ -1910,8 +2137,8 @@ function validateMaterialsBatchJSON(showBox = true) {
         const normalizedList = [];
         for (const item of list) {
             if (!item.titulo) continue;
-            const cat = item.categoria || formCategory;
-            const prefix = ASSET_SUBFOLDERS[cat] || "assets/5-multimedia-1d/guias-pdf/";
+            const cat = forceRoute ? formCategory : (item.categoria || formCategory);
+            const prefix = forceRoute ? formFolderPrefix : getDefaultFolderForCategory(cat);
             let url = String(item.recursoUrl || "").trim();
             if (url && !url.startsWith("http") && !url.startsWith("assets/") && !url.startsWith("data:")) {
                 url = `${prefix}${url.replace(/\s+/g, "-")}`;
@@ -1926,6 +2153,7 @@ function validateMaterialsBatchJSON(showBox = true) {
                 titulo: String(item.titulo).trim(),
                 codigo: String(item.codigo || "").trim(),
                 categoria: cat,
+                carpetaDestino: prefix,
                 planRequerido: forceRoute ? formPlan : (item.planRequerido || formPlan),
                 visible: item.visible !== false,
                 enPapelera: false,
@@ -1945,7 +2173,7 @@ function validateMaterialsBatchJSON(showBox = true) {
                     ✅ Lote JSON Válido: ${normalizedList.length} materiales listos para importar.
                 </div>
                 <div class="text-[11px] text-gray-300 mt-1">
-                    📍 Ruta donde se guardarán: <strong>${forceRoute ? `FORZADA A: ${formScope.toUpperCase()} ➔ ${formCareer} ➔ ${formLevel} ➔ ${formSubject} (Plan ${formPlan})` : "Según cada objeto del archivo JSON"}</strong>
+                    📍 Ruta donde se guardarán: <strong>${forceRoute ? `FORZADA A: ${formScope.toUpperCase()} ➔ ${formCareer} ➔ ${formLevel} ➔ ${formSubject} (${formFolderPrefix} • Plan ${formPlan})` : "Según cada objeto del archivo JSON"}</strong>
                 </div>
             `;
         }
