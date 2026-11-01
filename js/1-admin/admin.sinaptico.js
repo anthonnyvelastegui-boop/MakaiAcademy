@@ -1,9 +1,9 @@
 // ============================================================================
 // ARCHIVO: js/1-admin/admin.sinaptico.js
-// DESCRIPCIÓN: Gestor Maestro de Mazos y Tarjetas para Repetición Espaciada •
-//              Sináptico v4.4 con Cascada Curricular Oficial por Semestre,
-//              Verificador/Subida de Imágenes, Importador JSON con Ruta Forzada,
-//              Conversor desde Banco de Preguntas y Papelera de Reciclaje.
+// DESCRIPCIÓN: Gestor de Tarjetas Sinápticas (Repetición Espaciada • Sináptico v4.4)
+//              con Cascada Curricular Oficial por Semestre (11 Carreras + Preuniv.
+//              + CACES), Carga/Verificación de Imagen Clínica, Importador JSON con
+//              Ruta Forzada, Conversor desde Banco de Preguntas y Papelera.
 // PROYECTO: Makai Academy (Proyecto ALICIZATION) - makai-academy-f8039
 // ============================================================================
 
@@ -34,7 +34,7 @@ const SINAPTICO_COLLECTION = COLLECTIONS?.SINAPTICO || "tarjetas_sinaptico";
 const QUESTIONS_COLLECTION = COLLECTIONS?.QUESTIONS || "preguntas_caces";
 
 // ============================================================================
-// 1. MAPA CURRICULAR OFICIAL DEL ECUADOR (SINCRONIZADO CON BANCO DE PREGUNTAS)
+// 1. MAPA CURRICULAR OFICIAL DEL ECUADOR (IDÉNTICO A BANCO DE PREGUNTAS)
 // ============================================================================
 
 const COMPLEXIVO_AXES = [
@@ -45,8 +45,10 @@ const COMPLEXIVO_AXES = [
     "Eje 5 Complexivo: Resolución de Casos Prácticos de Fin de Carrera"
 ];
 
-const CURRICULUM_MAP = {
+export const CURRICULUM_MAP = {
+    // ========================================================================
     // ÁMBITO A: HABILITACIÓN PROFESIONAL OFICIAL CACES (EHEP ECUADOR)
+    // ========================================================================
     caces: {
         medicina: {
             nombre: "Medicina Humana (CACES Oficial)",
@@ -127,8 +129,11 @@ const CURRICULUM_MAP = {
         }
     },
 
+    // ========================================================================
     // ÁMBITO B: MALLA UNIVERSITARIA DEL ECUADOR (SEMESTRE POR SEMESTRE REAL)
+    // ========================================================================
     carrera: {
+        // 0. PREUNIVERSITARIO GENERAL DE SALUD
         preuniversitario_salud: {
             nombre: "0. Preuniversitario General de Salud",
             niveles: [
@@ -145,6 +150,8 @@ const CURRICULUM_MAP = {
                 ]
             }
         },
+
+        // 1. MEDICINA HUMANA (10 Semestres + Internado Rotativo + Titulación)
         medicina: {
             nombre: "1. Medicina Humana",
             niveles: [
@@ -178,6 +185,8 @@ const CURRICULUM_MAP = {
                 titulacion_complexivo: COMPLEXIVO_AXES
             }
         },
+
+        // 2. ENFERMERÍA (7 Semestres + Internado Rotativo + Titulación)
         enfermeria: {
             nombre: "2. Enfermería",
             niveles: [
@@ -205,6 +214,8 @@ const CURRICULUM_MAP = {
                 titulacion_complexivo: COMPLEXIVO_AXES
             }
         },
+
+        // 3. ODONTOLOGÍA (10 Semestres + Titulación)
         odontologia: {
             nombre: "3. Odontología",
             niveles: [
@@ -236,6 +247,8 @@ const CURRICULUM_MAP = {
                 titulacion_complexivo: COMPLEXIVO_AXES
             }
         },
+
+        // 4. OBSTETRICIA Y PUERICULTURA (7 Semestres + Internado Rotativo + Titulación)
         obstetricia: {
             nombre: "4. Obstetricia y Puericultura",
             niveles: [
@@ -263,6 +276,8 @@ const CURRICULUM_MAP = {
                 titulacion_complexivo: COMPLEXIVO_AXES
             }
         },
+
+        // 5. NUTRICIÓN Y DIETÉTICA (8 Semestres + Internado Rotativo + Titulación)
         nutricion: {
             nombre: "5. Nutrición y Dietética",
             niveles: [
@@ -292,6 +307,8 @@ const CURRICULUM_MAP = {
                 titulacion_complexivo: COMPLEXIVO_AXES
             }
         },
+
+        // 6. FISIOTERAPIA Y REHABILITACIÓN (8 Semestres + Titulación)
         fisioterapia: {
             nombre: "6. Fisioterapia y Rehabilitación",
             niveles: [
@@ -319,6 +336,8 @@ const CURRICULUM_MAP = {
                 titulacion_complexivo: COMPLEXIVO_AXES
             }
         },
+
+        // 7. LABORATORIO CLÍNICO (8 Semestres + Titulación)
         laboratorio_clinico: {
             nombre: "7. Laboratorio Clínico",
             niveles: [
@@ -346,6 +365,8 @@ const CURRICULUM_MAP = {
                 titulacion_complexivo: COMPLEXIVO_AXES
             }
         },
+
+        // 8. IMAGENOLOGÍA Y RADIOLOGÍA (8 Semestres + Titulación)
         imagenologia: {
             nombre: "8. Imagenología y Radiología",
             niveles: [
@@ -373,6 +394,8 @@ const CURRICULUM_MAP = {
                 titulacion_complexivo: COMPLEXIVO_AXES
             }
         },
+
+        // 9. BIOQUÍMICA Y FARMACIA (9 Semestres + Titulación)
         bioquimica_farmacia: {
             nombre: "9. Bioquímica y Farmacia",
             niveles: [
@@ -402,6 +425,8 @@ const CURRICULUM_MAP = {
                 titulacion_complexivo: COMPLEXIVO_AXES
             }
         },
+
+        // 10. PSICOLOGÍA CLÍNICA (8 Semestres + Titulación)
         psicologia_clinica: {
             nombre: "10. Psicología Clínica",
             niveles: [
@@ -429,6 +454,8 @@ const CURRICULUM_MAP = {
                 titulacion_complexivo: COMPLEXIVO_AXES
             }
         },
+
+        // 11. ATENCIÓN PREHOSPITALARIA Y EMERGENCIAS (8 Semestres + Titulación)
         atencion_prehospitalaria: {
             nombre: "11. Atención Prehospitalaria y Emergencias",
             niveles: [
@@ -467,14 +494,15 @@ const SINAPTICO_CARD_TYPES = [
     { id: "caso_corto", nombre: "⚡ Viñeta Clínica de Decisión Rápida" }
 ];
 
-const SINAPTICO_ASSET_FOLDERS = [
-    { prefix: "assets/4-banco-clinico/atlas-visual/", label: "📁 assets/4-banco-clinico/atlas-visual/ (Láminas y fotos)" },
+// Subcarpetas oficiales de la Bóveda Multimedia para Imágenes / Esquemas Sinápticos
+const CLINICAL_IMAGE_FOLDERS = [
+    { prefix: "assets/4-banco-clinico/atlas-visual/", label: "📁 assets/4-banco-clinico/atlas-visual/ (Lesiones, placas, fotos)" },
     { prefix: "assets/4-banco-clinico/electrocardiografia/", label: "📁 assets/4-banco-clinico/electrocardiografia/ (Tiras ECG)" },
     { prefix: "assets/4-banco-clinico/imagenologia/", label: "📁 assets/4-banco-clinico/imagenologia/ (RX, TAC, RMN, Eco)" },
     { prefix: "assets/5-multimedia-1d/infografias-y-algoritmos/", label: "📁 assets/5-multimedia-1d/infografias-y-algoritmos/" }
 ];
 
-// Estado interno del módulo Sináptico v4.4
+// Estado interno del módulo
 let sinapticoCache = [];
 let editingCardId = null;
 let uploadedCardImageBase64 = null;
@@ -495,11 +523,18 @@ function hasMasterPermission() {
     return isMasterAdmin(email) || MASTER_ADMINS.includes(email);
 }
 
+/**
+ * Inicializa el módulo de Tarjetas Sinápticas y renombra automáticamente
+ * el botón de la barra lateral / pestaña de "Tarjetas Sináptico" a "Tarjetas Sinápticas".
+ */
 export async function initAdminSinaptico() {
     if (!hasMasterPermission()) return;
 
     const adminView = document.getElementById("view-admin");
     if (!adminView) return;
+
+    // Renombrar automáticamente el botón en la barra lateral izquierda y pestañas
+    renameAdminTabToSinapticoCards();
 
     let section = document.getElementById("admin-sinaptico-section");
     if (!section) {
@@ -515,60 +550,64 @@ export async function initAdminSinaptico() {
     await loadSinapticoCards();
 }
 
+function renameAdminTabToSinapticoCards() {
+    const tabButtons = document.querySelectorAll('[data-admin-tab="sinaptico"], #tab-admin-sinaptico, button, a, span');
+    tabButtons.forEach(el => {
+        if (el.children.length === 0 && el.textContent && /Tarjetas\s*Sin[aá]pticos?\b/i.test(el.textContent)) {
+            el.textContent = el.textContent.replace(/Tarjetas\s*Sin[aá]pticos?\b/gi, "Tarjetas Sinápticas");
+        } else if (el.hasAttribute?.("data-admin-tab") && el.getAttribute("data-admin-tab") === "sinaptico") {
+            el.innerHTML = el.innerHTML
+                .replace(/Tarjetas\s*Sin[aá]pticos?\b/gi, "Tarjetas Sinápticas")
+                .replace(/4\.\s*Sin[aá]ptico\s*v4\.4/gi, "4. Tarjetas Sinápticas");
+        }
+    });
+}
+
 // ============================================================================
-// 3. INTERFAZ DEL GESTOR «SINÁPTICO v4.4»
+// 3. INTERFAZ DEL MÓDULO «TARJETAS SINÁPTICAS»
 // ============================================================================
 
 function renderSinapticoAdminUI(container) {
     container.innerHTML = `
-        <!-- CABECERA DEL MÓDULO SINÁPTICO v4.4 -->
+        <!-- CABECERA DEL MÓDULO: TARJETAS SINÁPTICAS -->
         <div class="bg-surface-container border border-secondary/40 rounded-2xl p-6 shadow-xl">
-            <div class="flex flex-wrap items-center justify-between gap-4 pb-4 mb-5 border-b border-surface-high">
+            <div class="flex flex-wrap items-center justify-between gap-4 border-b border-surface-high pb-4 mb-5">
                 <div>
-                    <span class="text-[11px] font-mono text-secondary uppercase tracking-widest block font-bold">
-                        Colección Firestore: ${SINAPTICO_COLLECTION} • Motor 1D • Malla Oficial por Semestre
+                    <span class="text-[11px] font-mono uppercase tracking-widest text-secondary block font-bold">
+                        Colección Firestore: ${SINAPTICO_COLLECTION} • Malla Armonizada CES Ecuador + EHEP CACES
                     </span>
                     <h3 class="text-xl font-extrabold text-white flex items-center gap-2 mt-1">
                         <span class="material-symbols-outlined text-secondary">psychology</span>
-                        <span>Gestor de Repetición Espaciada • Sináptico v4.4</span>
+                        <span>Tarjetas Sinápticas (CACES Oficial + Malla Universitaria por Semestre)</span>
                     </h3>
-                    <p class="text-xs text-gray-400 mt-0.5">
-                        Crea tarjetas de memoria activa, conviértelas en 1 clic desde el Banco de Preguntas o importa mazos JSON en la ruta curricular exacta.
-                    </p>
                 </div>
-
                 <div class="flex flex-wrap items-center gap-2">
                     <div class="px-3 py-1.5 rounded-xl bg-surface border border-surface-high text-xs font-mono text-gray-300">
                         Activas: <strong id="kpi-admin-sinaptico-local" class="text-secondary">0</strong>
                         <span class="mx-1 text-gray-600">|</span>
                         Papelera: <strong id="kpi-admin-sinaptico-trash" class="text-danger">0</strong>
                     </div>
-                    <button type="button" id="btn-refresh-sinaptico" class="px-3.5 py-2 bg-surface border border-secondary text-secondary hover:bg-secondary hover:text-surface text-xs font-extrabold rounded-xl transition-all flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-sm">sync</span>
+                    <button type="button" id="btn-refresh-sinaptico" class="px-3.5 py-2 rounded-xl bg-surface border border-gray-600 hover:border-secondary text-xs font-bold text-gray-200 transition-all flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-sm">refresh</span>
                         <span>Sincronizar</span>
                     </button>
-                    <button type="button" id="btn-sync-from-caces" class="px-3.5 py-2 bg-surface border border-primary text-primary hover:bg-primary hover:text-surface text-xs font-extrabold rounded-xl transition-all flex items-center gap-1.5" title="Convierte automáticamente reactivos activos del Banco de Preguntas en tarjetas Sináptico">
+                    <button type="button" id="btn-sync-from-caces" class="px-3.5 py-2 rounded-xl bg-surface border border-primary/60 hover:bg-primary/15 text-xs font-bold text-primary transition-all flex items-center gap-1.5" title="Convierte automáticamente los reactivos activos del Banco de Preguntas en Tarjetas Sinápticas respetando su ruta">
                         <span class="material-symbols-outlined text-sm">auto_awesome</span>
                         <span>Generar desde Banco de Preguntas</span>
                     </button>
-                    <button type="button" id="btn-export-sinaptico-json" class="px-3.5 py-2 bg-secondary text-surface text-xs font-extrabold rounded-xl hover:bg-opacity-90 transition-all flex items-center gap-1.5">
+                    <button type="button" id="btn-export-sinaptico-json" class="px-3.5 py-2 rounded-xl bg-surface border border-secondary/60 hover:bg-secondary/10 text-xs font-bold text-secondary transition-all flex items-center gap-1.5">
                         <span class="material-symbols-outlined text-sm">download</span>
                         <span>Exportar Vista (.JSON)</span>
                     </button>
                 </div>
             </div>
 
-            <!-- FORMULARIO CRUD DE TARJETA SINÁPTICA -->
+            <!-- FORMULARIO PRINCIPAL DE CREACIÓN / EDICIÓN DE TARJETA SINÁPTICA -->
             <form id="as-crud-form" class="space-y-5">
                 <div class="flex flex-wrap items-center justify-between gap-2 bg-surface px-4 py-2.5 rounded-xl border border-surface-high">
-                    <div class="flex items-center gap-2">
-                        <span id="as-form-mode-badge" class="px-2.5 py-0.5 rounded bg-secondary/20 text-secondary font-mono text-[11px] font-bold uppercase">
-                            ➕ MODO CREACIÓN
-                        </span>
-                        <span id="as-form-mode-title" class="text-xs text-gray-300 font-bold">
-                            Nueva Tarjeta de Repetición Espaciada • Sináptico v4.4
-                        </span>
-                    </div>
+                    <span id="as-form-mode-badge" class="text-xs font-mono font-bold text-secondary">
+                        ➕ MODO CREACIÓN: Nueva Tarjeta para el Banco de Tarjetas Sinápticas
+                    </span>
                     <button type="button" id="btn-as-cancel-edit" class="hidden text-xs font-mono text-danger hover:underline">
                         ✖ Cancelar edición y limpiar formulario
                     </button>
@@ -578,11 +617,11 @@ function renderSinapticoAdminUI(container) {
                 <div class="bg-secondary/10 border border-secondary/40 rounded-xl px-4 py-3 flex flex-wrap items-center justify-between gap-2">
                     <div class="text-xs font-mono text-gray-200 flex items-center gap-2">
                         <span class="material-symbols-outlined text-secondary text-base">route</span>
-                        <span><strong>Destino Exacto del Mazo:</strong></span>
+                        <span><strong>Destino Exacto de Guardado:</strong></span>
                         <span id="as-route-preview-text" class="text-secondary font-extrabold"></span>
                     </div>
                     <span class="text-[10px] font-mono text-gray-400">
-                        Sincronizado por carrera y semestre con el Banco de Preguntas
+                        Solo se habilitan las opciones válidas para tu selección
                     </span>
                 </div>
 
@@ -614,29 +653,29 @@ function renderSinapticoAdminUI(container) {
 
                     <div>
                         <label class="block text-[11px] font-mono text-secondary uppercase mb-1 font-bold">
-                            4. Materia / Mazo Clínico (Por Semestre)
+                            4. Materia / Área Clínica (Por Semestre)
                         </label>
                         <select id="as-materia" required class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2.5 text-xs text-white focus:border-secondary focus:outline-none"></select>
                     </div>
                 </div>
 
-                <!-- FILA 2: TIPO DE TARJETA, DIFICULTAD, CANDADO DEL PLAN, VISIBILIDAD Y TEMA ESPECÍFICO -->
+                <!-- FILA 2: TIPO DE ESTÍMULO, DIFICULTAD, CANDADO DEL PLAN, VISIBILIDAD Y TEMA ESPECÍFICO -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                     <div>
                         <label class="block text-[11px] font-mono text-gray-400 uppercase mb-1">
-                            5. Tipo de Estímulo
+                            5. Tipo de Tarjeta Sináptica
                         </label>
                         <select id="as-tipo" class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2.5 text-xs text-white focus:border-secondary focus:outline-none"></select>
                     </div>
 
                     <div>
                         <label class="block text-[11px] font-mono text-gray-400 uppercase mb-1">
-                            6. Complejidad Cognitiva
+                            6. Dificultad / Complejidad
                         </label>
                         <select id="as-dificultad" class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2.5 text-xs text-white focus:border-secondary focus:outline-none">
                             <option value="Baja">🟢 Baja (Memoria Directa)</option>
                             <option value="Media" selected>🟡 Media (Asociación Clínica)</option>
-                            <option value="Alta">🔴 Alta (Algoritmo Crítico)</option>
+                            <option value="Alta">🔴 Alta (Algoritmo Crítico / CACES Élite)</option>
                         </select>
                     </div>
 
@@ -645,73 +684,53 @@ function renderSinapticoAdminUI(container) {
                             7. Candado del Plan
                         </label>
                         <select id="as-plan-acceso" class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2.5 text-xs text-white focus:border-secondary focus:outline-none">
-                            <option value="Básico">🔓 Plan Básico (Abierto)</option>
-                            <option value="PRO" selected>💎 Makai PRO</option>
+                            <option value="Básico">🔓 Plan Básico (Abierto / Demo)</option>
+                            <option value="PRO" selected>💎 Makai PRO (Suscriptores PRO)</option>
                             <option value="VIP">👑 Mentoría Élite VIP</option>
                         </select>
                     </div>
 
                     <div>
                         <label class="block text-[11px] font-mono text-gray-400 uppercase mb-1">
-                            8. Visibilidad Usuarios
+                            8. Visibilidad para Alumnos
                         </label>
                         <select id="as-visible" class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2.5 text-xs text-white focus:border-secondary focus:outline-none">
-                            <option value="true" selected>🟢 Visible en Sináptico</option>
-                            <option value="false">🙈 Oculto (Borrador)</option>
+                            <option value="true" selected>🟢 Visible inmediatamente en Sináptico</option>
+                            <option value="false">🙈 Oculto (Borrador / En revisión)</option>
                         </select>
                     </div>
 
                     <div>
                         <label class="block text-[11px] font-mono text-primary uppercase mb-1 font-bold">
-                            9. Tema / Patología (Opcional)
+                            9. Tema Específico / Patología (Opcional)
                         </label>
-                        <input type="text" id="as-subtema" placeholder="Ej: Score MAMÁ / Sepsis" class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2.5 text-xs text-white focus:border-primary focus:outline-none" />
+                        <input
+                            type="text"
+                            id="as-subtema"
+                            list="as-subtema-suggestions"
+                            placeholder="Ej: Preeclampsia / GPC Score MAMÁ"
+                            class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2.5 text-xs text-white focus:border-primary focus:outline-none"
+                        />
+                        <datalist id="as-subtema-suggestions">
+                            <option value="GPC MSP Ecuador (Normativa Oficial)"></option>
+                            <option value="Fármaco de Primera Línea y Dosis"></option>
+                            <option value="Criterios Diagnósticos / Gold Standard"></option>
+                            <option value="Manejo de Emergencia / Clave Obstétrica"></option>
+                            <option value="Escalas y Clasificación Clínica"></option>
+                        </datalist>
                     </div>
                 </div>
 
-                <!-- FILA 3: FRENTE (CARA A) Y REVERSO (CARA B) -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-surface/70 border border-primary/30 rounded-xl p-4 space-y-2">
-                        <div class="flex items-center justify-between">
-                            <label class="text-[11px] font-mono text-primary uppercase font-bold flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-sm">flip_to_front</span>
-                                <span>10. Frente de la Tarjeta (Pregunta / Caso Activo) *</span>
-                            </label>
-                            <span class="text-[10px] font-mono text-gray-500">Cara A • Estímulo</span>
-                        </div>
-                        <textarea id="as-frente" rows="4" required placeholder="Ej: ¿Cuál es el antídoto específico de primera línea ante intoxicación por sulfato de magnesio con abolición del reflejo rotuliano y depresión respiratoria?" class="w-full bg-surface-container border border-surface-high rounded-xl p-3 text-xs text-white focus:border-primary focus:outline-none leading-relaxed"></textarea>
-                    </div>
-
-                    <div class="bg-surface/70 border border-secondary/30 rounded-xl p-4 space-y-2">
-                        <div class="flex items-center justify-between">
-                            <label class="text-[11px] font-mono text-secondary uppercase font-bold flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-sm">flip_to_back</span>
-                                <span>11. Reverso de la Tarjeta (Respuesta / Conducta Oficial) *</span>
-                            </label>
-                            <span class="text-[10px] font-mono text-gray-500">Cara B • Resolución</span>
-                        </div>
-                        <textarea id="as-reverso" rows="4" required placeholder="Ej: Gluconato de calcio al 10%: administrar 1 g (10 ml) por vía intravenosa lenta durante 3 a 5 minutos." class="w-full bg-surface-container border border-surface-high rounded-xl p-3 text-xs text-white focus:border-secondary focus:outline-none leading-relaxed"></textarea>
-                    </div>
-                </div>
-
-                <!-- FILA 4: PERLA CLÍNICA / NEMOTECNIA -->
-                <div>
-                    <label class="block text-[11px] font-mono text-warning uppercase mb-1 font-bold">
-                        12. Perla Clínica / Nemotecnia de Guardia (Opcional)
-                    </label>
-                    <input type="text" id="as-perla" placeholder="Ej: Vigilar FR >= 12 rpm, reflejo rotuliano presente y diuresis >= 30 ml/h antes de mantener infusión de Sulfato de Magnesio." class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-warning focus:outline-none" />
-                </div>
-
-                <!-- FILA 5: IMAGEN / ESQUEMA SINÁPTICO (RUTA VERIFICADA O SUBIDA DIRECTA DESDE TU PC) -->
+                <!-- FILA 3: IMAGEN CLÍNICA / ESQUEMA ADJUNTO (RUTA VERIFICADA + SUBIDA DESDE PC) -->
                 <div class="bg-surface border border-surface-high rounded-2xl p-4 space-y-3">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <div>
                             <label class="text-xs font-extrabold text-white flex items-center gap-1.5">
                                 <span class="material-symbols-outlined text-secondary text-base">image</span>
-                                <span>13. Imagen o Esquema Sináptico Adjunto (Opcional: ECG, Algoritmo, RX, Lesión)</span>
+                                <span>10. Imagen o Esquema Clínico Adjunto (Opcional: ECG, Rayos X, TAC, Algoritmo, Lesión)</span>
                             </label>
                             <p class="text-[11px] text-gray-400">
-                                Elige la carpeta en <code class="text-secondary font-mono">assets/</code> y prueba la ruta o sube el archivo directamente desde tu computadora.
+                                Elige la carpeta destino en <code class="text-secondary font-mono">assets/4-banco-clinico/</code> y verifica la ruta o sube el archivo directamente desde tu computadora.
                             </p>
                         </div>
                         <div class="flex items-center gap-2 text-xs font-mono">
@@ -739,7 +758,12 @@ function renderSinapticoAdminUI(container) {
                                 Ruta Completa de la Imagen (Puedes escribir solo el nombre, ej: bloqueo-av.png)
                             </label>
                             <div class="flex gap-2">
-                                <input type="text" id="as-imagen-url" placeholder="assets/4-banco-clinico/electrocardiografia/bloqueo-av.png" class="flex-1 bg-surface-container border border-surface-high rounded-xl px-3 py-2 text-xs text-white font-mono focus:border-secondary focus:outline-none" />
+                                <input
+                                    type="text"
+                                    id="as-imagen-url"
+                                    placeholder="assets/4-banco-clinico/electrocardiografia/bloqueo-av.png"
+                                    class="flex-1 bg-surface-container border border-surface-high rounded-xl px-3 py-2 text-xs text-white font-mono focus:border-secondary focus:outline-none"
+                                />
                                 <button type="button" id="btn-as-test-img" class="px-3 py-2 rounded-xl bg-surface-container border border-secondary text-secondary hover:bg-secondary hover:text-surface text-xs font-extrabold transition-all whitespace-nowrap">
                                     🔍 Probar Imagen
                                 </button>
@@ -750,9 +774,14 @@ function renderSinapticoAdminUI(container) {
                             <label class="block text-[10px] font-mono text-secondary uppercase mb-1">
                                 Selecciona la imagen desde tu computadora (.PNG, .JPG, .WEBP)
                             </label>
-                            <input type="file" id="as-imagen-file" accept="image/png,image/jpeg,image/webp,image/gif" class="w-full text-xs text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-extrabold file:bg-secondary file:text-surface cursor-pointer" />
+                            <input
+                                type="file"
+                                id="as-imagen-file"
+                                accept="image/png,image/jpeg,image/webp,image/gif"
+                                class="w-full text-xs text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-extrabold file:bg-secondary file:text-surface cursor-pointer"
+                            />
                             <p class="text-[10px] text-gray-400">
-                                Se optimiza automáticamente y queda guardada en Firestore junto a su ruta clasificada.
+                                Se asociará automáticamente a la ruta de carpeta elegida y quedará guardada en Firestore para mostrarse al instante.
                             </p>
                         </div>
                     </div>
@@ -771,6 +800,56 @@ function renderSinapticoAdminUI(container) {
                     </div>
                 </div>
 
+                <!-- FILA 4: FRENTE (CARA A) Y REVERSO (CARA B) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-surface/70 border border-primary/30 rounded-xl p-4 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label class="text-[11px] font-mono text-primary uppercase font-bold flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-sm">flip_to_front</span>
+                                <span>11. Frente de la Tarjeta (Estímulo / Caso / Pregunta Activa) *</span>
+                            </label>
+                            <span class="text-[10px] font-mono text-gray-500">Cara A • Estímulo</span>
+                        </div>
+                        <textarea
+                            id="as-frente"
+                            rows="4"
+                            required
+                            placeholder="Ej: ¿Cuál es el antídoto específico de primera línea ante intoxicación por sulfato de magnesio con abolición del reflejo rotuliano y depresión respiratoria?"
+                            class="w-full bg-surface-container border border-surface-high rounded-xl p-3 text-xs text-white focus:border-primary focus:outline-none leading-relaxed"
+                        ></textarea>
+                    </div>
+
+                    <div class="bg-surface/70 border border-secondary/30 rounded-xl p-4 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label class="text-[11px] font-mono text-secondary uppercase font-bold flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-sm">flip_to_back</span>
+                                <span>12. Reverso de la Tarjeta (Respuesta / Conducta Oficial) *</span>
+                            </label>
+                            <span class="text-[10px] font-mono text-gray-500">Cara B • Resolución</span>
+                        </div>
+                        <textarea
+                            id="as-reverso"
+                            rows="4"
+                            required
+                            placeholder="Ej: Gluconato de calcio al 10%: administrar 1 g (10 ml) por vía intravenosa lenta durante 3 a 5 minutos."
+                            class="w-full bg-surface-container border border-surface-high rounded-xl p-3 text-xs text-white focus:border-secondary focus:outline-none leading-relaxed"
+                        ></textarea>
+                    </div>
+                </div>
+
+                <!-- FILA 5: PERLA CLÍNICA / NEMOTECNIA -->
+                <div>
+                    <label class="block text-[11px] font-mono text-warning uppercase mb-1 font-bold">
+                        13. Perla Clínica / Nemotecnia / Justificación Rápida (Opcional)
+                    </label>
+                    <input
+                        type="text"
+                        id="as-perla"
+                        placeholder="Ej: Vigilar FR >= 12 rpm, reflejo rotuliano presente y diuresis >= 30 ml/h antes de mantener infusión."
+                        class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-warning focus:outline-none"
+                    />
+                </div>
+
                 <!-- BOTÓN DE GUARDADO -->
                 <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
                     <div class="text-[11px] font-mono text-gray-400 flex items-center gap-2">
@@ -787,13 +866,13 @@ function renderSinapticoAdminUI(container) {
             </form>
         </div>
 
-        <!-- IMPORTADOR MASIVO POR LOTES (.JSON) CON RUTA GARANTIZADA -->
+        <!-- IMPORTADOR MASIVO POR LOTES (.JSON) CON RUTA GUIADA Y PRE-VALIDADOR -->
         <div class="bg-surface-container border border-surface-high rounded-2xl p-6 shadow-xl space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <h4 class="text-sm font-extrabold text-white flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">upload_file</span>
-                        <span>Importación Masiva de Mazos Sinápticos por Lotes (.JSON) con Ruta Garantizada</span>
+                        <span>Importación Masiva de Tarjetas Sinápticas por Lotes (.JSON) con Ruta Garantizada</span>
                     </h4>
                     <p class="text-xs text-gray-400 mt-0.5">
                         Con el candado inferior activo, todo el lote JSON se guardará exactamente en el Ámbito, Carrera, Semestre y Materia seleccionados arriba.
@@ -815,47 +894,52 @@ function renderSinapticoAdminUI(container) {
                 <label class="flex items-center gap-2.5 text-xs text-white font-mono cursor-pointer">
                     <input type="checkbox" id="as-batch-force-route" checked class="w-4 h-4 accent-lime-400" />
                     <span>
-                        🎯 <strong>Forzar Ruta Actual del Formulario para todo este mazo:</strong>
+                        🎯 <strong>Forzar Ruta Actual del Formulario para todo este lote:</strong>
                         <span id="as-batch-route-badge" class="text-secondary font-extrabold ml-1"></span>
                     </span>
                 </label>
                 <span class="text-[10px] font-mono text-gray-400">
-                    Evita errores de tipeo en carreras o semestres dentro del JSON.
+                    Garantiza que ninguna tarjeta se desvíe de carrera o semestre.
                 </span>
             </div>
 
-            <textarea id="as-json-batch-textarea" rows="4" placeholder='[\n  {\n    "frente": "¿Cuál es el fármaco uterotónico de primera línea en atonía uterina según GPC-MSP?",\n    "reverso": "Oxitocina 10 UI IM o 5 UI IV lento, seguido de infusión de 20-40 UI en 1000 ml.",\n    "perlaClinica": "Las 4 T: Tono (70%), Trauma (20%), Tejido (9%), Trombina (1%)."\n  }\n]' class="w-full bg-surface border border-surface-high rounded-xl p-3 text-xs font-mono text-gray-200 focus:border-secondary focus:outline-none"></textarea>
+            <textarea
+                id="as-json-batch-textarea"
+                rows="5"
+                placeholder='[\n  {\n    "frente": "¿Cuál es el fármaco uterotónico de primera línea en hemorragia posparto por atonía uterina según la GPC del MSP?",\n    "reverso": "Oxitocina: 10 UI IM (o 5 UI IV lento) STAT, seguida de infusión de 20 a 40 UI en 1000 ml de cristaloides a 125 ml/h.",\n    "perlaClinica": "Las 4 T de la HPP: Tono (70%), Trauma (20%), Tejido (9%), Trombina (1%).",\n    "dificultad": "Alta",\n    "subtema": "Clave Roja Obstétrica MSP"\n  }\n]'
+                class="w-full bg-surface border border-surface-high rounded-xl p-3 text-xs font-mono text-gray-200 focus:border-secondary focus:outline-none"
+            ></textarea>
 
             <div id="as-batch-validation-box" class="hidden bg-surface border border-secondary/40 rounded-xl p-3 text-xs font-mono text-gray-200"></div>
 
             <div class="flex flex-wrap justify-end gap-2.5">
                 <button type="button" id="btn-as-validate-batch" class="px-4 py-2.5 bg-surface border border-secondary text-secondary hover:bg-secondary hover:text-surface font-extrabold text-xs rounded-xl transition-all flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-base">fact_check</span>
-                    <span>1. Pre-validar Mazo y Ruta</span>
+                    <span>1. Pre-validar Lote y Ruta</span>
                 </button>
                 <button type="button" id="btn-as-import-batch" class="px-5 py-2.5 bg-primary text-surface font-extrabold text-xs rounded-xl hover:bg-opacity-90 transition-all flex items-center gap-2">
                     <span class="material-symbols-outlined text-base">cloud_upload</span>
-                    <span>2. Procesar e Importar Mazo a Firestore</span>
+                    <span>2. Procesar e Importar Lote a Firestore</span>
                 </button>
             </div>
         </div>
 
-        <!-- CATÁLOGO ACTIVO EN CLOUD FIRESTORE + FILTROS + PAPELERA DE RECICLAJE -->
+        <!-- CATÁLOGO ACTIVO EN CLOUD FIRESTORE + FILTROS AVANZADOS + PAPELERA -->
         <div class="bg-surface-container border border-surface-high rounded-2xl p-6 shadow-xl space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-4 border-b border-surface-high pb-4">
                 <div>
                     <h4 class="text-base font-extrabold text-white flex items-center gap-2">
                         <span class="material-symbols-outlined text-secondary">style</span>
-                        <span>Catálogo de Tarjetas Sináptico v4.4 en Cloud Firestore</span>
+                        <span>Catálogo de Tarjetas Sinápticas en Cloud Firestore</span>
                     </h4>
                     <p class="text-xs text-gray-400 mt-0.5">
-                        Filtra por ámbito, carrera, semestre, visibilidad o plan. Cambia la visibilidad o el plan en 1 clic, o restaura tarjetas desde la Papelera.
+                        Filtra por ámbito, carrera, semestre, visibilidad o plan. Cambia la visibilidad o el plan en 1 clic, edita o restaura desde la Papelera.
                     </p>
                 </div>
 
                 <div class="flex items-center gap-2">
                     <button type="button" id="btn-as-tab-active" class="px-4 py-2 rounded-xl text-xs font-mono font-extrabold bg-secondary text-surface transition-all flex items-center gap-1.5">
-                        <span>📚 Mazos Activos</span>
+                        <span>📚 Catálogo Activo</span>
                         <span id="badge-as-active-count" class="px-1.5 py-0.5 rounded bg-black/20 text-[10px]">0</span>
                     </button>
                     <button type="button" id="btn-as-tab-trash" class="px-4 py-2 rounded-xl text-xs font-mono font-extrabold bg-surface border border-danger/50 text-danger hover:bg-danger/15 transition-all flex items-center gap-1.5">
@@ -865,11 +949,11 @@ function renderSinapticoAdminUI(container) {
                 </div>
             </div>
 
-            <!-- BARRA DE FILTROS AVANZADOS (7 CRITERIOS) -->
+            <!-- BARRA DE FILTROS AVANZADOS (7 CRITERIOS IDÉNTICOS A BANCO DE PREGUNTAS) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-surface p-3.5 rounded-xl border border-surface-high">
                 <div class="lg:col-span-2">
-                    <label class="block text-[10px] font-mono text-gray-400 uppercase mb-1">Buscar en Frente, Reverso, Perla, Tema o Materia</label>
-                    <input type="text" id="as-filter-search" placeholder="🔍 Ej: Zuspan, Oxitocina, NANDA, Score MAMÁ..." class="w-full bg-surface-container border border-surface-high rounded-xl px-3 py-2 text-xs text-white focus:border-secondary focus:outline-none" />
+                    <label class="block text-[10px] font-mono text-gray-400 uppercase mb-1">Buscar por Frente, Reverso, Perla, Tema o Materia</label>
+                    <input type="text" id="as-filter-search" placeholder="🔍 Ej: Preeclampsia, NANDA, Zuspan, Score MAMÁ, Farmacología..." class="w-full bg-surface-container border border-surface-high rounded-xl px-3 py-2 text-xs text-white focus:border-secondary focus:outline-none" />
                 </div>
 
                 <div>
@@ -899,7 +983,7 @@ function renderSinapticoAdminUI(container) {
                     <label class="block text-[10px] font-mono text-gray-400 uppercase mb-1">Visibilidad para Usuarios</label>
                     <select id="as-filter-visibility" class="w-full bg-surface-container border border-surface-high rounded-xl px-3 py-2 text-xs text-white focus:border-secondary focus:outline-none">
                         <option value="all">Todas (Visibles + Ocultas)</option>
-                        <option value="visible">🟢 Solo Visibles</option>
+                        <option value="visible">🟢 Solo Visibles para Usuarios</option>
                         <option value="hidden">🙈 Solo Ocultas / Borradores</option>
                     </select>
                 </div>
@@ -907,7 +991,7 @@ function renderSinapticoAdminUI(container) {
                 <div>
                     <label class="block text-[10px] font-mono text-gray-400 uppercase mb-1">Candado del Plan</label>
                     <select id="as-filter-plan" class="w-full bg-surface-container border border-surface-high rounded-xl px-3 py-2 text-xs text-white focus:border-secondary focus:outline-none">
-                        <option value="all">Todos los Planes</option>
+                        <option value="all">Todos los Planes (Básico/PRO/VIP)</option>
                         <option value="Básico">🔓 Plan Básico</option>
                         <option value="PRO">💎 Makai PRO</option>
                         <option value="VIP">👑 Élite VIP</option>
@@ -915,33 +999,33 @@ function renderSinapticoAdminUI(container) {
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-mono text-gray-400 uppercase mb-1">Tipo de Estímulo</label>
+                    <label class="block text-[10px] font-mono text-gray-400 uppercase mb-1">Tipo / Dificultad</label>
                     <select id="as-filter-type" class="w-full bg-surface-container border border-surface-high rounded-xl px-3 py-2 text-xs text-white focus:border-secondary focus:outline-none">
-                        <option value="all">Todos los Tipos</option>
+                        <option value="all">Todos los Tipos de Tarjeta</option>
                     </select>
                 </div>
             </div>
 
             <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-gray-400">
-                <span id="as-filter-count-label">Mostrando 0 tarjetas</span>
+                <span id="as-filter-count-label">Mostrando 0 tarjetas sinápticas</span>
                 <button type="button" id="btn-as-empty-trash" class="hidden px-3 py-1.5 rounded-lg bg-danger/20 border border-danger text-danger hover:bg-danger hover:text-white font-extrabold text-[11px] transition-all">
                     🔥 Vaciar toda la Papelera definitivamente
                 </button>
             </div>
 
-            <!-- TABLA DE TARJETAS SINÁPTICAS -->
+            <!-- TABLA DEL CATÁLOGO DE TARJETAS SINÁPTICAS -->
             <div class="overflow-x-auto rounded-xl border border-surface-high">
-                <table class="w-full text-xs text-left text-gray-300 font-mono">
-                    <thead class="text-[11px] text-gray-400 uppercase bg-surface border-b border-surface-high">
-                        <tr>
-                            <th class="px-4 py-3">Ruta Curricular (Ámbito / Carrera / Semestre / Mazo)</th>
-                            <th class="px-4 py-3">Frente (Cara A • Estímulo)</th>
-                            <th class="px-4 py-3">Reverso (Cara B • Conducta & Perla)</th>
-                            <th class="px-4 py-3">Visibilidad & Plan</th>
-                            <th class="px-4 py-3 text-right">Acciones CRUD / Papelera</th>
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-surface text-[11px] font-mono text-gray-400 uppercase border-b border-surface-high">
+                            <th class="py-3 px-4">Ruta Curricular (Ámbito / Carrera / Semestre / Materia)</th>
+                            <th class="py-3 px-4">Frente (Cara A • Estímulo)</th>
+                            <th class="py-3 px-4">Reverso (Cara B • Respuesta & Perla)</th>
+                            <th class="py-3 px-4">Visibilidad & Plan</th>
+                            <th class="py-3 px-4 text-right">Acciones CRUD / Papelera</th>
                         </tr>
                     </thead>
-                    <tbody id="as-cards-tbody" class="divide-y divide-surface-high"></tbody>
+                    <tbody id="as-cards-tbody" class="divide-y divide-surface-high text-xs"></tbody>
                 </table>
             </div>
         </div>
@@ -954,7 +1038,7 @@ function renderSinapticoAdminUI(container) {
                         <span id="as-preview-meta" class="text-[10px] font-mono text-secondary uppercase font-bold"></span>
                         <h4 class="text-base font-extrabold text-white flex items-center gap-2">
                             <span class="material-symbols-outlined text-secondary text-lg">psychology</span>
-                            <span>Simulador de Tarjeta • Sináptico v4.4</span>
+                            <span>Vista Previa de Tarjeta Sináptica (Modo Repetición Espaciada)</span>
                         </h4>
                     </div>
                     <button type="button" id="btn-as-close-preview" class="text-gray-400 hover:text-white text-sm font-mono px-2.5 py-1 rounded-lg bg-surface">
@@ -970,8 +1054,8 @@ function renderSinapticoAdminUI(container) {
                         <span id="as-preview-subtema" class="text-[11px] font-mono text-gray-400"></span>
                     </div>
 
-                    <div id="as-preview-image-box" class="hidden">
-                        <img id="as-preview-image" src="" alt="Recurso visual sináptico" class="max-h-56 rounded-xl border border-surface-high mx-auto object-contain" />
+                    <div id="as-preview-image-box" class="hidden rounded-xl overflow-hidden border border-surface-high bg-black/40 p-2 text-center">
+                        <img id="as-preview-image" src="" alt="Recurso visual sináptico" class="max-h-60 rounded-lg mx-auto object-contain" />
                     </div>
 
                     <div id="as-preview-front-box" class="py-2">
@@ -1021,7 +1105,7 @@ function renderSinapticoAdminUI(container) {
 }
 
 // ============================================================================
-// 4. LÓGICA DE CASCADA CURRICULAR ESTRICTA Y VERIFICADOR DE IMÁGENES
+// 4. LÓGICA DE CASCADA CURRICULAR ESTRICTA POR SEMESTRE Y CARRERA
 // ============================================================================
 
 function populateSinapticoStaticSelectors() {
@@ -1034,7 +1118,7 @@ function populateSinapticoStaticSelectors() {
 
     const folderSelect = document.getElementById("as-asset-folder");
     if (folderSelect) {
-        folderSelect.innerHTML = SINAPTICO_ASSET_FOLDERS
+        folderSelect.innerHTML = CLINICAL_IMAGE_FOLDERS
             .map(f => `<option value="${f.prefix}">${f.label}</option>`)
             .join("");
     }
@@ -1158,7 +1242,7 @@ function populateSinapticoFilterDropdowns() {
     }
 
     if (filterType) {
-        filterType.innerHTML = `<option value="all">Todos los Tipos</option>` +
+        filterType.innerHTML = `<option value="all">Todos los Tipos de Tarjeta</option>` +
             SINAPTICO_CARD_TYPES.map(t => `<option value="${t.id}">${t.nombre}</option>`).join("");
     }
 }
@@ -1258,7 +1342,7 @@ function handleDirectSinapticoImageUpload(file) {
 }
 
 // ============================================================================
-// 5. EVENTOS DEL MÓDULO SINÁPTICO v4.4
+// 5. EVENTOS DEL MÓDULO
 // ============================================================================
 
 function bindSinapticoEvents() {
@@ -1398,7 +1482,7 @@ export async function loadSinapticoCards() {
         tbody.innerHTML = `
             <tr>
                 <td colspan="5" class="px-4 py-6 text-center text-gray-400 font-mono">
-                    Sincronizando mazos con Cloud Firestore (${SINAPTICO_COLLECTION})...
+                    Sincronizando Tarjetas Sinápticas con Cloud Firestore (${SINAPTICO_COLLECTION})...
                 </td>
             </tr>
         `;
@@ -1501,8 +1585,8 @@ function renderSinapticoTable() {
     const filtered = getFilteredSinapticoCards();
     if (countLabel) {
         countLabel.textContent = activeCatalogTab === "trash"
-            ? `🗑️ Mostrando ${filtered.length} tarjetas en la Papelera de Reciclaje`
-            : `📚 Mostrando ${filtered.length} tarjetas activas en este filtro`;
+            ? `🗑️ Mostrando ${filtered.length} tarjetas sinápticas en la Papelera de Reciclaje`
+            : `📚 Mostrando ${filtered.length} tarjetas sinápticas activas en este filtro`;
     }
 
     if (filtered.length === 0) {
@@ -1511,8 +1595,8 @@ function renderSinapticoTable() {
                 <td colspan="5" class="px-4 py-8 text-center text-gray-500 font-mono">
                     ${
                         activeCatalogTab === "trash"
-                            ? "La Papelera de Reciclaje de Sináptico está vacía."
-                            : "No se encontraron tarjetas Sináptico con los filtros seleccionados."
+                            ? "La Papelera de Reciclaje de Tarjetas Sinápticas está vacía."
+                            : "No se encontraron tarjetas sinápticas con los filtros seleccionados."
                     }
                 </td>
             </tr>
@@ -1541,44 +1625,43 @@ function renderSinapticoTable() {
         tr.className = `transition-colors ${!isVisible ? "bg-surface/40 opacity-75" : "hover:bg-surface/60"}`;
 
         tr.innerHTML = `
-            <!-- 1. RUTA CURRICULAR -->
-            <td class="px-4 py-3.5 align-top">
+            <td class="py-3.5 px-4 align-top">
                 <div class="flex items-center gap-1.5 mb-1">
                     ${scopeBadge}
-                    <span class="text-white font-extrabold uppercase text-[11px]">${escapeHTML(item.carrera || "medicina")}</span>
+                    <span class="font-extrabold text-white uppercase text-[11px]">${escapeHTML(item.carrera || "medicina")}</span>
                 </div>
                 <div class="text-[11px] text-secondary font-bold">${escapeHTML(item.materia || "General")}</div>
-                <div class="text-[10px] text-gray-400">Nivel: ${escapeHTML(item.nivel || "caces_oficial")}</div>
-                <div class="text-[10px] text-primary mt-0.5">${escapeHTML(typeLabel)}</div>
+                <div class="text-[10px] font-mono text-gray-400">Nivel: ${escapeHTML(item.nivel || "caces_oficial")}</div>
+                <div class="text-[10px] font-mono text-primary mt-0.5">${escapeHTML(typeLabel)}</div>
             </td>
 
-            <!-- 2. FRENTE (CARA A) -->
-            <td class="px-4 py-3.5 align-top max-w-xs">
+            <td class="py-3.5 px-4 align-top max-w-xs">
                 ${
                     item.subtema
-                        ? `<span class="inline-block px-2 py-0.5 rounded bg-surface-high text-primary font-mono text-[10px] font-bold mb-1">📌 ${escapeHTML(item.subtema)}</span>`
+                        ? `<span class="inline-block px-2 py-0.5 rounded bg-surface-high text-secondary font-mono text-[10px] font-bold mb-1">📌 Tema: ${escapeHTML(item.subtema)}</span>`
                         : ""
                 }
-                <div class="text-gray-200 font-sans text-xs line-clamp-3 leading-relaxed">${escapeHTML(frontText)}</div>
+                <div class="text-gray-200 line-clamp-2 leading-relaxed">${escapeHTML(frontText)}</div>
                 ${
                     hasImg
-                        ? `<span class="inline-block mt-1 text-[10px] text-secondary font-mono">🖼️ ${escapeHTML(item.imagenUrl || "Imagen subida")}</span>`
+                        ? `<div class="text-[10px] font-mono text-primary mt-1 flex items-center gap-1">
+                               <span>🖼️ Imagen adjunta: ${escapeHTML(item.imagenUrl || "Subida directa")}</span>
+                           </div>`
                         : ""
                 }
             </td>
 
-            <!-- 3. REVERSO (CARA B) Y PERLA -->
-            <td class="px-4 py-3.5 align-top max-w-xs">
-                <div class="text-gray-300 font-sans text-xs line-clamp-3 leading-relaxed">${escapeHTML(backText)}</div>
+            <td class="py-3.5 px-4 align-top max-w-xs">
+                <div class="text-gray-300 line-clamp-2 leading-relaxed">${escapeHTML(backText)}</div>
                 ${
                     item.perlaClinica
-                        ? `<div class="mt-1 text-[10px] text-warning font-sans line-clamp-2">💡 ${escapeHTML(item.perlaClinica)}</div>`
+                        ? `<div class="mt-1 text-[10px] text-warning line-clamp-1">💡 ${escapeHTML(item.perlaClinica)}</div>`
                         : ""
                 }
+                <div class="text-[10px] font-mono text-gray-400 mt-1">Dif: ${escapeHTML(item.dificultad || "Media")}</div>
             </td>
 
-            <!-- 4. VISIBILIDAD Y PLAN EN 1 CLIC -->
-            <td class="px-4 py-3.5 align-top space-y-1.5">
+            <td class="py-3.5 px-4 align-top space-y-1.5">
                 <div>
                     <button type="button" class="btn-as-toggle-vis px-2.5 py-1 rounded-lg text-[10px] font-mono font-extrabold border transition-all ${
                         isVisible
@@ -1597,18 +1680,17 @@ function renderSinapticoTable() {
                 </div>
             </td>
 
-            <!-- 5. ACCIONES CRUD / PAPELERA -->
-            <td class="px-4 py-3.5 align-top text-right whitespace-nowrap space-x-1">
-                <button type="button" class="btn-as-preview px-2.5 py-1.5 rounded-lg bg-surface border border-gray-600 text-gray-200 hover:border-secondary hover:text-secondary font-bold text-[11px]" title="Probar Volteo Sináptico">
+            <td class="py-3.5 px-4 align-top text-right whitespace-nowrap space-x-1">
+                <button type="button" class="btn-as-preview px-2.5 py-1.5 rounded-lg bg-surface border border-primary/50 text-primary hover:bg-primary hover:text-surface font-bold text-[11px]" title="Probar Volteo Sináptico">
                     🔄 Probar
                 </button>
                 ${
                     activeCatalogTab === "active"
                         ? `
-                            <button type="button" class="btn-as-edit px-2.5 py-1.5 rounded-lg bg-surface border border-primary/60 text-primary hover:bg-primary hover:text-surface font-bold text-[11px]" title="Editar Tarjeta">
+                            <button type="button" class="btn-as-edit px-2.5 py-1.5 rounded-lg bg-surface border border-secondary/50 text-secondary hover:bg-secondary hover:text-surface font-bold text-[11px]" title="Editar tarjeta">
                                 ✏️ Editar
                             </button>
-                            <button type="button" class="btn-as-trash px-2.5 py-1.5 rounded-lg bg-surface border border-danger/60 text-danger hover:bg-danger hover:text-white font-bold text-[11px]" title="Enviar a la Papelera">
+                            <button type="button" class="btn-as-trash px-2.5 py-1.5 rounded-lg bg-surface border border-danger/50 text-danger hover:bg-danger hover:text-white font-bold text-[11px]" title="Enviar a la Papelera">
                                 🗑️
                             </button>
                           `
@@ -1657,12 +1739,11 @@ export async function saveSinapticoCard(event) {
     const visible = document.getElementById("as-visible")?.value !== "false";
     const subtema = (document.getElementById("as-subtema")?.value || "").trim();
 
+    syncCardImagePathWithFolder();
+    const imagenUrl = (document.getElementById("as-imagen-url")?.value || "").trim();
     const frenteVal = (document.getElementById("as-frente")?.value || "").trim();
     const reversoVal = (document.getElementById("as-reverso")?.value || "").trim();
     const perlaClinica = (document.getElementById("as-perla")?.value || "").trim();
-
-    syncCardImagePathWithFolder();
-    const imagenUrl = (document.getElementById("as-imagen-url")?.value || "").trim();
 
     if (!frenteVal || !reversoVal) {
         alert("⚠️ Completa tanto el Frente (Cara A) como el Reverso (Cara B) de la tarjeta.");
@@ -1682,13 +1763,13 @@ export async function saveSinapticoCard(event) {
         visible,
         enPapelera: false,
         subtema,
+        imagenUrl,
+        imagenBase64: uploadedCardImageBase64 || null,
         frente: frenteVal,
         pregunta: frenteVal,
         reverso: reversoVal,
         respuesta: reversoVal,
         perlaClinica,
-        imagenUrl,
-        imagenBase64: uploadedCardImageBase64 || null,
         intervalosAlgoritmo: {
             dificil: "<10m",
             bueno: "1d",
@@ -1704,19 +1785,19 @@ export async function saveSinapticoCard(event) {
 
         if (editingCardId) {
             await setDoc(doc(db, SINAPTICO_COLLECTION, editingCardId), payload, { merge: true });
-            alert(`✅ Tarjeta actualizada en [${scope.toUpperCase()} > ${carrera} > ${nivel} > ${materia}].`);
+            alert(`✅ Tarjeta Sináptica actualizada en [${scope.toUpperCase()} > ${carrera} > ${nivel} > ${materia}].`);
         } else {
-            payload.createdAt = nowIso;
             payload.creadoPor = activeEmail;
+            payload.createdAt = nowIso;
             await addDoc(collection(db, SINAPTICO_COLLECTION), payload);
-            alert(`✅ Nueva tarjeta Sináptica guardada en [${scope.toUpperCase()} > ${carrera} > ${nivel} > ${materia}].`);
+            alert(`✅ Nueva Tarjeta Sináptica guardada en [${scope.toUpperCase()} > ${carrera} > ${nivel} > ${materia}].`);
         }
 
         resetSinapticoForm();
         await loadSinapticoCards();
     } catch (err) {
-        console.error("[AdminSinaptico] Error guardando tarjeta:", err);
-        alert("Error al guardar la tarjeta en Firestore: " + err.message);
+        console.error("[AdminSinaptico] Error al guardar tarjeta:", err);
+        alert("Error al guardar en Cloud Firestore: " + err.message);
     } finally {
         if (submitBtn) submitBtn.disabled = false;
     }
@@ -1728,7 +1809,7 @@ export function editSinapticoCard(cardId) {
     const item = sinapticoCache.find(c => c.id === cardId);
     if (!item) return;
 
-    editingCardId = item.id;
+    editingCardId = cardId;
     uploadedCardImageBase64 = item.imagenBase64 || null;
 
     const scope = item.ambito || (item.nivel && item.nivel !== "caces_oficial" ? "carrera" : "caces");
@@ -1749,10 +1830,10 @@ export function editSinapticoCard(cardId) {
     setVal("as-plan-acceso", item.planAcceso || "PRO");
     setVal("as-visible", item.visible === false ? "false" : "true");
     setVal("as-subtema", item.subtema || "");
+    setVal("as-imagen-url", item.imagenUrl || "");
     setVal("as-frente", item.frente || item.pregunta || "");
     setVal("as-reverso", item.reverso || item.respuesta || "");
     setVal("as-perla", item.perlaClinica || "");
-    setVal("as-imagen-url", item.imagenUrl || "");
 
     updateSinapticoLiveRouteBanner();
 
@@ -1763,18 +1844,15 @@ export function editSinapticoCard(cardId) {
     }
 
     const badge = document.getElementById("as-form-mode-badge");
-    const title = document.getElementById("as-form-mode-title");
-    const submitLabel = document.getElementById("btn-as-submit-label");
-
     if (badge) {
-        badge.textContent = "✏️ MODO EDICIÓN";
-        badge.className = "px-2.5 py-0.5 rounded bg-warning/20 text-warning font-mono text-[11px] font-bold uppercase";
+        badge.textContent = `✏️ MODO EDICIÓN: Modificando tarjeta (${cardId})`;
+        badge.className = "text-xs font-mono font-bold text-warning";
     }
-    if (title) title.textContent = `Modificando Tarjeta Sináptica (${item.id})`;
+    const submitLabel = document.getElementById("btn-as-submit-label");
     if (submitLabel) submitLabel.textContent = "Actualizar Tarjeta en Cloud Firestore";
 
     document.getElementById("btn-as-cancel-edit")?.classList.remove("hidden");
-    document.getElementById("admin-sinaptico-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById("as-crud-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function resetSinapticoForm() {
@@ -1786,14 +1864,11 @@ function resetSinapticoForm() {
     document.getElementById("as-img-live-preview-wrap")?.classList.add("hidden");
 
     const badge = document.getElementById("as-form-mode-badge");
-    const title = document.getElementById("as-form-mode-title");
-    const submitLabel = document.getElementById("btn-as-submit-label");
-
     if (badge) {
-        badge.textContent = "➕ MODO CREACIÓN";
-        badge.className = "px-2.5 py-0.5 rounded bg-secondary/20 text-secondary font-mono text-[11px] font-bold uppercase";
+        badge.textContent = "➕ MODO CREACIÓN: Nueva Tarjeta para el Banco de Tarjetas Sinápticas";
+        badge.className = "text-xs font-mono font-bold text-secondary";
     }
-    if (title) title.textContent = "Nueva Tarjeta de Repetición Espaciada • Sináptico v4.4";
+    const submitLabel = document.getElementById("btn-as-submit-label");
     if (submitLabel) submitLabel.textContent = "Guardar Tarjeta en Cloud Firestore";
 
     document.getElementById("btn-as-cancel-edit")?.classList.add("hidden");
@@ -1839,10 +1914,11 @@ export async function moveSinapticoCardToTrash(cardId) {
     if (!item) return;
 
     try {
+        const nowIso = new Date().toISOString();
         await updateDoc(doc(db, SINAPTICO_COLLECTION, cardId), {
             enPapelera: true,
             visible: false,
-            eliminadoEn: new Date().toISOString()
+            eliminadoEn: nowIso
         });
         item.enPapelera = true;
         item.visible = false;
@@ -1879,7 +1955,7 @@ export async function deleteSinapticoCard(cardId) {
     const item = sinapticoCache.find(c => c.id === cardId);
     const previewText = (item?.frente || item?.pregunta || cardId).substring(0, 80);
 
-    if (!confirm(`🔥 ¿Confirmas ELIMINAR DEFINITIVAMENTE esta tarjeta de Firestore?\nEsta acción no se puede deshacer.\n\n"${previewText}..."`)) {
+    if (!confirm(`🔥 ¿Confirmas ELIMINAR DEFINITIVAMENTE esta tarjeta sináptica de Firestore?\nEsta acción no se puede deshacer.\n\n"${previewText}..."`)) {
         return;
     }
 
@@ -1931,11 +2007,11 @@ function insertSampleSinapticoBatchJSON() {
             tipoTarjeta: "algoritmo_gpc",
             dificultad: "Alta",
             planAcceso: plan,
-            subtema: "Clave Roja Obstétrica MSP",
+            subtema: "Guía de Práctica Clínica MSP",
+            imagenUrl: "assets/4-banco-clinico/electrocardiografia/bloqueo-av.png",
             frente: "Paciente puérpera inmediata con hemorragia posparto por atonía uterina. ¿Cuál es el fármaco uterotónico de primera línea y su dosis inicial según la GPC del MSP?",
             reverso: "Oxitocina: 10 UI por vía intramuscular (o 5 UI IV lento) STAT, seguida de infusión continua de 20 a 40 UI en 1000 ml de cristaloides a 125 ml/hora.",
-            perlaClinica: "Las 4 T de la Hemorragia Posparto: Tono (70% atonía), Trauma (20%), Tejido (9%), Trombina (1%).",
-            imagenUrl: ""
+            perlaClinica: "Las 4 T de la Hemorragia Posparto: Tono (70% atonía), Trauma (20%), Tejido (9%), Trombina (1%)."
         }
     ];
 
@@ -2010,7 +2086,7 @@ function validateSinapticoBatchJSON(showBox = true) {
             box.classList.remove("hidden");
             box.innerHTML = `
                 <div class="text-secondary font-extrabold">
-                    ✅ Mazo JSON Válido: ${normalizedList.length} tarjetas listas para importar.
+                    ✅ Lote JSON Válido: ${normalizedList.length} tarjetas sinápticas listas para subir.
                 </div>
                 <div class="text-[11px] text-gray-300 mt-1">
                     📍 Ruta donde se guardarán: <strong>${forceRoute ? `FORZADA A: ${formScope.toUpperCase()} ➔ ${formCareer} ➔ ${formLevel} ➔ ${formSubject} (Plan ${formPlan})` : "Según cada objeto del archivo JSON"}</strong>
@@ -2045,7 +2121,7 @@ export async function importSinapticoBatchJSON() {
     try {
         if (importBtn) {
             importBtn.disabled = true;
-            importBtn.textContent = `Importando ${validList.length} tarjetas...`;
+            importBtn.textContent = `Subiendo ${validList.length} tarjetas...`;
         }
 
         let importedCount = 0;
@@ -2059,24 +2135,20 @@ export async function importSinapticoBatchJSON() {
             importedCount++;
         }
 
-        alert(`✅ Importación masiva exitosa: ${importedCount} tarjetas guardadas en la ruta seleccionada.`);
+        alert(`✅ Importación masiva exitosa: ${importedCount} tarjetas sinápticas guardadas en la ruta seleccionada.`);
         if (textarea) textarea.value = "";
         document.getElementById("as-batch-validation-box")?.classList.add("hidden");
         await loadSinapticoCards();
     } catch (err) {
-        alert("Error al importar mazo JSON: " + err.message);
+        alert("Error al importar lote JSON: " + err.message);
     } finally {
         if (importBtn) {
             importBtn.disabled = false;
-            importBtn.innerHTML = `<span class="material-symbols-outlined text-base">cloud_upload</span><span>2. Procesar e Importar Mazo a Firestore</span>`;
+            importBtn.innerHTML = `<span class="material-symbols-outlined text-base">cloud_upload</span><span>2. Procesar e Importar Lote a Firestore</span>`;
         }
     }
 }
 
-/**
- * Convierte automáticamente los reactivos activos de preguntas_caces en tarjetas
- * Sináptico v4.4 respetando su ruta exacta e ignorando los reactivos en Papelera.
- */
 export async function generateCardsFromCacesQuestions() {
     if (!hasMasterPermission()) return;
 
@@ -2108,7 +2180,6 @@ export async function generateCardsFromCacesQuestions() {
             if (existingSourceIds.has(qDoc.id)) continue;
 
             const q = qDoc.data();
-            // Ignorar preguntas eliminadas en la Papelera
             if (q.enPapelera === true) continue;
 
             const correctLetter = q.respuestaCorrecta || "A";
@@ -2150,9 +2221,9 @@ export async function generateCardsFromCacesQuestions() {
         }
 
         if (createdCount === 0) {
-            alert("ℹ️ Todos los reactivos activos del Banco de Preguntas ya cuentan con su tarjeta Sináptica correspondiente.");
+            alert("ℹ️ Todos los reactivos activos del Banco de Preguntas ya cuentan con su Tarjeta Sináptica correspondiente.");
         } else {
-            alert(`✅ Conversión completada: Se generaron ${createdCount} nuevas tarjetas en ${SINAPTICO_COLLECTION} conservando su carrera, semestre y materia.`);
+            alert(`✅ Conversión completada: Se generaron ${createdCount} nuevas Tarjetas Sinápticas conservando su carrera, semestre y materia.`);
             await loadSinapticoCards();
         }
     } catch (err) {
@@ -2193,10 +2264,10 @@ export function previewSinapticoCardModal(cardId) {
     if (!modal || !frontText || !backText) return;
 
     if (metaEl) {
-        metaEl.textContent = `${(item.ambito || "caces").toUpperCase()} • ${(item.carrera || "medicina").toUpperCase()} • ${item.nivel || "CACES"} • ${item.materia || "General"}`;
+        metaEl.textContent = `${(item.ambito || "caces").toUpperCase()} • ${(item.carrera || "medicina").toUpperCase()} • ${item.nivel || "CACES"} • ${item.materia || "General"} • Plan ${item.planAcceso || "PRO"}`;
     }
     if (subtemaEl) {
-        subtemaEl.textContent = item.subtema || "Repetición Espaciada • Sináptico v4.4";
+        subtemaEl.textContent = item.subtema || "Tarjetas Sinápticas • Sináptico v4.4";
     }
     if (faceBadge) {
         faceBadge.textContent = "CARA A • ESTÍMULO CLÍNICO";
@@ -2273,12 +2344,13 @@ export function exportSinapticoDeckJSON() {
 
     const filtered = getFilteredSinapticoCards();
     if (filtered.length === 0) {
-        alert("No hay tarjetas en la vista actual para exportar.");
+        alert("No hay tarjetas sinápticas en la vista actual para exportar.");
         return;
     }
 
     const exportPayload = {
         plataforma: "Makai Academy (Proyecto ALICIZATION)",
+        modulo: "Tarjetas Sinápticas",
         sistema: "Repetición Espaciada • Sináptico v4.4",
         coleccion: SINAPTICO_COLLECTION,
         fechaExportacion: new Date().toLocaleString("es-EC", { timeZone: "America/Guayaquil" }),
@@ -2291,7 +2363,7 @@ export function exportSinapticoDeckJSON() {
     const a = document.createElement("a");
     const dateStr = new Date().toISOString().split("T")[0];
     a.href = url;
-    a.download = `Mazo_Sinaptico_Makai_${dateStr}.json`;
+    a.download = `Tarjetas_Sinapticas_Makai_${dateStr}.json`;
     a.click();
     URL.revokeObjectURL(url);
 }
