@@ -1,618 +1,524 @@
 // ============================================================================
 // ARCHIVO: js/3-security/auth.login.js
-// PROYECTO: MakaiAcademy (Proyecto ALICIZATION)
-// RESPONSABILIDAD: Controlador de Inicio de Sesión (Correo/Contraseña y OAuth),
-//                  Recuperación de Clave, Verificación Inicial y Enrutamiento
-//                  de Planes desde index.html hacia dashboard.html / registro.html.
+// PROYECTO: MakaiAcademy (Arquitectura "Rieles de Acero")
+// RESPONSABILIDAD: Autenticación en index.html, Motor de Precios Dinámico
+//                  (renderPricingCards desde Firestore) y Postulación Docente.
 // ============================================================================
 
 import {
     auth,
     db,
-    GoogleAuthProvider,
-    OAuthProvider,
+    COLLECTIONS,
+    googleProvider,
     signInWithEmailAndPassword,
-    createUserWithEmailAndPassword,
     signInWithPopup,
-    sendEmailVerification,
     sendPasswordResetEmail,
-    doc,
-    getDoc,
-    setDoc
+    collection,
+    getDocs,
+    addDoc
 } from "../2-core/firebase.service.js";
 
-import * as StateStore from "../2-core/state.store.js";
+import { isMasterAdmin } from "../2-core/state.store.js";
 
-// --- LISTA DE RESPALDO DE ADMINISTRADORES MAESTROS ---
-const FALLBACK_MASTER_ADMINS = [
-    "anthonnyvelastegui@gmail.com",
-    "aavemakaihc@gmail.com"
-];
-
-// Bandera para evitar enlaces duplicados de eventos en el DOM
-let authLoginInitialized = false;
-let isRegisterModeInIndex = false;
+let currentBillingCycle = "annual"; // "monthly" | "annual"
+let cachedPlans = [];
+let loginUIBound = false;
 
 /**
- * Comprueba si un correo electrónico pertenece a una cuenta maestra de administración.
- * @param {string} email
- * @returns {boolean}
+ * CATÁLOGO SEMILLA DE RESPALDO ("Diversificación de Bolsillos")
+ * Se utiliza automáticamente si la colección `planes_suscripcion` en Firestore
+ * aún no tiene documentos creados por el Administrador Maestro o si falla la red.
  */
-function checkIsAdminEmail(email) {
-    if (!email) return false;
-    if (typeof StateStore.isMasterAdmin === "function") {
-        return StateStore.isMasterAdmin(email);
+export const DEFAULT_DYNAMIC_PLANS = Object.freeze([
+    {
+        id: "basico",
+        codigoPlan: "Básico",
+        titulo: "Plan Básico Freemium",
+        subtitulo: "Exploración inicial del ecosistema",
+        precio_mensual: 0,
+        precio_anual: 0,
+        unidad_anual: "siempre gratis",
+        etiqueta_badge: "ACCESO INICIAL",
+        color_acento: "gray",
+        destacado: false,
+        activo: true,
+        orden: 1,
+        beneficios: [
+            "15 casos clínicos de práctica al mes",
+            "Acceso al primer nivel de tu carrera",
+            "Vista previa de tarjetas Sináptico v4.4",
+            "1 PC + 1 Dispositivo Móvil protegido"
+        ]
+    },
+    {
+        id: "sobrevivencia_universitaria",
+        codigoPlan: "Sobrevivencia",
+        titulo: "Sobrevivencia Universitaria",
+        subtitulo: "Ideal de 1° a 8° Semestre y Preuniversitario",
+        precio_mensual: 9.99,
+        precio_anual: 49.99,
+        unidad_anual: "semestre",
+        etiqueta_badge: "ESTUDIANTES 1° A 8° SEM",
+        color_acento: "secondary",
+        destacado: false,
+        activo: true,
+        orden: 2,
+        beneficios: [
+            "Desbloqueo total de los semestres de TU carrera",
+            "Motor de Repetición Espaciada Sináptico v4.4 ilimitado",
+            "Biblioteca 1D: Guías GPC-MSP, PDFs y resúmenes",
+            "Exámenes parciales por materia en Modo Tutor"
+        ]
+    },
+    {
+        id: "pro_caces",
+        codigoPlan: "PRO",
+        titulo: "Makai PRO CACES",
+        subtitulo: "Internado Rotativo, Egresados y Salud Rural",
+        precio_mensual: 18.60,
+        precio_anual: 144.75,
+        unidad_anual: "año",
+        etiqueta_badge: "MÁS ELEGIDO • AHORRA 35%",
+        color_acento: "primary",
+        destacado: true,
+        activo: true,
+        orden: 3,
+        beneficios: [
+            "Bancos de reactivos CACES 100% ilimitados",
+            "Modo Estándar Oficial (100 preguntas / 150 min)",
+            "Simuladores Clínicos Interactivos 1D, 2D y 3D UCI",
+            "Bootcamp de Examen Complexivo y Año de Salud Rural"
+        ]
+    },
+    {
+        id: "matchmaker_vip",
+        codigoPlan: "VIP",
+        titulo: "Vinculación Tutor VIP / Tesis",
+        subtitulo: "Conexión directa 1 a 1 con Especialistas",
+        precio_mensual: 10.00,
+        precio_anual: 10.00,
+        unidad_anual: "vinculación",
+        etiqueta_badge: "MARKETPLACE 1 A 1",
+        color_acento: "warning",
+        destacado: false,
+        activo: true,
+        orden: 4,
+        beneficios: [
+            "Tasa única de vinculación garantizada por Makai",
+            "Desbloqueo de WhatsApp y agenda del Especialista",
+            "Tutores con registro SENESCYT auditado",
+            "Negociación libre de honorarios sin intermediarios"
+        ]
     }
-    return FALLBACK_MASTER_ADMINS.includes(email.trim().toLowerCase());
-}
+]);
 
 /**
- * Verifica si el usuario autenticado ya confirmó su correo electrónico.
- * Las cuentas maestras tienen pase directo automático.
- * @param {Object} user - Objeto User de Firebase Auth
- * @returns {Promise<boolean>}
+ * Resuelve el logotipo oficial sin romper la vista si cambia el nombre del archivo.
  */
-async function checkUserVerificationStatus(user) {
-    if (!user) return false;
-    if (checkIsAdminEmail(user.email)) return true;
+function resolveBrandLogo() {
+    const imgEl = document.getElementById("brand-logo-img");
+    const fallbackEl = document.getElementById("brand-logo-fallback");
+    if (!imgEl) return;
 
-    const isGoogle = user.providerData?.some(p => p.providerId === "google.com");
-    if (isGoogle) {
-        try {
-            const snap = await getDoc(doc(db, "usuarios", user.uid));
-            if (snap.exists() && snap.data().correoConfirmadoMakai === true) {
-                return true;
-            }
-        } catch (err) {
-            console.warn("[AuthLogin] Verificando estado Gmail en Firestore:", err);
-        }
-        if (localStorage.getItem(`makai_gmail_verified_${user.uid}`) === "true") {
-            return true;
-        }
-        return !!user.emailVerified;
-    }
+    const candidates = [
+        "assets/1-branding/logos/logo.png",
+        "assets/1-branding/logos/Logo.png",
+        "assets/1-branding/logos/Fondo MAKAI Academy 2.png",
+        "logo.png"
+    ];
 
-    return !!user.emailVerified;
-}
-
-/**
- * Traduce los códigos de error de Firebase Authentication v13.0.0 a mensajes
- * claros en español para mostrar en la interfaz de index.html.
- * @param {Object|Error} error
- * @returns {string}
- */
-export function translateFirebaseAuthError(error) {
-    const code = error?.code || "";
-    switch (code) {
-        case "auth/invalid-credential":
-        case "auth/wrong-password":
-        case "auth/user-not-found":
-            return "Correo electrónico o contraseña incorrectos. Verifica tus datos o crea tu expediente si eres nuevo.";
-        case "auth/invalid-email":
-            return "El formato del correo electrónico ingresado no es válido.";
-        case "auth/user-disabled":
-            return "Esta cuenta ha sido suspendida temporalmente. Contacta a soporte de Makai Academy.";
-        case "auth/email-already-in-use":
-            return "Este correo electrónico ya está registrado. Inicia sesión o recupera tu contraseña.";
-        case "auth/weak-password":
-            return "La contraseña debe tener al menos 6 caracteres.";
-        case "auth/too-many-requests":
-            return "Demasiados intentos seguidos. Por seguridad, espera unos minutos o restablece tu contraseña.";
-        case "auth/popup-closed-by-user":
-            return "Se cerró la ventana emergente antes de completar el acceso con Google.";
-        case "auth/popup-blocked":
-            return "Tu navegador bloqueó la ventana emergente. Permite las ventanas emergentes para este sitio.";
-        case "auth/unauthorized-domain":
-            return "Dominio no autorizado en Firebase Authentication. Asegúrate de autorizar el dominio en Firebase Console.";
-        case "auth/network-request-failed":
-            return "Error de conexión a internet. Verifica tu red e inténtalo nuevamente.";
-        default:
-            return `No se pudo completar la autenticación (${code || error?.message || "Error desconocido"}).`;
-    }
-}
-
-/**
- * Muestra un mensaje de retroalimentación visual dentro del formulario de login
- * o utiliza alert() como respaldo si no existe un contenedor de errores en el DOM.
- * @param {string} message - Texto a mostrar
- * @param {"error"|"success"|"warning"} type - Tipo de alerta
- */
-function showAuthFeedback(message, type = "error") {
-    let feedbackBox = document.getElementById("auth-feedback-box") || document.getElementById("login-error-box");
-
-    // Si no existe contenedor de feedback en index.html, lo inyectamos dinámicamente sobre el botón submit
-    const authForm = document.getElementById("auth-form");
-    const submitBtn = document.getElementById("submit-btn");
-
-    if (!feedbackBox && authForm) {
-        feedbackBox = document.createElement("div");
-        feedbackBox.id = "auth-feedback-box";
-        if (submitBtn && submitBtn.parentNode === authForm) {
-            authForm.insertBefore(feedbackBox, submitBtn);
-        } else {
-            authForm.prepend(feedbackBox);
-        }
-    }
-
-    if (feedbackBox) {
-        const styles = {
-            error: "mb-4 p-3 rounded-xl text-xs font-mono bg-danger/15 border border-danger text-danger",
-            warning: "mb-4 p-3 rounded-xl text-xs font-mono bg-warning/15 border border-warning text-warning",
-            success: "mb-4 p-3 rounded-xl text-xs font-mono bg-secondary/15 border border-secondary text-secondary"
+    let idx = 0;
+    const tryNext = () => {
+        if (idx >= candidates.length) return;
+        const testImg = new Image();
+        const currentSrc = candidates[idx++];
+        testImg.onload = () => {
+            imgEl.src = currentSrc;
+            imgEl.classList.remove("hidden");
+            fallbackEl?.classList.add("hidden");
         };
-        feedbackBox.className = styles[type] || styles.error;
-        feedbackBox.textContent = message;
-        feedbackBox.classList.remove("hidden");
-    } else {
-        alert(message);
-    }
+        testImg.onerror = tryNext;
+        testImg.src = currentSrc;
+    };
+    tryNext();
 }
 
 /**
- * Oculta el cuadro de retroalimentación de errores del formulario de login.
+ * Muestra alertas limpias dentro del cajón de login.
  */
-function clearAuthFeedback() {
-    const feedbackBox = document.getElementById("auth-feedback-box") || document.getElementById("login-error-box");
-    feedbackBox?.classList.add("hidden");
+function showAuthAlert(message, type = "info") {
+    const box = document.getElementById("auth-alert-box");
+    if (!box) return;
+
+    const styles = {
+        info: "bg-primary/10 border-primary/40 text-primary",
+        error: "bg-danger/10 border-danger/40 text-danger",
+        success: "bg-secondary/10 border-secondary/40 text-secondary",
+        warning: "bg-warning/10 border-warning/40 text-warning"
+    };
+
+    box.className = `mb-5 p-3.5 rounded-xl border text-xs font-mono ${styles[type] || styles.info}`;
+    box.textContent = message;
+    box.classList.remove("hidden");
 }
 
 /**
- * Determina la URL de destino tras un inicio de sesión exitoso y verificado,
- * respetando si el estudiante había elegido previamente un plan PRO o VIP.
- * @param {string} email - Correo del usuario autenticado
- * @returns {string} URL de redirección
+ * Descarga los planes desde Firestore (`planes_suscripcion`).
+ * Si no existen aún o falla el internet, utiliza `DEFAULT_DYNAMIC_PLANS`.
  */
-function resolvePostLoginDestination(email) {
-    const isAdmin = checkIsAdminEmail(email);
-    const pendingPlan = sessionStorage.getItem("makai_selected_plan");
-    const pendingBilling = sessionStorage.getItem("makai_selected_billing") || "annual";
+export async function fetchDynamicPlansFromFirestore() {
+    try {
+        const snap = await getDocs(collection(db, COLLECTIONS.SUBSCRIPTIONS));
+        const remotePlans = [];
+        snap.forEach((docSnap) => {
+            const data = docSnap.data();
+            if (data && data.activo !== false) {
+                remotePlans.push({ id: docSnap.id, ...data });
+            }
+        });
 
-    if (pendingPlan && (pendingPlan === "PRO" || pendingPlan === "VIP" || pendingPlan === "pro_anual" || pendingPlan === "pro_mensual" || pendingPlan === "vip") && !isAdmin) {
-        sessionStorage.removeItem("makai_selected_plan");
-        if (pendingPlan === "pro_anual" || pendingPlan === "pro_mensual" || pendingPlan === "vip") {
-            return `registro.html?plan=${pendingPlan}&pago=qr`;
+        if (remotePlans.length > 0) {
+            remotePlans.sort((a, b) => Number(a.orden || 99) - Number(b.orden || 99));
+            cachedPlans = remotePlans;
+            localStorage.setItem("makai_cached_plans_v1", JSON.stringify(remotePlans));
+            return remotePlans;
         }
-        const normalizedPlan = pendingPlan === "VIP"
-            ? "vip"
-            : (pendingBilling === "monthly" ? "pro_mensual" : "pro_anual");
-        return `registro.html?plan=${normalizedPlan}&pago=qr`;
+    } catch (err) {
+        console.warn("[DynamicPricing] Usando catálogo en caché/semilla por red:", err.message);
     }
 
-    return "dashboard.html";
+    try {
+        const saved = localStorage.getItem("makai_cached_plans_v1");
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                cachedPlans = parsed;
+                return parsed;
+            }
+        }
+    } catch (e) {}
+
+    cachedPlans = [...DEFAULT_DYNAMIC_PLANS];
+    return cachedPlans;
 }
 
 /**
- * Procesa el envío del formulario principal (#auth-form) con correo y contraseña.
- * @param {Event} e - Evento submit del formulario
+ * MOTOR DE RENDERIZADO DE TARJETAS DE PRECIOS EN EL CLIENTE
+ * Construye el HTML dinámicamente sin tocar index.html.
  */
-export async function handleEmailPasswordSubmit(e) {
-    e.preventDefault();
-    clearAuthFeedback();
+export async function renderPricingCards(forceRefresh = false) {
+    const mount = document.getElementById("pricing-cards-mount");
+    if (!mount) return;
 
-    const emailInput = document.getElementById("email");
-    const passInput = document.getElementById("password");
-    const submitBtn = document.getElementById("submit-btn");
+    const plans = (cachedPlans.length > 0 && !forceRefresh)
+        ? cachedPlans
+        : await fetchDynamicPlansFromFirestore();
 
-    const email = (emailInput?.value || "").trim();
-    const pass = passInput?.value || "";
+    const accentPalette = {
+        primary: {
+            border: "border-2 border-primary shadow-[0_0_25px_rgba(0,229,255,0.12)]",
+            badge: "bg-primary text-surface",
+            price: "text-primary",
+            btn: "bg-primary text-surface hover:bg-opacity-90"
+        },
+        secondary: {
+            border: "border border-secondary/50 hover:border-secondary",
+            badge: "bg-secondary/20 text-secondary border border-secondary/40",
+            price: "text-secondary",
+            btn: "bg-surface border border-secondary text-secondary hover:bg-secondary hover:text-surface"
+        },
+        warning: {
+            border: "border border-warning/50 hover:border-warning",
+            badge: "bg-warning/20 text-warning border border-warning/40",
+            price: "text-warning",
+            btn: "bg-surface border border-warning text-warning hover:bg-warning hover:text-surface"
+        },
+        gray: {
+            border: "border border-surface-high hover:border-gray-600",
+            badge: "bg-surface-high text-gray-300",
+            price: "text-white",
+            btn: "bg-surface border border-surface-high text-gray-200 hover:border-primary hover:text-primary"
+        }
+    };
 
-    if (!email || !pass) {
-        showAuthFeedback("⚠️ Por favor ingresa tu correo electrónico y contraseña.");
+    mount.innerHTML = plans.map((plan) => {
+        const palette = accentPalette[plan.color_acento] || accentPalette.primary;
+        const isFree = Number(plan.precio_mensual) === 0 && Number(plan.precio_anual) === 0;
+        const useAnnual = currentBillingCycle === "annual" && Number(plan.precio_anual) > 0;
+
+        const displayedPrice = isFree
+            ? "$0"
+            : `$${Number(useAnnual ? plan.precio_anual : plan.precio_mensual).toFixed(2)}`;
+
+        const displayedUnit = isFree
+            ? "/gratis"
+            : (useAnnual ? `/${plan.unidad_anual || "año"}` : "/mes");
+
+        const secondaryPriceNote = (!isFree && Number(plan.precio_anual) > 0 && Number(plan.precio_mensual) !== Number(plan.precio_anual))
+            ? (useAnnual
+                ? `Facturación mensual disponible a $${Number(plan.precio_mensual).toFixed(2)}/mes`
+                : `O ahorra pagando $${Number(plan.precio_anual).toFixed(2)}/${plan.unidad_anual || "año"}`)
+            : "Tarifa controlada por Rieles Makai";
+
+        const benefitsList = Array.isArray(plan.beneficios) ? plan.beneficios : [];
+
+        return `
+            <article class="bg-surface-container ${palette.border} rounded-2xl p-6 flex flex-col justify-between relative transition-all">
+                <div>
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                        <span class="text-[10px] font-mono font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider ${palette.badge}">
+                            ${plan.etiqueta_badge || "PLAN OFICIAL"}
+                        </span>
+                        <span class="text-[10px] font-mono text-gray-500">ID: ${plan.id}</span>
+                    </div>
+
+                    <h3 class="text-lg font-extrabold text-white">${plan.titulo}</h3>
+                    <p class="text-xs text-gray-400 mt-0.5 mb-4">${plan.subtitulo || ""}</p>
+
+                    <div class="bg-surface rounded-xl p-3.5 border border-surface-high mb-5">
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-2xl sm:text-3xl font-extrabold font-mono ${palette.price}">${displayedPrice}</span>
+                            <span class="text-xs font-mono text-gray-400">${displayedUnit}</span>
+                        </div>
+                        <p class="text-[11px] font-mono text-gray-500 mt-1">${secondaryPriceNote}</p>
+                    </div>
+
+                    <ul class="space-y-2.5 text-xs text-gray-300 mb-6">
+                        ${benefitsList.map(item => `
+                            <li class="flex items-start gap-2">
+                                <span class="material-symbols-outlined text-primary text-sm mt-0.5">check_circle</span>
+                                <span>${item}</span>
+                            </li>
+                        `).join("")}
+                    </ul>
+                </div>
+
+                <button type="button"
+                    data-select-plan-id="${plan.id}"
+                    class="w-full py-3 rounded-xl font-extrabold text-xs uppercase tracking-wider transition-all ${palette.btn}">
+                    ${isFree ? "Comenzar Gratis →" : `Elegir ${plan.titulo} →`}
+                </button>
+            </article>
+        `;
+    }).join("");
+
+    // Enlazar clic de cada tarjeta para guardar la FOTO HISTÓRICA del precio
+    mount.querySelectorAll("[data-select-plan-id]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            const planId = btn.dataset.selectPlanId;
+            const chosen = plans.find(p => p.id === planId) || plans[0];
+            handlePlanSelectionRedirect(chosen);
+        });
+    });
+}
+
+/**
+ * Guarda la foto histórica (Snapshot) del plan elegido y redirige al embudo `registro.html`.
+ */
+function handlePlanSelectionRedirect(planObj) {
+    const isFree = Number(planObj.precio_mensual) === 0 && Number(planObj.precio_anual) === 0;
+    const billingMode = isFree ? "free" : currentBillingCycle;
+    const lockedAmount = isFree
+        ? 0
+        : Number(billingMode === "annual" && planObj.precio_anual > 0 ? planObj.precio_anual : planObj.precio_mensual);
+
+    const snapshot = {
+        id: planObj.id,
+        codigoPlan: planObj.codigoPlan || planObj.titulo,
+        titulo: planObj.titulo,
+        billingCycle: billingMode,
+        montoCongeladoUSD: lockedAmount,
+        unidad: billingMode === "annual" ? (planObj.unidad_anual || "año") : "mes",
+        capturedAt: new Date().toISOString()
+    };
+
+    sessionStorage.setItem("makai_selected_plan", snapshot.codigoPlan);
+    sessionStorage.setItem("makai_selected_billing", billingMode);
+    sessionStorage.setItem("makai_selected_plan_snapshot", JSON.stringify(snapshot));
+
+    window.location.href = `registro.html?plan=${encodeURIComponent(snapshot.codigoPlan)}&billing=${encodeURIComponent(billingMode)}&price=${encodeURIComponent(lockedAmount)}`;
+}
+
+/**
+ * Gestiona el envío del formulario de Postulación de Especialistas a Firestore (`perfiles_docentes`).
+ */
+async function handleTutorApplicationSubmit(event) {
+    event.preventDefault();
+    const submitBtn = document.getElementById("btn-submit-tutor-app");
+    const feedback = document.getElementById("tutor-form-feedback");
+
+    const nombre = document.getElementById("tutor-name")?.value.trim() || "";
+    const senescyt = document.getElementById("tutor-senescyt")?.value.trim() || "";
+    const especialidad = document.getElementById("tutor-specialty")?.value.trim() || "";
+    const modalidad = document.getElementById("tutor-modality")?.value || "mentorias_y_tesis";
+    const tarifaReferencial = document.getElementById("tutor-rate")?.value.trim() || "";
+    const whatsapp = document.getElementById("tutor-whatsapp")?.value.trim() || "";
+    const email = document.getElementById("tutor-email")?.value.trim() || "";
+    const cvUrl = document.getElementById("tutor-cv-link")?.value.trim() || "";
+    const bio = document.getElementById("tutor-bio")?.value.trim() || "";
+
+    if (senescyt.length < 6) {
+        if (feedback) {
+            feedback.className = "p-3 rounded-xl text-xs font-mono bg-danger/15 border border-danger text-danger";
+            feedback.textContent = "Por favor ingresa un número de registro SENESCYT válido para auditoría.";
+            feedback.classList.remove("hidden");
+        }
         return;
     }
-
-    const originalBtnHTML = submitBtn ? submitBtn.innerHTML : "Ingresar al Portal";
 
     try {
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.innerHTML = "<span>Verificando credenciales...</span>";
+            submitBtn.textContent = "Enviando a Bóveda Admin...";
         }
 
-        let cred;
-        if (isRegisterModeInIndex) {
-            cred = await createUserWithEmailAndPassword(auth, email, pass);
-        } else {
-            cred = await signInWithEmailAndPassword(auth, email, pass);
+        await addDoc(collection(db, COLLECTIONS.TUTORS), {
+            nombre,
+            registroSenescyt: senescyt,
+            especialidad,
+            modalidad,
+            tarifaReferencial,
+            whatsapp,
+            email,
+            cvUrl,
+            biografia: bio,
+            tasaVinculacionMakaiUSD: 10,
+            verificadoSenescyt: false,
+            estado: "pendiente_revision", // Entra en cuarentena hasta que el Master Admin lo apruebe
+            createdAt: new Date().toISOString()
+        });
+
+        if (feedback) {
+            feedback.className = "p-3 rounded-xl text-xs font-mono bg-secondary/15 border border-secondary text-secondary";
+            feedback.textContent = "✅ Postulación recibida en la Bóveda Maestra. Tras verificar tu SENESCYT te contactaremos por WhatsApp.";
+            feedback.classList.remove("hidden");
         }
 
-        await cred.user.reload();
-
-        // Pase directo inmediato para las cuentas maestras de administración
-        if (checkIsAdminEmail(cred.user.email)) {
-            window.location.href = "dashboard.html";
-            return;
+        document.getElementById("tutor-application-form")?.reset();
+    } catch (error) {
+        if (feedback) {
+            feedback.className = "p-3 rounded-xl text-xs font-mono bg-danger/15 border border-danger text-danger";
+            feedback.textContent = `Error al registrar postulación: ${error.message}`;
+            feedback.classList.remove("hidden");
         }
-
-        const verified = await checkUserVerificationStatus(cred.user);
-        if (!verified) {
-            try {
-                await sendEmailVerification(cred.user);
-            } catch (verifyErr) {
-                console.warn("[AuthLogin] Enlace de verificación ya enviado recientemente:", verifyErr);
-            }
-            showAuthFeedback(
-                "Hemos enviado un enlace de verificación a tu correo electrónico. Ábrelo para activar tu acceso.",
-                "warning"
-            );
-            setTimeout(() => {
-                window.location.href = "registro.html?verify=pending";
-            }, 1200);
-            return;
-        }
-
-        window.location.href = resolvePostLoginDestination(cred.user.email);
-    } catch (err) {
-        console.error("[AuthLogin] Error en autenticación:", err);
-        showAuthFeedback(translateFirebaseAuthError(err), "error");
-
+    } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = originalBtnHTML;
+            submitBtn.textContent = "Enviar Expediente a Auditoría →";
         }
     }
 }
 
 /**
- * Ejecuta el inicio de sesión mediante ventana emergente de Google (GoogleAuthProvider).
- * Sincroniza el documento inicial en la colección `usuarios` y verifica el estado del correo.
- * @param {HTMLElement|null} btnElement - Botón que disparó la acción
+ * Inicializador principal invocado automáticamente por `app.orchestrator.js`.
  */
-export async function loginWithGoogle(btnElement = null) {
-    clearAuthFeedback();
-    const googleBtn = btnElement || document.getElementById("btn-google-login");
-    const originalHTML = googleBtn ? googleBtn.innerHTML : "Continuar con Google";
+export async function initAuthLogin() {
+    if (loginUIBound) return;
+    loginUIBound = true;
 
-    if (googleBtn) {
-        googleBtn.disabled = true;
-        googleBtn.innerHTML = "<span>Conectando con Gmail...</span>";
+    resolveBrandLogo();
+
+    // Mostrar aviso si fue desconectado por límite de dispositivos
+    const signoutNotice = sessionStorage.getItem("makai_signout_notice");
+    if (signoutNotice) {
+        sessionStorage.removeItem("makai_signout_notice");
+        showAuthAlert(signoutNotice, "warning");
     }
 
-    const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: "select_account" });
+    // 1. Renderizar tarjetas de precios desde Firestore
+    await renderPricingCards();
 
-    try {
-        const result = await signInWithPopup(auth, provider);
-        const gUser = result.user;
+    // 2. Conmutador Mensual vs Anual/Semestral
+    document.querySelectorAll(".billing-toggle-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            currentBillingCycle = btn.dataset.billingToggle || "annual";
+            document.querySelectorAll(".billing-toggle-btn").forEach((b) => {
+                if (b.dataset.billingToggle === currentBillingCycle) {
+                    b.className = "billing-toggle-btn px-3.5 py-2 rounded-lg text-xs font-mono font-extrabold bg-primary text-surface transition-all";
+                } else {
+                    b.className = "billing-toggle-btn px-3.5 py-2 rounded-lg text-xs font-mono font-bold text-gray-400 transition-all";
+                }
+            });
+            renderPricingCards(false);
+        });
+    });
 
-        // 1. Pase directo para cuentas maestras de administración
-        if (checkIsAdminEmail(gUser.email)) {
-            const adminRef = doc(db, "usuarios", gUser.uid);
-            await setDoc(adminRef, {
-                uid: gUser.uid,
-                email: gUser.email,
-                nombre: gUser.displayName || gUser.email.split("@")[0],
-                rol: "admin",
-                subscriptionLevel: "PRO",
-                estadoPago: "activo_verificado",
-                correoConfirmadoMakai: true,
-                lastLoginAt: new Date().toISOString()
-            }, { merge: true }).catch(() => {});
+    // 3. Login con Correo y Contraseña
+    const authForm = document.getElementById("auth-form");
+    authForm?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("auth-email")?.value.trim() || "";
+        const pass = document.getElementById("auth-password")?.value || "";
+        const btn = document.getElementById("btn-submit-login");
 
-            window.location.href = "dashboard.html";
-            return;
-        }
-
-        // 2. Comprobar expediente del estudiante en Cloud Firestore
-        const userRef = doc(db, "usuarios", gUser.uid);
-        let snap = null;
         try {
-            snap = await getDoc(userRef);
-        } catch (fireErr) {
-            console.warn("[AuthLogin] Lectura inicial de Firestore en espera:", fireErr);
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = "Verificando credenciales...";
+            }
+            await signInWithEmailAndPassword(auth, email, pass);
+            showAuthAlert("Acceso verificado. Entrando a tu estación...", "success");
+        } catch (err) {
+            showAuthAlert("Credenciales inválidas o cuenta no registrada.", "error");
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = "Ingresar a mi Estación →";
+            }
         }
+    });
 
-        const isConfirmedInFirestore = snap?.exists() && snap.data()?.correoConfirmadoMakai === true;
-        const isConfirmedInLocal = localStorage.getItem(`makai_gmail_verified_${gUser.uid}`) === "true";
+    // 4. Login con Google OAuth
+    const googleBtn = document.getElementById("btn-google-login");
+    googleBtn?.addEventListener("click", async () => {
+        try {
+            await signInWithPopup(auth, googleProvider);
+            showAuthAlert("Cuenta de Google autenticada. Redirigiendo...", "success");
+        } catch (err) {
+            showAuthAlert("Se canceló el inicio con Google o hubo un bloqueo de ventana emergente.", "warning");
+        }
+    });
 
-        if (!isConfirmedInFirestore && !isConfirmedInLocal) {
-            try {
-                await setDoc(userRef, {
-                    uid: gUser.uid,
-                    email: gUser.email,
-                    nombre: gUser.displayName || gUser.email.split("@")[0],
-                    primerNombre: (gUser.displayName || gUser.email.split("@")[0]).split(" ")[0],
-                    rol: "estudiante",
-                    subscriptionLevel: "Básico",
-                    estadoPago: "activo_gratis",
-                    carrera: "medicina",
-                    correoConfirmadoMakai: false,
-                    casesUsedThisMonth: 0,
-                    totalExamsCompleted: 0,
-                    globalAverage: 0,
-                    createdAt: new Date().toISOString()
-                }, { merge: true });
-            } catch (writeErr) {
-                console.warn("[AuthLogin] Aviso creando perfil inicial Gmail:", writeErr);
-            }
-
-            try {
-                await sendEmailVerification(gUser);
-            } catch (verifyErr) {
-                console.warn("[AuthLogin] Aviso envío de enlace Gmail:", verifyErr);
-            }
-
-            window.location.href = "registro.html?verify=pending&provider=google";
+    // 5. Recuperación de contraseña con un clic
+    const forgotBtn = document.getElementById("btn-forgot-password");
+    forgotBtn?.addEventListener("click", async () => {
+        const email = document.getElementById("auth-email")?.value.trim() || "";
+        if (!email) {
+            showAuthAlert("Escribe primero tu correo en la casilla superior para enviarte el enlace de recuperación.", "warning");
             return;
         }
-
-        window.location.href = resolvePostLoginDestination(gUser.email);
-    } catch (err) {
-        console.error("[AuthLogin] Detalle error Google Auth:", err);
-        showAuthFeedback(translateFirebaseAuthError(err), "error");
-
-        if (googleBtn) {
-            googleBtn.innerHTML = originalHTML;
-            googleBtn.disabled = false;
+        try {
+            await sendPasswordResetEmail(auth, email);
+            showAuthAlert(`Enlace de restablecimiento enviado a ${email}. Revisa tu bandeja o Spam.`, "success");
+        } catch (err) {
+            showAuthAlert("No pudimos enviar el correo de recuperación. Verifica que esté bien escrito.", "error");
         }
-    }
-}
+    });
 
-/**
- * Ejecuta el inicio de sesión opcional con cuenta Microsoft (OAuthProvider).
- * @param {HTMLElement|null} btnElement
- */
-export async function loginWithMicrosoft(btnElement = null) {
-    clearAuthFeedback();
-    const msBtn = btnElement || document.getElementById("btn-microsoft-login");
-    const originalHTML = msBtn ? msBtn.innerHTML : "Microsoft";
-
-    if (msBtn) {
-        msBtn.disabled = true;
-        msBtn.innerHTML = "<span>Conectando con Microsoft...</span>";
-    }
-
-    const provider = new OAuthProvider("microsoft.com");
-    provider.setCustomParameters({ prompt: "select_account" });
-
-    try {
-        const result = await signInWithPopup(auth, provider);
-        window.location.href = resolvePostLoginDestination(result.user.email);
-    } catch (err) {
-        console.error("[AuthLogin] Error Microsoft Auth:", err);
-        showAuthFeedback(translateFirebaseAuthError(err), "error");
-        if (msBtn) {
-            msBtn.innerHTML = originalHTML;
-            msBtn.disabled = false;
-        }
-    }
-}
-
-/**
- * Inicializa el modal de recuperación de contraseña (#forgot-password-modal) en index.html.
- */
-export function initForgotPasswordModal() {
-    const forgotBtn = document.getElementById("btn-forgot-password");
-    const forgotModal = document.getElementById("forgot-password-modal");
-    const closeForgot = document.getElementById("close-forgot-modal");
-    const cancelForgot = document.getElementById("cancel-forgot-btn");
-    const forgotForm = document.getElementById("forgot-password-form");
-    const resetFeedback = document.getElementById("reset-feedback");
-
-    if (!forgotModal && !forgotBtn) return;
-
-    const hideForgotModal = () => {
-        forgotModal?.classList.add("hidden");
-        forgotModal?.classList.remove("flex");
-        resetFeedback?.classList.add("hidden");
+    // 6. Modal de Postulación Docente VIP
+    const tutorModal = document.getElementById("tutor-application-modal");
+    const openTutorModal = () => {
+        tutorModal?.classList.remove("hidden");
+        tutorModal?.classList.add("flex");
+    };
+    const closeTutorModal = () => {
+        tutorModal?.classList.add("hidden");
+        tutorModal?.classList.remove("flex");
     };
 
-    if (forgotBtn && !forgotBtn.dataset.boundForgot) {
-        forgotBtn.dataset.boundForgot = "1";
-        forgotBtn.addEventListener("click", () => {
-            const currentTypedEmail = document.getElementById("email")?.value?.trim() || "";
-            const resetInput = document.getElementById("reset-email-input");
-            if (resetInput && currentTypedEmail) {
-                resetInput.value = currentTypedEmail;
-            }
-            forgotModal?.classList.remove("hidden");
-            forgotModal?.classList.add("flex");
-        });
-    }
-
-    closeForgot?.addEventListener("click", hideForgotModal);
-    cancelForgot?.addEventListener("click", hideForgotModal);
-
-    // Cerrar modal al hacer clic en el fondo oscuro exterior
-    forgotModal?.addEventListener("click", (e) => {
-        if (e.target === forgotModal) hideForgotModal();
-    });
-
-    if (forgotForm && !forgotForm.dataset.boundResetForm) {
-        forgotForm.dataset.boundResetForm = "1";
-        forgotForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const resetInput = document.getElementById("reset-email-input");
-            const submitForgotBtn = document.getElementById("submit-forgot-btn");
-            const emailToReset = (resetInput?.value || "").trim();
-
-            if (!emailToReset) return;
-
-            try {
-                if (submitForgotBtn) {
-                    submitForgotBtn.disabled = true;
-                    submitForgotBtn.textContent = "Enviando enlace...";
-                }
-
-                await sendPasswordResetEmail(auth, emailToReset);
-
-                if (resetFeedback) {
-                    resetFeedback.className = "text-xs font-mono p-3 rounded-xl bg-secondary/15 border border-secondary text-secondary";
-                    resetFeedback.textContent = `✓ Enlace enviado a ${emailToReset}. Revisa tu bandeja de entrada o carpeta de Spam.`;
-                    resetFeedback.classList.remove("hidden");
-                }
-            } catch (err) {
-                if (resetFeedback) {
-                    resetFeedback.className = "text-xs font-mono p-3 rounded-xl bg-danger/15 border border-danger text-danger";
-                    resetFeedback.textContent = translateFirebaseAuthError(err);
-                    resetFeedback.classList.remove("hidden");
-                }
-            } finally {
-                if (submitForgotBtn) {
-                    submitForgotBtn.disabled = false;
-                    submitForgotBtn.textContent = "Enviar Enlace al Correo";
-                }
-            }
-        });
-    }
+    document.getElementById("btn-open-tutor-modal")?.addEventListener("click", openTutorModal);
+    document.getElementById("btn-open-tutor-modal-bottom")?.addEventListener("click", openTutorModal);
+    document.getElementById("btn-close-tutor-modal")?.addEventListener("click", closeTutorModal);
+    document.getElementById("btn-cancel-tutor-modal")?.addEventListener("click", closeTutorModal);
+    document.getElementById("tutor-application-form")?.addEventListener("submit", handleTutorApplicationSubmit);
 }
 
-/**
- * Inicializa las pestañas de Login / Registro (#tab-login, #tab-register),
- * el medidor de fortaleza de contraseña (#password-strength) y el botón
- * para mostrar u ocultar la contraseña si están presentes en index.html.
- */
-export function initPasswordControls() {
-    const tabLogin = document.getElementById("tab-login");
-    const tabRegister = document.getElementById("tab-register");
-    const regFields = document.getElementById("register-fields");
-    const submitBtn = document.getElementById("submit-btn");
-
-    if (tabLogin && tabRegister) {
-        tabLogin.addEventListener("click", () => {
-            isRegisterModeInIndex = false;
-            tabLogin.classList.replace("text-gray-400", "text-white");
-            tabLogin.classList.replace("hover:text-white", "bg-surface-high");
-            tabLogin.classList.add("shadow");
-            tabRegister.classList.replace("bg-surface-high", "hover:text-white");
-            tabRegister.classList.replace("text-white", "text-gray-400");
-            tabRegister.classList.remove("shadow");
-            regFields?.classList.add("hidden");
-            if (submitBtn) {
-                submitBtn.innerHTML = '<span>Ingresar al Portal</span><span class="material-symbols-outlined text-lg">arrow_forward</span>';
-            }
-        });
-
-        tabRegister.addEventListener("click", () => {
-            // Si no hay campos de registro incrustados en index.html, redirigir a la bóveda registro.html
-            if (!regFields) {
-                window.location.href = "registro.html";
-                return;
-            }
-            isRegisterModeInIndex = true;
-            tabRegister.classList.replace("text-gray-400", "text-white");
-            tabRegister.classList.replace("hover:text-white", "bg-surface-high");
-            tabRegister.classList.add("shadow");
-            tabLogin.classList.replace("bg-surface-high", "hover:text-white");
-            tabLogin.classList.replace("text-white", "text-gray-400");
-            tabLogin.classList.remove("shadow");
-            regFields.classList.remove("hidden");
-            if (submitBtn) {
-                submitBtn.textContent = "Crear Cuenta Nueva";
-            }
-        });
-    }
-
-    // Medidor de seguridad de contraseña en tiempo real
-    const passwordInput = document.getElementById("password");
-    const strengthBar = document.getElementById("password-strength");
-    const strengthIndicator = strengthBar?.querySelector("div");
-
-    if (passwordInput && strengthBar && strengthIndicator) {
-        passwordInput.addEventListener("input", (e) => {
-            const val = e.target.value;
-            if (!val) {
-                strengthBar.classList.add("hidden");
-                return;
-            }
-            strengthBar.classList.remove("hidden");
-
-            let strength = 0;
-            if (val.length >= 8) strength++;
-            if (/[A-Z]/.test(val)) strength++;
-            if (/[0-9]/.test(val)) strength++;
-            if (/[^A-Za-z0-9]/.test(val)) strength++;
-
-            strengthIndicator.className = "h-full transition-all ";
-            if (strength <= 1) {
-                strengthIndicator.classList.add("w-1/3", "bg-danger");
-            } else if (strength === 2 || strength === 3) {
-                strengthIndicator.classList.add("w-2/3", "bg-warning");
-            } else {
-                strengthIndicator.classList.add("w-full", "bg-secondary");
-            }
-        });
-    }
-
-    // Conmutador opcional de visibilidad de contraseña (mostrar/ocultar)
-    const togglePassBtn = document.getElementById("btn-toggle-password");
-    if (togglePassBtn && passwordInput) {
-        togglePassBtn.addEventListener("click", () => {
-            const isPassword = passwordInput.type === "password";
-            passwordInput.type = isPassword ? "text" : "password";
-            const icon = togglePassBtn.querySelector(".material-symbols-outlined");
-            if (icon) {
-                icon.textContent = isPassword ? "visibility_off" : "visibility";
-            }
-        });
-    }
-}
-
-/**
- * Inicializa los selectores de facturación (Mensual vs. Anual) y botones de
- * planes académicos en index.html (Básico $0, PRO CACES $17.99/$139.99 y VIP $49.99),
- * guardando la intención en sessionStorage para registro.html.
- */
-export function initPlanSelectionButtons() {
-    const planButtons = document.querySelectorAll("[data-select-plan]");
-    planButtons.forEach(btn => {
-        if (btn.dataset.boundPlanBtn) return;
-        btn.dataset.boundPlanBtn = "1";
-        btn.addEventListener("click", () => {
-            const selectedPlan = btn.dataset.selectPlan || "basico";
-            const selectedBilling = btn.dataset.billing || "annual";
-            const paymentMethod = btn.dataset.pago || "qr";
-
-            sessionStorage.setItem("makai_selected_plan", selectedPlan);
-            sessionStorage.setItem("makai_selected_billing", selectedBilling);
-
-            window.location.href = `registro.html?plan=${encodeURIComponent(selectedPlan)}&pago=${encodeURIComponent(paymentMethod)}`;
-        });
-    });
-}
-
-/**
- * Punto de entrada principal del módulo de Login en index.html.
- * Invocado automáticamente por `js/2-core/app.orchestrator.js`.
- */
-export function initAuthLogin() {
-    if (authLoginInitialized) return;
-    authLoginInitialized = true;
-
-    // 1. Enlazar formulario principal de inicio de sesión (#auth-form)
-    const authForm = document.getElementById("auth-form");
-    if (authForm && !authForm.dataset.boundLoginSubmit) {
-        authForm.dataset.boundLoginSubmit = "1";
-        authForm.addEventListener("submit", handleEmailPasswordSubmit);
-    }
-
-    // 2. Exponer función global y enlazar botón de acceso con Google (#btn-google-login)
-    window.loginWithGoogle = loginWithGoogle;
-    const googleBtn = document.getElementById("btn-google-login");
-    if (googleBtn && !googleBtn.dataset.boundGoogle) {
-        googleBtn.dataset.boundGoogle = "1";
-        googleBtn.addEventListener("click", () => loginWithGoogle(googleBtn));
-    }
-
-    // 3. Enlazar botón opcional de Microsoft (#btn-microsoft-login)
-    window.loginWithMicrosoft = loginWithMicrosoft;
-    const msBtn = document.getElementById("btn-microsoft-login");
-    if (msBtn && !msBtn.dataset.boundMicrosoft) {
-        msBtn.dataset.boundMicrosoft = "1";
-        msBtn.addEventListener("click", () => loginWithMicrosoft(msBtn));
-    }
-
-    // 4. Inicializar modal de recuperación de contraseña (#forgot-password-modal)
-    initForgotPasswordModal();
-
-    // 5. Inicializar pestañas, barra de fortaleza y visibilidad de contraseña
-    initPasswordControls();
-
-    // 6. Inicializar botones de planes académicos hacia registro.html
-    initPlanSelectionButtons();
-
-    console.info("[AuthLogin] Controlador de autenticación inicializado en index.html.");
-}
-
-// Alias de compatibilidad para llamadas desde app.orchestrator.js
 export const initAuthUI = initAuthLogin;
+
+if (typeof window !== "undefined") {
+    window.MakaiAuthLogin = {
+        initAuthLogin,
+        renderPricingCards,
+        fetchDynamicPlansFromFirestore
+    };
+}
