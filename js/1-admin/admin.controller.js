@@ -1,803 +1,560 @@
 // ============================================================================
 // ARCHIVO: js/1-admin/admin.controller.js
-// DESCRIPCIÓN: Controlador Maestro del Panel de Administración (Blindado con
-//              carga dinámica anticaídas). Gestiona KPIs, sub-pestañas y los
-//              6 subcomponentes de js/1-admin/ (incluyendo Tutores y Tesis).
-// PROYECTO: MakaiAcademy (Proyecto ALICIZATION)
+// PROYECTO: MakaiAcademy (Arquitectura "Rieles de Acero")
+// RESPONSABILIDAD: Orquestador de la Bóveda Admin con Ceguera por Diseño (RBAC),
+//                  KPIs en Vivo, Gestión de Roles de Empleados, Interruptores de
+//                  11 Carreras y Reseteo de Hardware (1 PC + 1 Móvil).
 // ============================================================================
 
 import {
-    db,
     auth,
+    db,
+    COLLECTIONS,
     collection,
     getDocs,
-    updateDoc,
-    setDoc,
     doc,
-    COLLECTIONS
+    updateDoc,
+    deleteDoc
 } from "../2-core/firebase.service.js";
 
 import {
     appState,
-    MASTER_ADMINS,
     isMasterAdmin
 } from "../2-core/state.store.js";
 
-// Referencias en memoria a los submódulos cargados dinámicamente
-const loadedSubmodules = {
-    backups: null,
-    payments: null,
-    questions: null,
-    sinaptico: null,
-    materials: null,
-    tutors: null,
-    users: null
-};
+import { makaiData } from "../2-core/curriculum.data.js";
 
-let adminControllerInitialized = false;
-let currentAdminSubTab = "all";
-let currentWorkspaceMode = sessionStorage.getItem("makai_admin_workspace_mode") || "admin"; // "admin" | "user"
+let adminBootstrapped = false;
+let currentAdminTab = "payments";
+let cachedUsersList = [];
+let cachedCareerRequests = [];
 
-const SAFE_COLLECTIONS = {
-    USERS: COLLECTIONS?.USERS || "usuarios",
-    PAYMENTS: COLLECTIONS?.PAYMENTS || "solicitudes_pago",
-    QUESTIONS: COLLECTIONS?.QUESTIONS || "preguntas_caces",
-    SINAPTICO: COLLECTIONS?.SINAPTICO || "tarjetas_sinaptico",
-    MATERIALS: COLLECTIONS?.MATERIALS || "materiales_estudio",
-    CAREER_REQUESTS: "solicitudes_cambio_carrera"
-};
+/**
+ * Definición de pestañas administrativas y qué roles tienen permiso de verlas.
+ */
+const ADMIN_TABS_CONFIG = Object.freeze([
+    {
+        id: "payments",
+        moduleId: "admin-section-payments",
+        label: "💳 Auditoría de Pagos",
+        roles: ["master", "secretaria"]
+    },
+    {
+        id: "pricing",
+        moduleId: "admin-section-pricing",
+        label: "🏷️ Gestor de Tarifas (CMS)",
+        roles: ["master"] // Exclusivo Olimpo
+    },
+    {
+        id: "users",
+        moduleId: "admin-section-users",
+        label: "👥 Usuarios, Roles & Dispositivos",
+        roles: ["master", "secretaria"]
+    },
+    {
+        id: "workstation",
+        moduleId: "admin-section-questions",
+        label: "🛠️ Estación de Contenido (CACES / 1D / 3D)",
+        roles: ["master", "dev_3d"]
+    },
+    {
+        id: "tutors",
+        moduleId: "admin-section-tutors",
+        label: "🩺 Marketplace Tutores VIP",
+        roles: ["master"]
+    },
+    {
+        id: "backups",
+        moduleId: "admin-section-backups",
+        label: "💾 Respaldos JSON",
+        roles: ["master"]
+    }
+]);
 
-// ============================================================================
-// 1. VALIDACIÓN DE SEGURIDAD Y CONTENEDOR GARANTIZADO (#view-admin)
-// ============================================================================
-
-export function verifyAdminPermissions() {
-    const activeEmail =
-        auth.currentUser?.email ||
-        appState?.currentUser?.email ||
-        appState?.currentUserData?.email ||
-        window.makaiCurrentUser?.email ||
-        "";
-
-    return isMasterAdmin(activeEmail);
+/**
+ * Muestra una notificación rápida dentro de la Bóveda Admin.
+ */
+export function showAdminToast(message, type = "info") {
+    window.MakaiSecurityGuard?.showSecurityToast?.(message, type);
 }
 
 /**
- * Garantiza que exista el contenedor #view-admin dentro del área principal de dashboard.html
+ * Carga dinámicamente un submódulo de `js/1-admin/` sin romper la consola si aún es semilla.
  */
-function ensureAdminViewContainer() {
-    let adminView = document.getElementById("view-admin");
-    if (adminView) return adminView;
-
-    const mainContainer =
-        document.getElementById("views-container") ||
-        document.querySelector("main") ||
-        document.body;
-
-    adminView = document.createElement("div");
-    adminView.id = "view-admin";
-    adminView.className = "tab-content hidden max-w-6xl mx-auto p-6";
-    mainContainer.appendChild(adminView);
-    return adminView;
-}
-
-export function syncAdminNavigationVisibility() {
-    const isAuthorized = verifyAdminPermissions();
-    const sideNavBtn = document.getElementById("admin-nav-btn");
-    const headerBtn = document.getElementById("header-admin-btn");
-    const adminView = document.getElementById("view-admin");
-
-    if (isAuthorized) {
-        sideNavBtn?.classList.remove("hidden");
-        headerBtn?.classList.remove("hidden");
-    } else {
-        sideNavBtn?.classList.add("hidden");
-        headerBtn?.classList.add("hidden");
-        if (adminView) {
-            adminView.classList.add("hidden");
-            adminView.classList.remove("active");
-            adminView.style.display = "none";
-        }
-    }
-}
-
-// ============================================================================
-// 2. INICIALIZADOR PRINCIPAL CON CARGA DINÁMICA ANTICAÍDAS
-// ============================================================================
-
-async function safeImportSubmodule(relativePath) {
+async function safeLoadAdminSubmodule(path, fnNames = [], ...args) {
     try {
-        return await import(relativePath);
+        const mod = await import(path);
+        for (const fn of fnNames) {
+            if (typeof mod[fn] === "function") {
+                await mod[fn](...args);
+                break;
+            }
+        }
+        return mod;
     } catch (err) {
-        console.warn(`[AdminController] Aviso al importar ${relativePath}:`, err.message || err);
+        console.warn(`[AdminVault] Submódulo en espera (${path}):`, err.message || err);
         return null;
     }
 }
 
-export async function initAdmin() {
-    syncAdminNavigationVisibility();
-    bindHeaderAdminShortcut();
+/**
+ * Actualiza los 5 contadores KPI superiores (Solo Master Admin ve el total general).
+ */
+export async function refreshAdminVaultKPIs() {
+    const isMaster = isMasterAdmin(auth.currentUser?.email || appState.currentUser?.email);
+    const kpiBar = document.getElementById("admin-master-kpi-bar");
+    if (!kpiBar || !isMaster) return;
 
-    if (!verifyAdminPermissions()) {
-        return;
+    try {
+        const [usersSnap, paySnap, qSnap, sinSnap, matSnap] = await Promise.all([
+            getDocs(collection(db, COLLECTIONS.USERS)),
+            getDocs(collection(db, COLLECTIONS.PAYMENTS)),
+            getDocs(collection(db, COLLECTIONS.QUESTIONS)),
+            getDocs(collection(db, COLLECTIONS.SINAPTICO)),
+            getDocs(collection(db, COLLECTIONS.MATERIALS))
+        ]);
+
+        let pendingPayments = 0;
+        paySnap.forEach(d => {
+            if (d.data().estado === "pendiente") pendingPayments++;
+        });
+
+        const setTxt = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = String(val);
+        };
+
+        setTxt("kpi-count-users", usersSnap.size);
+        setTxt("kpi-count-payments", `${pendingPayments} pend. / ${paySnap.size}`);
+        setTxt("kpi-count-questions", qSnap.size);
+        setTxt("kpi-count-sinaptico", sinSnap.size);
+        setTxt("kpi-count-materials", matSnap.size);
+    } catch (err) {
+        console.warn("[AdminVault] No se pudieron refrescar los KPIs:", err.message);
     }
-
-    const adminView = ensureAdminViewContainer();
-    if (!adminView) return;
-
-    // 1. Construir el Menú Lateral Izquierdo de Administrador + Conmutador Bóveda Usuario / Admin
-    setupAdminLeftSidebarWorkspace();
-
-    // 2. Renderizar la Cabecera de Mando y KPIs en tiempo real
-    renderAdminCommandHeader();
-
-    // 3. Inicializar los 7 subcomponentes de js/1-admin/ de forma aislada
-    await initSubmodulesSafely();
-
-    // 4. Cargar métricas globales de Firestore
-    await refreshAdminKPIs();
-
-    // 5. Arrancar directamente en Modo Administrador (o restaurar el último modo elegido en la sesión)
-    setAdminWorkspaceMode(currentWorkspaceMode);
-
-    adminControllerInitialized = true;
 }
 
-export const initAdminController = initAdmin;
+/**
+ * Construye el esqueleto principal de la Bóveda Admin aplicando Ceguera por Diseño.
+ */
+function renderAdminVaultSkeleton(role) {
+    const mount = document.getElementById("admin-vault-mount") || document.getElementById("view-admin");
+    if (!mount) return;
 
-async function initSubmodulesSafely() {
-    const [
-        backupsMod,
-        paymentsMod,
-        questionsMod,
-        sinapticoMod,
-        materialsMod,
-        tutorsMod,
-        usersMod
-    ] = await Promise.all([
-        safeImportSubmodule("./admin.backups.js"),
-        safeImportSubmodule("./admin.payments.js"),
-        safeImportSubmodule("./admin.questions.js"),
-        safeImportSubmodule("./admin.sinaptico.js"),
-        safeImportSubmodule("./admin.materials.js"),
-        safeImportSubmodule("./admin.tutors.js"),
-        safeImportSubmodule("./admin.users.js")
-    ]);
-
-    loadedSubmodules.backups = backupsMod;
-    loadedSubmodules.payments = paymentsMod;
-    loadedSubmodules.questions = questionsMod;
-    loadedSubmodules.sinaptico = sinapticoMod;
-    loadedSubmodules.materials = materialsMod;
-    loadedSubmodules.tutors = tutorsMod;
-    loadedSubmodules.users = usersMod;
-
-    // 1. Bóveda de Respaldos
-    try {
-        if (typeof backupsMod?.initAdminBackups === "function") {
-            backupsMod.initAdminBackups();
-        }
-    } catch (e) { console.warn("Error en admin.backups:", e); }
-
-    // 2. Bandeja de Pagos
-    try {
-        if (typeof paymentsMod?.initAdminPayments === "function") {
-            paymentsMod.initAdminPayments();
-        } else if (typeof paymentsMod?.loadPaymentRequests === "function") {
-            paymentsMod.loadPaymentRequests();
-        }
-    } catch (e) { console.warn("Error en admin.payments:", e); }
-
-    // 3. Gestor de Reactivos CACES / Carreras
-    try {
-        if (typeof questionsMod?.initAdminQuestions === "function") {
-            questionsMod.initAdminQuestions();
-        } else {
-            initLegacyQuestionsFallback();
-        }
-    } catch (e) { console.warn("Error en admin.questions:", e); }
-
-    // 4. Gestor de Tarjetas Sináptico v4.4
-    try {
-        if (typeof sinapticoMod?.initAdminSinaptico === "function") {
-            sinapticoMod.initAdminSinaptico();
-        }
-    } catch (e) { console.warn("Error en admin.sinaptico:", e); }
-
-    // 5. Gestor de Materiales y PDFs
-    try {
-        if (typeof materialsMod?.initAdminMaterials === "function") {
-            materialsMod.initAdminMaterials();
-        }
-    } catch (e) { console.warn("Error en admin.materials:", e); }
-
-    // 6. Reclutamiento de Tutores y Comisiones Tesis ($10)
-    try {
-        if (typeof tutorsMod?.initAdminTutors === "function") {
-            tutorsMod.initAdminTutors();
-        }
-    } catch (e) { console.warn("Error en admin.tutors:", e); }
-
-    if (!document.getElementById("admin-tutors-section")) {
-        initAdminTutorsFallback();
+    const isMaster = role === "master";
+    const allowedTabs = ADMIN_TABS_CONFIG.filter(t => t.roles.includes(role));
+    if (allowedTabs.length > 0 && !allowedTabs.some(t => t.id === currentAdminTab)) {
+        currentAdminTab = allowedTabs[0].id;
     }
 
-    // 7. Carreras por Alumno, Suscripciones y Dispositivos (1+1) -> admin.users.js
-    try {
-        if (typeof usersMod?.initAdminUsers === "function") {
-            usersMod.initAdminUsers();
-        }
-    } catch (e) { console.warn("Error en admin.users:", e); }
-}
-// ============================================================================
-// 3. CABECERA TÁCTICA, KPIS EN TIEMPO REAL Y NAVEGACIÓN DE SUB-PESTAÑAS
-// ============================================================================
-
-function renderAdminCommandHeader() {
-    const adminView = ensureAdminViewContainer();
-    if (!adminView || document.getElementById("admin-command-center")) return;
-
-    const activeEmail =
-        auth.currentUser?.email ||
-        appState?.currentUserData?.email ||
-        MASTER_ADMINS[0];
-
-    const commandCenter = document.createElement("div");
-    commandCenter.id = "admin-command-center";
-    commandCenter.className = "mb-8 space-y-5";
-
-    commandCenter.innerHTML = `
-        <div class="bg-surface-container border border-primary/40 rounded-2xl p-5 shadow-[0_0_25px_rgba(0,229,255,0.08)]">
-            <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-surface-high">
+    mount.innerHTML = `
+        <div class="space-y-6">
+            <!-- CABECERA DE LA BÓVEDA / ESTACIÓN DE TRABAJO -->
+            <div class="bg-surface-container border-2 border-warning/50 rounded-2xl p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-2xl">
                 <div>
                     <div class="flex items-center gap-2">
-                        <span class="inline-block w-2.5 h-2.5 rounded-full bg-secondary animate-pulse"></span>
-                        <span class="text-[11px] font-mono text-primary uppercase tracking-widest font-bold">
-                            Centro de Comando ALICIZATION • Arquitectura Modular
+                        <span class="px-2.5 py-0.5 rounded-full bg-warning/20 text-warning border border-warning/40 text-[10px] font-mono font-extrabold uppercase">
+                            ROL ACTIVO: ${role.toUpperCase()}
+                        </span>
+                        <span class="text-[10px] font-mono text-gray-400">
+                            ● RIELES DE ACERO • CERO ACCESO AL CÓDIGO FUENTE
                         </span>
                     </div>
-                    <h2 class="text-2xl font-extrabold text-white mt-1 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary">admin_panel_settings</span>
-                        Bóveda de Administración Maestra
+                    <h2 class="text-xl sm:text-2xl font-extrabold text-white mt-1">
+                        ${isMaster ? "⚡ Bóveda Maestra Makai Academy (Olimpo)" : "🛠️ Estación de Trabajo Operativa"}
                     </h2>
-                    <p class="text-xs text-gray-400 font-mono mt-0.5">
-                        Sesión autorizada: <strong class="text-secondary">${activeEmail}</strong>
+                    <p class="text-xs text-gray-400 mt-0.5">
+                        ${isMaster
+                            ? "Control total de tarifas en vivo, auditoría split-screen, permisos de personal y bases de datos."
+                            : "Entorno guiado con permisos específicos asignados por el Administrador Maestro."}
                     </p>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-3">
-                    <button type="button" id="btn-admin-refresh-all" class="px-4 py-2.5 bg-surface-high border border-primary/50 text-primary hover:bg-primary hover:text-surface font-extrabold text-xs rounded-xl transition-all flex items-center gap-2">
-                        <span class="material-symbols-outlined text-base" id="icon-admin-refresh">refresh</span>
+                <div class="flex items-center gap-2">
+                    <button type="button" id="btn-refresh-admin-vault"
+                        class="px-4 py-2.5 rounded-xl bg-surface border border-surface-high hover:border-primary text-xs font-mono font-bold text-primary flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-sm">sync</span>
                         <span>Sincronizar Firestore</span>
                     </button>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-4">
-                <div class="bg-surface border border-surface-high rounded-xl p-3.5">
-                    <span class="text-[10px] font-mono text-gray-400 uppercase block">Alumnos Registrados</span>
-                    <div class="text-2xl font-extrabold text-white mt-1 font-mono" id="kpi-admin-users">--</div>
-                    <span class="text-[10px] text-primary font-mono">Colección: usuarios</span>
+            <!-- BARRA DE 5 KPIs EN VIVO (SOLO VISIBLE PARA MASTER ADMIN) -->
+            ${isMaster ? `
+                <div id="admin-master-kpi-bar" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                    <div class="bg-surface-container border border-surface-high rounded-xl p-4">
+                        <span class="text-[10px] font-mono text-gray-400 uppercase block">Usuarios Totales</span>
+                        <span id="kpi-count-users" class="text-xl font-mono font-extrabold text-white mt-1 block">...</span>
+                    </div>
+                    <div class="bg-surface-container border border-warning/40 rounded-xl p-4">
+                        <span class="text-[10px] font-mono text-warning uppercase block">Solicitudes Pago</span>
+                        <span id="kpi-count-payments" class="text-xl font-mono font-extrabold text-warning mt-1 block">...</span>
+                    </div>
+                    <div class="bg-surface-container border border-primary/40 rounded-xl p-4">
+                        <span class="text-[10px] font-mono text-primary uppercase block">Reactivos CACES</span>
+                        <span id="kpi-count-questions" class="text-xl font-mono font-extrabold text-primary mt-1 block">...</span>
+                    </div>
+                    <div class="bg-surface-container border border-secondary/40 rounded-xl p-4">
+                        <span class="text-[10px] font-mono text-secondary uppercase block">Tarjetas Sináptico</span>
+                        <span id="kpi-count-sinaptico" class="text-xl font-mono font-extrabold text-secondary mt-1 block">...</span>
+                    </div>
+                    <div class="bg-surface-container border border-surface-high rounded-xl p-4">
+                        <span class="text-[10px] font-mono text-gray-300 uppercase block">Materiales 1D</span>
+                        <span id="kpi-count-materials" class="text-xl font-mono font-extrabold text-white mt-1 block">...</span>
+                    </div>
                 </div>
+            ` : ""}
 
-                <div class="bg-surface border border-warning/40 rounded-xl p-3.5">
-                    <span class="text-[10px] font-mono text-warning uppercase block">Pagos Pendientes</span>
-                    <div class="text-2xl font-extrabold text-warning mt-1 font-mono" id="kpi-admin-payments">--</div>
-                    <span class="text-[10px] text-gray-400 font-mono" id="kpi-admin-payments-total">Total solicitudes: --</span>
-                </div>
-
-                <div class="bg-surface border border-surface-high rounded-xl p-3.5">
-                    <span class="text-[10px] font-mono text-gray-400 uppercase block">Reactivos CACES</span>
-                    <div class="text-2xl font-extrabold text-secondary mt-1 font-mono" id="kpi-admin-questions">--</div>
-                    <span class="text-[10px] text-gray-400 font-mono">preguntas_caces</span>
-                </div>
-
-                <div class="bg-surface border border-surface-high rounded-xl p-3.5">
-                    <span class="text-[10px] font-mono text-gray-400 uppercase block">Mazos Sináptico</span>
-                    <div class="text-2xl font-extrabold text-primary mt-1 font-mono" id="kpi-admin-sinaptico">--</div>
-                    <span class="text-[10px] text-gray-400 font-mono">tarjetas_sinaptico</span>
-                </div>
-
-                <div class="bg-surface border border-surface-high rounded-xl p-3.5 col-span-2 sm:col-span-1">
-                    <span class="text-[10px] font-mono text-gray-400 uppercase block">Guías y PDFs</span>
-                    <div class="text-2xl font-extrabold text-white mt-1 font-mono" id="kpi-admin-materials">--</div>
-                    <span class="text-[10px] text-gray-400 font-mono">materiales_estudio</span>
-                </div>
+            <!-- PESTAÑAS DE NAVEGACIÓN INTERNA SEGÚN ROL -->
+            <div class="flex flex-wrap gap-2 border-b border-surface-high pb-3">
+                ${allowedTabs.map(tab => `
+                    <button type="button"
+                        data-admin-tab-btn="${tab.id}"
+                        class="px-4 py-2.5 rounded-xl font-mono text-xs font-extrabold transition-all ${
+                            tab.id === currentAdminTab
+                                ? "bg-warning text-surface shadow-lg"
+                                : "bg-surface-container border border-surface-high text-gray-300 hover:border-warning/50"
+                        }">
+                        ${tab.label}
+                    </button>
+                `).join("")}
             </div>
 
+            <!-- CONTENEDORES DE CADA SUB-MÓDULO (Protegidos por data-admin-module) -->
+            <div id="admin-tab-panel-payments" data-admin-module="admin-section-payments"
+                class="${currentAdminTab === "payments" ? "" : "hidden"}"></div>
+
+            <div id="admin-tab-panel-pricing" data-admin-module="admin-section-pricing"
+                class="${currentAdminTab === "pricing" ? "" : "hidden"}"></div>
+
+            <div id="admin-tab-panel-users" data-admin-module="admin-section-users"
+                class="${currentAdminTab === "users" ? "" : "hidden"}"></div>
+
+            <div id="admin-tab-panel-workstation" data-admin-module="admin-section-questions"
+                class="${currentAdminTab === "workstation" ? "" : "hidden"} space-y-6">
+                <div id="admin-questions-mount"></div>
+                <div id="admin-sinaptico-mount"></div>
+                <div id="admin-materials-mount"></div>
             </div>
+
+            <div id="admin-tab-panel-tutors" data-admin-module="admin-section-tutors"
+                class="${currentAdminTab === "tutors" ? "" : "hidden"}"></div>
+
+            <div id="admin-tab-panel-backups" data-admin-module="admin-section-backups"
+                class="${currentAdminTab === "backups" ? "" : "hidden"}"></div>
+        </div>
     `;
 
-    adminView.insertBefore(commandCenter, adminView.firstChild);
+    // Aplicar limpieza DOM del Guardia de Seguridad
+    window.MakaiSecurityGuard?.applyRoleBlindnessInsideVault?.(role);
 
-    document.getElementById("btn-admin-refresh-all")?.addEventListener("click", async () => {
-        await refreshAdminKPIs();
-        if (typeof loadedSubmodules.payments?.loadPaymentRequests === "function") {
-            await loadedSubmodules.payments.loadPaymentRequests();
-        }
-        if (typeof loadedSubmodules.users?.loadAdminAccessAndDevicesData === "function") {
-            await loadedSubmodules.users.loadAdminAccessAndDevicesData();
-        }
+    // Enlazar cambio de pestañas
+    mount.querySelectorAll("[data-admin-tab-btn]").forEach(btn => {
+        btn.addEventListener("click", () => {
+            currentAdminTab = btn.dataset.adminTabBtn;
+            renderAdminVaultSkeleton(role);
+            activateSelectedAdminSubmodule(role);
+        });
+    });
+
+    document.getElementById("btn-refresh-admin-vault")?.addEventListener("click", () => {
+        refreshAdminVaultKPIs();
+        activateSelectedAdminSubmodule(role, true);
+        showAdminToast("Datos sincronizados con Cloud Firestore.", "info");
     });
 }
 
-export async function refreshAdminKPIs() {
-    if (!verifyAdminPermissions()) return;
+// ============================================================================
+// GESTIÓN DE USUARIOS, ROLES DE EMPLEADOS, MULTICARRERA Y RESET DE HARDWARE
+// ============================================================================
 
-    const iconRefresh = document.getElementById("icon-admin-refresh");
-    iconRefresh?.classList.add("animate-spin");
+async function renderUsersAndRolesManagement(role) {
+    const container = document.getElementById("admin-tab-panel-users");
+    if (!container) return;
+
+    const isMaster = role === "master";
+    container.innerHTML = `
+        <div class="bg-surface-container border border-surface-high rounded-2xl p-6 text-xs font-mono text-primary">
+            Cargando expedientes de usuarios y solicitudes de cambio de carrera...
+        </div>
+    `;
 
     try {
-        const [
-            usersSnap,
-            paymentsSnap,
-            questionsSnap,
-            sinapticoSnap,
-            materialsSnap
-        ] = await Promise.all([
-            getDocs(collection(db, SAFE_COLLECTIONS.USERS)),
-            getDocs(collection(db, SAFE_COLLECTIONS.PAYMENTS)),
-            getDocs(collection(db, SAFE_COLLECTIONS.QUESTIONS)),
-            getDocs(collection(db, SAFE_COLLECTIONS.SINAPTICO)),
-            getDocs(collection(db, SAFE_COLLECTIONS.MATERIALS))
+        const [usersSnap, reqSnap] = await Promise.all([
+            getDocs(collection(db, COLLECTIONS.USERS)),
+            getDocs(collection(db, "solicitudes_cambio_carrera")).catch(() => ({ forEach: () => {} }))
         ]);
 
-        let pendingPayments = 0;
-        paymentsSnap.forEach(docSnap => {
-            const data = docSnap.data();
-            if (!data.estado || data.estado === "pendiente") {
-                pendingPayments++;
-            }
+        cachedUsersList = [];
+        usersSnap.forEach(d => cachedUsersList.push({ id: d.id, ...d.data() }));
+
+        cachedCareerRequests = [];
+        reqSnap.forEach(d => {
+            const data = d.data();
+            if (data.estado === "pendiente") cachedCareerRequests.push({ id: d.id, ...data });
         });
-
-        const setKPI = (id, val) => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = String(val);
-        };
-
-        setKPI("kpi-admin-users", usersSnap.size);
-        setKPI("kpi-admin-payments", pendingPayments);
-        setKPI("kpi-admin-questions", questionsSnap.size);
-        setKPI("kpi-admin-sinaptico", sinapticoSnap.size);
-        setKPI("kpi-admin-materials", materialsSnap.size);
-
-        // Actualizar globo de pagos pendientes en la barra lateral izquierda
-        const payBadge = document.getElementById("badge-pending-payments-sidebar");
-        if (payBadge) {
-            payBadge.textContent = String(pendingPayments);
-            payBadge.classList.toggle("hidden", pendingPayments === 0);
-        }
-
-        const totalPayEl = document.getElementById("kpi-admin-payments-total");
-        if (totalPayEl) {
-            totalPayEl.textContent = `Total solicitudes: ${paymentsSnap.size}`;
-        }
     } catch (err) {
-        console.warn("Aviso al actualizar KPIs de Firestore en Admin:", err);
-    } finally {
-        iconRefresh?.classList.remove("animate-spin");
-    }
-}
-
-export function switchAdminSubTab(tabId = "all") {
-    currentAdminSubTab = tabId;
-
-    // 1. Actualizar botones del menú lateral izquierdo de Administrador (#sidebar-admin-menu)
-    document.querySelectorAll(".admin-sidebar-tab-btn").forEach(btn => {
-        const isActive = btn.dataset.adminTab === tabId;
-        if (isActive) {
-            btn.className = "admin-sidebar-tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-extrabold bg-primary text-surface shadow-[0_0_15px_rgba(0,229,255,0.25)] transition-all";
-        } else {
-            btn.className = "admin-sidebar-tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-gray-300 hover:text-white hover:bg-surface-high border border-transparent transition-all";
-        }
-    });
-
-    // 2. Mostrar/ocultar los contenedores de los 7 subcomponentes dentro de #view-admin
-    const sectionMap = {
-        respaldos: document.getElementById("admin-backup-vault"),
-        pagos: document.getElementById("admin-payments-section") || document.getElementById("admin-payments-inbox"),
-        reactivos: document.getElementById("admin-questions-section") || document.getElementById("admin-form")?.closest(".grid") || document.getElementById("admin-form")?.parentElement,
-        sinaptico: document.getElementById("admin-sinaptico-section"),
-        materiales: document.getElementById("admin-materials-section"),
-        docentes: document.getElementById("admin-tutors-section"),
-        accesos: document.getElementById("admin-access-devices-section")
-    };
-
-    Object.entries(sectionMap).forEach(([key, element]) => {
-        if (!element) return;
-        if (tabId === "all" || tabId === key) {
-            element.classList.remove("hidden");
-        } else {
-            element.classList.add("hidden");
-        }
-    });
-}
-
-// ============================================================================
-// 4. BARRA LATERAL IZQUIERDA EXCLUSIVA DE ADMIN Y CONMUTADOR "BÓVEDA USUARIO"
-// ============================================================================
-
-const SIMULATOR_CAREERS = [
-    { id: "medicina", label: "01 • Medicina Humana" },
-    { id: "enfermeria", label: "02 • Enfermería" },
-    { id: "odontologia", label: "03 • Odontología" },
-    { id: "obstetricia", label: "04 • Obstetricia" },
-    { id: "nutricion", label: "05 • Nutrición" },
-    { id: "fisioterapia", label: "06 • Fisioterapia" },
-    { id: "laboratorio", label: "07 • Laboratorio Clínico" },
-    { id: "imagenologia", label: "08 • Imagenología" },
-    { id: "farmacia", label: "09 • Bioquímica y Farmacia" },
-    { id: "psicologia_clinica", label: "10 • Psicología Clínica" },
-    { id: "paramedicina", label: "11 • Atención Prehospitalaria" },
-    { id: "preuniversitario_salud", label: "🎓 Preuniversitario de Salud" }
-];
-
-/**
- * Inyecta en la barra lateral izquierda (<aside>) las 8 opciones de Administrador
- * y el botón "BÓVEDA USUARIO" para alternar entre el Panel Admin y la Visión de Alumno.
- */
-function setupAdminLeftSidebarWorkspace() {
-    if (!verifyAdminPermissions()) return;
-
-    const sidebarNav = document.querySelector("aside nav") || document.querySelector("#main-sidebar nav");
-    if (!sidebarNav || document.getElementById("sidebar-admin-menu")) return;
-
-    // 1. Crear contenedor de las 8 opciones administrativas en la barra lateral izquierda
-    const adminMenu = document.createElement("div");
-    adminMenu.id = "sidebar-admin-menu";
-    adminMenu.className = "space-y-1.5 pb-3 border-b border-surface-high";
-
-    adminMenu.innerHTML = `
-        <div class="px-3 py-1.5 flex items-center justify-between">
-            <span class="text-[10px] font-mono uppercase tracking-widest text-warning font-extrabold">
-                ⚡ MODO ADMINISTRADOR
-            </span>
-            <span class="px-1.5 py-0.5 rounded bg-warning/20 text-warning font-mono text-[9px] font-bold">
-                MASTER
-            </span>
-        </div>
-
-        <button type="button" data-admin-tab="all" class="admin-sidebar-tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-extrabold bg-primary text-surface shadow-[0_0_15px_rgba(0,229,255,0.25)] transition-all">
-            <div class="flex items-center gap-2.5 truncate">
-                <span class="material-symbols-outlined text-base">dashboard</span>
-                <span class="truncate">Vista Completa</span>
-            </div>
-            <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-surface/30">ALL</span>
-        </button>
-
-        <button type="button" data-admin-tab="respaldos" class="admin-sidebar-tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-gray-300 hover:text-white hover:bg-surface-high transition-all">
-            <div class="flex items-center gap-2.5 truncate">
-                <span class="material-symbols-outlined text-base text-primary">cloud_download</span>
-                <span class="truncate">1. Bóveda de Respaldos</span>
-            </div>
-        </button>
-
-        <button type="button" data-admin-tab="pagos" class="admin-sidebar-tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-gray-300 hover:text-white hover:bg-surface-high transition-all">
-            <div class="flex items-center gap-2.5 truncate">
-                <span class="material-symbols-outlined text-base text-warning">receipt_long</span>
-                <span class="truncate">2. Bandeja Bancaria</span>
-            </div>
-            <span id="badge-pending-payments-sidebar" class="hidden px-1.5 py-0.5 rounded-full bg-warning text-surface text-[10px] font-mono font-extrabold">0</span>
-        </button>
-
-        <button type="button" data-admin-tab="reactivos" class="admin-sidebar-tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-gray-300 hover:text-white hover:bg-surface-high transition-all">
-            <div class="flex items-center gap-2.5 truncate">
-                <span class="material-symbols-outlined text-base text-secondary">quiz</span>
-                <span class="truncate">3. Reactivos CACES</span>
-            </div>
-        </button>
-
-        <button type="button" data-admin-tab="sinaptico" class="admin-sidebar-tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-gray-300 hover:text-white hover:bg-surface-high transition-all">
-            <div class="flex items-center gap-2.5 truncate">
-                <span class="material-symbols-outlined text-base text-primary">psychology</span>
-                <span class="truncate">4. Tarjetas Sináptico</span>
-            </div>
-        </button>
-
-        <button type="button" data-admin-tab="materiales" class="admin-sidebar-tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-gray-300 hover:text-white hover:bg-surface-high transition-all">
-            <div class="flex items-center gap-2.5 truncate">
-                <span class="material-symbols-outlined text-base text-gray-300">picture_as_pdf</span>
-                <span class="truncate">5. Materiales y PDFs</span>
-            </div>
-        </button>
-
-        <button type="button" data-admin-tab="docentes" class="admin-sidebar-tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-gray-300 hover:text-white hover:bg-surface-high transition-all">
-            <div class="flex items-center gap-2.5 truncate">
-                <span class="material-symbols-outlined text-base text-secondary">school</span>
-                <span class="truncate">6. Tutores y Tesis</span>
-            </div>
-        </button>
-
-        <button type="button" data-admin-tab="accesos" class="admin-sidebar-tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-gray-300 hover:text-white hover:bg-surface-high transition-all">
-            <div class="flex items-center gap-2.5 truncate">
-                <span class="material-symbols-outlined text-base text-warning">manage_accounts</span>
-                <span class="truncate">7. Alumnos y Equipos (1+1)</span>
-            </div>
-            <span id="badge-pending-career-reqs" class="badge-pending-career-reqs hidden px-1.5 py-0.5 rounded-full bg-danger text-white text-[10px] font-mono font-extrabold">0</span>
-        </button>
-
-        <!-- BOTÓN PARA PASAR A LA VISIÓN DE USUARIO -->
-        <button type="button" id="user-vision-nav-btn" class="w-full flex items-center justify-between px-3.5 py-3 text-xs font-extrabold text-primary bg-primary/10 hover:bg-primary/20 rounded-xl transition-all mt-3 border border-primary/40">
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-base">visibility</span>
-                <span>BÓVEDA USUARIO</span>
-            </div>
-            <span class="text-[9px] font-mono font-extrabold px-1.5 py-0.5 rounded bg-primary text-surface">
-                VISIÓN ALUMNO
-            </span>
-        </button>
-    `;
-
-    sidebarNav.insertBefore(adminMenu, sidebarNav.firstChild);
-
-    // Enlazar clic en cada una de las 8 opciones de la barra izquierda
-    adminMenu.querySelectorAll(".admin-sidebar-tab-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            if (currentWorkspaceMode !== "admin") {
-                setAdminWorkspaceMode("admin");
-            }
-            switchAdminSubTab(btn.dataset.adminTab);
-        });
-    });
-
-    // Enlazar botón "BÓVEDA USUARIO" para pasar a la Visión de Alumno
-    document.getElementById("user-vision-nav-btn")?.addEventListener("click", () => {
-        setAdminWorkspaceMode("user");
-    });
-
-    // Crear la barra flotante superior de Simulación de Carrera y Plan cuando estés en Visión de Usuario
-    ensureUserVisionSimulatorBar();
-}
-
-/**
- * Crea una barra superior exclusiva para que cuando estés en "Bóveda Usuario"
- * puedas cambiar libremente entre las 12 carreras y simular los Planes Básico, PRO o VIP.
- */
-function ensureUserVisionSimulatorBar() {
-    if (document.getElementById("admin-user-vision-bar")) return;
-
-    const mainArea = document.querySelector("main") || document.getElementById("views-container")?.parentElement;
-    if (!mainArea) return;
-
-    const simBar = document.createElement("div");
-    simBar.id = "admin-user-vision-bar";
-    simBar.className = "hidden bg-surface-container border-b border-primary/40 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 z-30";
-
-    const currentCareer = appState?.currentUserData?.carrera || "medicina";
-    const currentPlan = appState?.currentUserData?.subscriptionLevel || "VIP";
-
-    simBar.innerHTML = `
-        <div class="flex items-center gap-2">
-            <span class="inline-block w-2 h-2 rounded-full bg-primary animate-ping"></span>
-            <span class="text-[11px] font-mono font-extrabold text-primary uppercase">
-                👁️ MODO VISIÓN DE USUARIO (SIMULADOR ADMIN EN VIVO)
-            </span>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-2.5">
-            <div class="flex items-center gap-1.5">
-                <label class="text-[10px] font-mono text-gray-400 uppercase">Simular Carrera:</label>
-                <select id="admin-sim-career-select" class="bg-surface border border-primary/50 rounded-lg px-2.5 py-1 text-xs text-white font-bold focus:outline-none">
-                    ${SIMULATOR_CAREERS.map(c => `<option value="${c.id}" ${c.id === currentCareer ? "selected" : ""}>${c.label}</option>`).join("")}
-                </select>
-            </div>
-
-            <div class="flex items-center gap-1.5">
-                <label class="text-[10px] font-mono text-gray-400 uppercase">Simular Plan:</label>
-                <select id="admin-sim-plan-select" class="bg-surface border border-secondary/50 rounded-lg px-2.5 py-1 text-xs text-secondary font-bold focus:outline-none">
-                    <option value="Básico" ${currentPlan === "Básico" ? "selected" : ""}>🔓 Plan Básico</option>
-                    <option value="PRO" ${currentPlan === "PRO" ? "selected" : ""}>⚡ Plan PRO</option>
-                    <option value="VIP" ${currentPlan === "VIP" ? "selected" : ""}>👑 Plan VIP</option>
-                </select>
-            </div>
-
-            <button type="button" id="btn-return-to-admin-vault" class="px-3 py-1 rounded-lg bg-warning text-surface font-extrabold text-xs flex items-center gap-1 hover:opacity-90 transition-all">
-                <span class="material-symbols-outlined text-sm">bolt</span>
-                <span>Volver a Bóveda Admin</span>
-            </button>
-        </div>
-    `;
-
-    mainArea.insertBefore(simBar, mainArea.firstChild);
-
-    // Cambiar de carrera en vivo mientras estás en Visión de Usuario
-    document.getElementById("admin-sim-career-select")?.addEventListener("change", (e) => {
-        const selectedCareer = e.target.value;
-        if (appState?.currentUserData) {
-            appState.currentUserData.carrera = selectedCareer;
-            appState.currentUserData.esPreuniversitarioExclusivo = (selectedCareer === "preuniversitario_salud");
-        }
-        const headerCareerSwitcher = document.getElementById("header-career-switcher");
-        if (headerCareerSwitcher) {
-            headerCareerSwitcher.value = selectedCareer;
-            headerCareerSwitcher.dispatchEvent(new Event("change"));
-        }
-        window.dispatchEvent(new CustomEvent("makai:careerChanged", { detail: { career: selectedCareer } }));
-    });
-
-    // Cambiar de Plan (Básico / PRO / VIP) en vivo para probar candados
-    document.getElementById("admin-sim-plan-select")?.addEventListener("change", (e) => {
-        const selectedPlan = e.target.value;
-        if (appState?.currentUserData) {
-            appState.currentUserData.subscriptionLevel = selectedPlan;
-        }
-        const userPlanEl = document.getElementById("user-plan");
-        if (userPlanEl) userPlanEl.textContent = `Plan ${selectedPlan}`;
-        window.dispatchEvent(new CustomEvent("makai:planChanged", { detail: { plan: selectedPlan } }));
-    });
-
-    document.getElementById("btn-return-to-admin-vault")?.addEventListener("click", () => {
-        setAdminWorkspaceMode("admin");
-    });
-}
-
-/**
- * Alterna toda la plataforma entre:
- * - "admin": Barra izquierda con las 8 opciones administrativas y #view-admin abierto.
- * - "user": Barra izquierda con los botones de estudiante (MI CARRERA, CACES, RURAL...) y simulador de carreras activo.
- */
-export function setAdminWorkspaceMode(mode = "admin") {
-    if (!verifyAdminPermissions()) return;
-
-    currentWorkspaceMode = mode === "user" ? "user" : "admin";
-    sessionStorage.setItem("makai_admin_workspace_mode", currentWorkspaceMode);
-
-    const sidebarNav = document.querySelector("aside nav") || document.querySelector("#main-sidebar nav");
-    const adminMenu = document.getElementById("sidebar-admin-menu");
-    const adminNavBtn = document.getElementById("admin-nav-btn");
-    const simBar = document.getElementById("admin-user-vision-bar");
-    const adminView = ensureAdminViewContainer();
-
-    // Botones de estudiante dentro del sidebar (todos los hijos directos de nav excepto #sidebar-admin-menu)
-    const studentButtons = sidebarNav
-        ? Array.from(sidebarNav.children).filter(el => el.id !== "sidebar-admin-menu")
-        : [];
-
-    if (currentWorkspaceMode === "admin") {
-        // 1. Mostrar menú lateral Admin y ocultar botones de estudiante
-        adminMenu?.classList.remove("hidden");
-        studentButtons.forEach(el => el.classList.add("hidden"));
-        simBar?.classList.add("hidden");
-
-        // 2. Ocultar todas las vistas de alumno y mostrar #view-admin
-        document.querySelectorAll(".tab-content, .view-section, main > div[id^='view-'], #views-container > div[id^='view-']").forEach(el => {
-            if (el.id !== "view-admin") {
-                el.classList.remove("active");
-                el.classList.add("hidden");
-                el.style.display = "none";
-            }
-        });
-
-        adminView.classList.remove("hidden");
-        adminView.classList.add("active");
-        adminView.style.display = "block";
-
-        if (appState) appState.currentActiveView = "view-admin";
-        switchAdminSubTab(currentAdminSubTab || "all");
-        refreshAdminKPIs();
-    } else {
-        // MODO VISIÓN DE USUARIO (ALUMNO)
-        // 1. Ocultar menú lateral Admin y mostrar los botones de estudiante + botón BÓVEDA ADMIN
-        adminMenu?.classList.add("hidden");
-        studentButtons.forEach(el => el.classList.remove("hidden"));
-        adminNavBtn?.classList.remove("hidden");
-        simBar?.classList.remove("hidden");
-
-        // 2. Ocultar #view-admin y abrir la vista principal de estudiante (#view-launcher o la primera pestaña)
-        adminView.classList.add("hidden");
-        adminView.classList.remove("active");
-        adminView.style.display = "none";
-
-        document.querySelectorAll(".tab-content, .view-section, main > div[id^='view-'], #views-container > div[id^='view-']").forEach(el => {
-            if (el.id !== "view-admin") {
-                el.style.display = "";
-            }
-        });
-
-        const firstStudentBtn = document.querySelector("aside .nav-btn:not(#admin-nav-btn)");
-        if (firstStudentBtn) {
-            firstStudentBtn.click();
-        } else {
-            const launcherView = document.getElementById("view-launcher") || document.getElementById("view-career");
-            launcherView?.classList.remove("hidden");
-        }
-    }
-}
-
-function bindHeaderAdminShortcut() {
-    const headerAdminBtn = document.getElementById("header-admin-btn");
-    const sideAdminBtn = document.getElementById("admin-nav-btn");
-
-    const openAdminPanel = async (e) => {
-        if (!verifyAdminPermissions()) return;
-        if (e) e.stopPropagation();
-
-        setupAdminLeftSidebarWorkspace();
-
-        if (!document.getElementById("admin-command-center")) {
-            renderAdminCommandHeader();
-            await initSubmodulesSafely();
-        }
-
-        setAdminWorkspaceMode("admin");
-    };
-
-    if (headerAdminBtn && !headerAdminBtn.dataset.adminBound) {
-        headerAdminBtn.dataset.adminBound = "1";
-        headerAdminBtn.addEventListener("click", openAdminPanel);
-    }
-
-    if (sideAdminBtn && !sideAdminBtn.dataset.adminBound) {
-        sideAdminBtn.dataset.adminBound = "1";
-        sideAdminBtn.addEventListener("click", openAdminPanel);
-    }
-}
-
-function initAdminTutorsFallback() {
-    const adminView = ensureAdminViewContainer();
-    if (!adminView || document.getElementById("admin-tutors-section")) return;
-
-    const tutorsSection = document.createElement("div");
-    tutorsSection.id = "admin-tutors-section";
-    tutorsSection.className = "mb-10 space-y-6";
-
-    tutorsSection.innerHTML = `
-        <div class="bg-surface-container border-2 border-secondary/50 rounded-2xl p-6 shadow-2xl">
-            <div class="flex flex-wrap items-center justify-between gap-4 mb-4 pb-3 border-b border-surface-high">
-                <div>
-                    <h3 class="text-xl font-extrabold text-secondary flex items-center gap-2">
-                        <span class="material-symbols-outlined">school</span>
-                        6. Reclutamiento y Postulaciones de Docentes
-                    </h3>
-                    <p class="text-xs text-gray-400 mt-1">Activa a los candidatos como "Tutores Verificados de Tesis" o "Docentes de Aulas Virtuales".</p>
-                </div>
-                <button type="button" id="btn-refresh-tutors" class="px-4 py-2 bg-surface border border-secondary text-secondary hover:bg-secondary hover:text-surface text-xs font-extrabold rounded-xl transition-all">
-                    ↻ Actualizar Solicitudes
-                </button>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-xs text-left text-gray-300 font-mono">
-                    <thead class="text-[11px] text-gray-400 uppercase bg-surface border-b border-surface-high">
-                        <tr>
-                            <th class="px-4 py-3">Fecha / Candidato</th>
-                            <th class="px-4 py-3">Especialidad / Título</th>
-                            <th class="px-4 py-3">Contacto</th>
-                            <th class="px-4 py-3">Estado</th>
-                            <th class="px-4 py-3">Acciones de Activación</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-tutors-tbody">
-                        <tr><td colspan="5" class="px-4 py-6 text-center text-gray-500">Sin postulaciones pendientes.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
-    adminView.appendChild(tutorsSection);
-}
-
-function initLegacyQuestionsFallback() {
-    const adminCarrera = document.getElementById("admin-carrera");
-    const adminMateria = document.getElementById("admin-materia");
-    const data = window.makaiData;
-
-    if (!adminCarrera || !adminMateria || !data?.carreras || adminCarrera.dataset.fallbackBound) {
+        container.innerHTML = `<div class="p-4 rounded-xl bg-danger/15 border border-danger text-xs text-danger">Error al cargar usuarios: ${err.message}</div>`;
         return;
     }
 
-    adminCarrera.dataset.fallbackBound = "1";
-    adminCarrera.addEventListener("change", () => {
-        adminMateria.innerHTML = "";
-        const selectedCareer = data.carreras.find(c => c.id === adminCarrera.value);
-        if (selectedCareer && Array.isArray(selectedCareer.materias)) {
-            selectedCareer.materias.forEach(materia => {
-                const opt = document.createElement("option");
-                opt.value = materia;
-                opt.textContent = materia;
-                adminMateria.appendChild(opt);
+    const allCareers = window.makaiData?.carreras || makaiData.carreras || [];
+
+    container.innerHTML = `
+        <div class="space-y-6">
+            <!-- BANDEJA DE SOLICITUDES DE CAMBIO / SEGUNDA CARRERA -->
+            ${cachedCareerRequests.length > 0 ? `
+                <div class="bg-surface-container border-2 border-warning rounded-2xl p-5 space-y-3">
+                    <h3 class="text-sm font-extrabold text-warning font-mono uppercase">
+                        🔔 Solicitudes Pendientes de Segunda Carrera / Cambio (${cachedCareerRequests.length})
+                    </h3>
+                    <div class="space-y-2">
+                        ${cachedCareerRequests.map(req => `
+                            <div class="bg-surface border border-surface-high rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+                                <div>
+                                    <span class="font-extrabold text-white">${req.nombre || req.email}</span>
+                                    <span class="text-gray-400 font-mono block">
+                                        Actual: <strong>${req.carreraActual}</strong> → Solicita habilitar: <strong class="text-primary">${req.carreraSolicitada}</strong>
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" data-approve-career-req="${req.id}" data-req-uid="${req.uid}" data-req-career="${req.carreraSolicitada}"
+                                        class="px-3 py-1.5 rounded-lg bg-secondary text-surface font-mono font-extrabold text-xs">
+                                        ✅ Autorizar Carrera
+                                    </button>
+                                    <button type="button" data-reject-career-req="${req.id}"
+                                        class="px-3 py-1.5 rounded-lg bg-danger/20 border border-danger text-danger font-mono font-bold text-xs">
+                                        Descartar
+                                    </button>
+                                </div>
+                            </div>
+                        `).join("")}
+                    </div>
+                </div>
+            ` : ""}
+
+            <!-- BUSCADOR Y TABLA DE USUARIOS / EMPLEADOS / DISPOSITIVOS -->
+            <div class="bg-surface-container border border-surface-high rounded-2xl p-6 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h3 class="text-lg font-extrabold text-white">Directorio de Usuarios, Roles RBAC & Hardware</h3>
+                        <p class="text-xs text-gray-400">
+                            Resetea los 2 dispositivos (PC + Móvil), habilita múltiples carreras o asigna roles a tus trabajadores.
+                        </p>
+                    </div>
+                    <input type="search" id="admin-user-search" placeholder="Buscar por correo, nombre o carrera..."
+                        class="bg-surface border border-surface-high rounded-xl px-4 py-2 text-xs text-white w-full sm:w-72 focus:border-primary focus:outline-none">
+                </div>
+
+                <div id="admin-users-list-mount" class="space-y-3 max-h-[600px] overflow-y-auto pr-1"></div>
+            </div>
+        </div>
+    `;
+
+    const renderFilteredUsers = (queryText = "") => {
+        const listMount = document.getElementById("admin-users-list-mount");
+        if (!listMount) return;
+
+        const q = queryText.trim().toLowerCase();
+        const filtered = cachedUsersList.filter(u =>
+            !q ||
+            (u.email || "").toLowerCase().includes(q) ||
+            (u.nombre || "").toLowerCase().includes(q) ||
+            (u.carrera || "").toLowerCase().includes(q)
+        );
+
+        listMount.innerHTML = filtered.map(u => {
+            const userIsMaster = isMasterAdmin(u.email);
+            const deskSlot = u.dispositivosRegistrados?.desktop?.etiqueta || "Libre";
+            const mobSlot = u.dispositivosRegistrados?.mobile?.etiqueta || "Libre";
+            const enabledCareers = Array.isArray(u.carrerasHabilitadas) ? u.carrerasHabilitadas : [u.carrera || "medicina"];
+
+            return `
+                <div class="bg-surface border border-surface-high rounded-xl p-4 space-y-3 text-xs">
+                    <div class="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-extrabold text-white text-sm">${u.nombre || "Sin nombre"}</span>
+                                <span class="px-2 py-0.5 rounded bg-primary/15 text-primary font-mono font-bold text-[10px] uppercase">
+                                    Plan ${u.subscriptionLevel || "Básico"}
+                                </span>
+                                <span class="px-2 py-0.5 rounded bg-warning/15 text-warning font-mono font-bold text-[10px] uppercase">
+                                    Rol: ${userIsMaster ? "MASTER" : (u.rol || "estudiante")}
+                                </span>
+                            </div>
+                            <p class="text-gray-400 font-mono mt-0.5">${u.email} • WhatsApp: ${u.whatsapp || "N/A"} • Carrera base: <strong>${u.carrera || "medicina"}</strong></p>
+                            <p class="text-[11px] font-mono text-gray-500 mt-1">
+                                💻 Slot PC: <span class="text-gray-300">${deskSlot}</span> | 📱 Slot Móvil: <span class="text-gray-300">${mobSlot}</span>
+                            </p>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- Botón para Resetear los 2 Dispositivos (Permitido para Master y Secretaría) -->
+                            <button type="button" data-reset-devices-uid="${u.id}"
+                                class="px-3 py-1.5 rounded-lg bg-surface-container border border-primary/50 hover:bg-primary hover:text-surface text-primary font-mono font-bold text-[11px] transition-all">
+                                🔄 Resetear 2 Dispositivos
+                            </button>
+
+                            <!-- Selector de Rol RBAC (SOLO MASTER ADMIN PUEDE CREAR TRABAJADORES) -->
+                            ${isMaster && !userIsMaster ? `
+                                <select data-change-role-uid="${u.id}"
+                                    class="bg-surface-container border border-warning/50 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-warning font-bold">
+                                    <option value="estudiante" ${(u.rol || "estudiante") === "estudiante" ? "selected" : ""}>Rol: Estudiante</option>
+                                    <option value="secretaria" ${u.rol === "secretaria" ? "selected" : ""}>Rol: Secretaría (Pagos/Usuarios)</option>
+                                    <option value="dev_3d" ${u.rol === "dev_3d" ? "selected" : ""}>Rol: Digitador / Dev 3D</option>
+                                    <option value="docente" ${u.rol === "docente" ? "selected" : ""}>Rol: Docente Especialista</option>
+                                </select>
+                            ` : ""}
+                        </div>
+                    </div>
+
+                    <!-- Interruptores (Switches) de las 11 Carreras + Preuniversitario -->
+                    <details class="pt-2 border-t border-surface-high">
+                        <summary class="cursor-pointer text-[11px] font-mono text-secondary font-bold">
+                            ⚙️ Interruptores de Carreras Habilitadas (${enabledCareers.length} activas)
+                        </summary>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3">
+                            ${allCareers.map(c => {
+                                const checked = enabledCareers.includes(c.id) || u.carrera === c.id;
+                                return `
+                                    <label class="flex items-center gap-2 p-2 rounded-lg bg-surface-container border border-surface-high cursor-pointer text-[11px]">
+                                        <input type="checkbox"
+                                            data-toggle-career-uid="${u.id}"
+                                            data-career-id="${c.id}"
+                                            ${checked ? "checked" : ""}
+                                            class="accent-primary">
+                                        <span class="truncate">${c.nombre}</span>
+                                    </label>
+                                `;
+                            }).join("")}
+                        </div>
+                    </details>
+                </div>
+            `;
+        }).join("");
+
+        // Eventos: Resetear 2 Dispositivos
+        listMount.querySelectorAll("[data-reset-devices-uid]").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                const uid = btn.dataset.resetDevicesUid;
+                await updateDoc(doc(db, COLLECTIONS.USERS, uid), {
+                    dispositivosRegistrados: {}
+                });
+                showAdminToast("✅ Dispositivos (PC y Móvil) liberados correctamente.", "success");
+                renderUsersAndRolesManagement(role);
             });
-        }
+        });
+
+        // Eventos: Cambiar Rol RBAC (Solo Master Admin)
+        listMount.querySelectorAll("[data-change-role-uid]").forEach(sel => {
+            sel.addEventListener("change", async () => {
+                if (!isMaster) return;
+                const uid = sel.dataset.changeRoleUid;
+                const newRole = sel.value;
+                await updateDoc(doc(db, COLLECTIONS.USERS, uid), { rol: newRole });
+                showAdminToast(`✅ Rol actualizado a "${newRole.toUpperCase()}" con Ceguera por Diseño.`, "success");
+            });
+        });
+
+        // Eventos: Interruptores de Carreras Habilitadas
+        listMount.querySelectorAll("[data-toggle-career-uid]").forEach(chk => {
+            chk.addEventListener("change", async () => {
+                const uid = chk.dataset.toggleCareerUid;
+                const boxes = listMount.querySelectorAll(`[data-toggle-career-uid="${uid}"]`);
+                const selectedIds = [];
+                boxes.forEach(b => {
+                    if (b.checked) selectedIds.push(b.dataset.careerId);
+                });
+                if (selectedIds.length === 0) selectedIds.push("medicina");
+
+                await updateDoc(doc(db, COLLECTIONS.USERS, uid), {
+                    carrera: selectedIds[0],
+                    carrerasHabilitadas: selectedIds
+                });
+                showAdminToast(`✅ Carreras actualizadas (${selectedIds.join(", ")}).`, "info");
+            });
+        });
+    };
+
+    renderFilteredUsers();
+
+    document.getElementById("admin-user-search")?.addEventListener("input", (e) => {
+        renderFilteredUsers(e.target.value);
     });
 
-    adminCarrera.dispatchEvent(new Event("change"));
+    // Eventos de Solicitudes de Segunda Carrera
+    container.querySelectorAll("[data-approve-career-req]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            const reqId = btn.dataset.approveCareerReq;
+            const uid = btn.dataset.reqUid;
+            const reqCareer = (btn.dataset.reqCareer || "").toLowerCase();
+            const targetUser = cachedUsersList.find(u => u.id === uid);
+            const currentList = Array.isArray(targetUser?.carrerasHabilitadas)
+                ? [...targetUser.carrerasHabilitadas]
+                : [targetUser?.carrera || "medicina"];
+
+            if (!currentList.includes(reqCareer)) currentList.push(reqCareer);
+
+            await updateDoc(doc(db, COLLECTIONS.USERS, uid), {
+                carrerasHabilitadas: currentList
+            }).catch(() => {});
+            await updateDoc(doc(db, "solicitudes_cambio_carrera", reqId), {
+                estado: "aprobado"
+            }).catch(() => {});
+
+            showAdminToast("✅ Segunda carrera habilitada en el expediente del alumno.", "success");
+            renderUsersAndRolesManagement(role);
+        });
+    });
+
+    container.querySelectorAll("[data-reject-career-req]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            const reqId = btn.dataset.rejectCareerReq;
+            await deleteDoc(doc(db, "solicitudes_cambio_carrera", reqId)).catch(() => {});
+            renderUsersAndRolesManagement(role);
+        });
+    });
 }
+
+/**
+ * Despierta el submódulo correspondiente a la pestaña activa.
+ */
+async function activateSelectedAdminSubmodule(role, forceReload = false) {
+    if (currentAdminTab === "payments") {
+        await safeLoadAdminSubmodule("./admin.payments.js", ["initAdminPayments"], role, "audit", forceReload);
+    } else if (currentAdminTab === "pricing" && role === "master") {
+        await safeLoadAdminSubmodule("./admin.payments.js", ["initAdminPricingManager"], role);
+    } else if (currentAdminTab === "users") {
+        await renderUsersAndRolesManagement(role);
+    } else if (currentAdminTab === "workstation") {
+        await Promise.all([
+            safeLoadAdminSubmodule("./admin.questions.js", ["initAdminQuestions"], role),
+            safeLoadAdminSubmodule("./admin.sinaptico.js", ["initAdminSinaptico"], role),
+            safeLoadAdminSubmodule("./admin.materials.js", ["initAdminMaterials"], role)
+        ]);
+    } else if (currentAdminTab === "tutors" && role === "master") {
+        await safeLoadAdminSubmodule("./admin.tutors.js", ["initAdminTutors"], role);
+    } else if (currentAdminTab === "backups" && role === "master") {
+        await safeLoadAdminSubmodule("./admin.backups.js", ["initAdminBackups"], role);
+    }
+}
+
+/**
+ * Inicializador principal de la Bóveda Admin invocado por `app.orchestrator.js`.
+ */
+export async function initAdminController(passedRole = null) {
+    const email = auth.currentUser?.email || appState.currentUser?.email || "";
+    const role = isMasterAdmin(email) ? "master" : (passedRole || appState.role || "estudiante");
+
+    if (!["master", "secretaria", "dev_3d"].includes(role)) {
+        return;
+    }
+
+    renderAdminVaultSkeleton(role);
+    await refreshAdminVaultKPIs();
+    await activateSelectedAdminSubmodule(role);
+    adminBootstrapped = true;
+}
+
+export const initAdmin = initAdminController;
+
