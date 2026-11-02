@@ -1,1184 +1,433 @@
 <!DOCTYPE html>
 <html lang="es" class="dark">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Apertura de Expediente Académico | Makai Academy</title>
-    <link rel="icon" type="image/png" href="assets/1-branding/logos/logo.png" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Makai Academy • Registro Clínico y Activación de Plan</title>
 
-    <!-- Tailwind CSS & Google Fonts -->
+    <!-- Tailwind CSS CDN & Configuración Cyber-Medical Dark Mode -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
-
     <script>
         tailwind.config = {
-            darkMode: "class",
+            darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ["Inter", "sans-serif"],
-                        mono: ["JetBrains Mono", "monospace"]
-                    },
                     colors: {
-                        surface: "#0a0e14",
-                        "surface-container": "#111722",
-                        "surface-high": "#1c2536",
-                        primary: "#00e5ff",
-                        secondary: "#00e676",
-                        warning: "#ffab00",
-                        danger: "#ff5252"
+                        surface: '#06090e',
+                        'surface-container': '#111722',
+                        'surface-high': '#1c2536',
+                        primary: '#00e5ff',
+                        secondary: '#94de2d',
+                        warning: '#ffbe0b',
+                        danger: '#ff4d4d'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
                     }
                 }
             }
         };
     </script>
-</head>
-<body class="bg-surface text-gray-100 font-sans min-h-screen py-8 px-4 sm:px-6 selection:bg-primary selection:text-surface">
 
-    <div class="max-w-4xl mx-auto">
-        <!-- BARRA SUPERIOR DE NAVEGACIÓN -->
-        <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-surface-container border border-primary/40 flex items-center justify-center text-primary font-mono font-extrabold text-sm overflow-hidden p-1">
-                    <img
-                        src="assets/1-branding/logos/logo.png"
-                        alt="Makai Academy"
-                        class="w-full h-full object-contain hidden"
-                        onload="this.classList.remove('hidden'); this.nextElementSibling.classList.add('hidden');"
-                        onerror="if(!this.dataset.try1){this.dataset.try1='1';this.src='assets/1-branding/logos/logo.jpg';}else if(!this.dataset.try2){this.dataset.try2='1';this.src='logo.png';}else{this.classList.add('hidden');}"
-                    />
-                    <span>MK</span>
+    <!-- Fuentes e Iconografía Oficial -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+</head>
+
+<body class="bg-surface text-white font-sans min-h-screen flex flex-col selection:bg-primary selection:text-surface">
+
+    <!-- =================================================================== -->
+    <!-- CABECERA DEL EMBUDO DE REGISTRO Y PASARELA BLINDADA                 -->
+    <!-- =================================================================== -->
+    <header class="border-b border-surface-high bg-surface/90 backdrop-blur-md sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 group">
+                <div class="w-9 h-9 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center text-primary font-mono font-extrabold">
+                    M
                 </div>
                 <div>
-                    <span class="text-xs font-mono text-primary font-bold tracking-wider uppercase">MAKAI ACADEMY • ALICIZATION</span>
-                    <p class="text-xs text-gray-400">Registro Académico, Planes y Verificación Bancaria</p>
+                    <span class="font-extrabold tracking-tight text-white text-sm sm:text-base group-hover:text-primary transition-colors">
+                        MAKAI ACADEMY
+                    </span>
+                    <span class="block text-[10px] font-mono text-gray-400">
+                        Embudo de Registro & Activación Blindada
+                    </span>
+                </div>
+            </a>
+
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="px-3.5 py-2 rounded-xl bg-surface-container border border-surface-high hover:border-primary text-xs font-mono text-gray-300 flex items-center gap-1.5 transition-all">
+                    <span class="material-symbols-outlined text-sm">arrow_back</span>
+                    <span>Volver al Portal</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- =================================================================== -->
+    <!-- CONTENEDOR PRINCIPAL DEL TÚNEL DE ESTUDIANTES                       -->
+    <!-- =================================================================== -->
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8">
+
+        <!-- =============================================================== -->
+        <!-- TARJETA 1: FORMULARIO GUIADO EN CASCADA (#registration-card)     -->
+        <!-- =============================================================== -->
+        <div id="registration-card" class="space-y-6">
+
+            <!-- Indicador de Progreso de Rieles de Acero -->
+            <div class="bg-surface-container border border-surface-high rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <span class="text-[10px] font-mono text-primary uppercase tracking-widest font-bold">
+                        ● TÚNEL GUIADO • CERO ERRORES DE REGISTRO
+                    </span>
+                    <h1 class="text-xl sm:text-2xl font-extrabold text-white mt-0.5">
+                        Configura tu Expediente Clínico Makai
+                    </h1>
+                </div>
+                <div class="flex items-center gap-2 text-[11px] font-mono">
+                    <span class="px-2.5 py-1 rounded-lg bg-primary text-surface font-extrabold">1. Carrera</span>
+                    <span class="text-gray-600">→</span>
+                    <span class="px-2.5 py-1 rounded-lg bg-surface border border-primary/40 text-primary font-bold">2. Plan</span>
+                    <span class="text-gray-600">→</span>
+                    <span id="step-indicator-payment" class="px-2.5 py-1 rounded-lg bg-surface border border-surface-high text-gray-400">3. Activación</span>
                 </div>
             </div>
-            <a href="index.html" class="px-4 py-2 rounded-xl bg-surface-container border border-surface-high hover:border-primary text-primary text-xs font-mono font-bold transition-all flex items-center gap-1.5">
-                <span>← Volver al Login</span>
-            </a>
-        </div>
 
-        <!-- =========================================================
-             TARJETA 1: FORMULARIO DE REGISTRO DEL EXPEDIENTE
-             ========================================================= -->
-        <div id="registration-card" class="bg-surface-container border border-surface-high rounded-2xl p-6 sm:p-8 shadow-2xl">
+            <!-- Caja Global de Alertas -->
+            <div id="register-alert-box" class="hidden p-4 rounded-xl border text-xs font-mono"></div>
 
-            <!-- CABECERA -->
-            <div class="pb-6 border-b border-surface-high">
-                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-[11px] font-mono font-bold uppercase tracking-wider">
-                    <span class="w-2 h-2 rounded-full bg-primary"></span>
-                    REGISTRO OFICIAL DE ESTUDIANTE
-                </span>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-white mt-3">
-                    Apertura de Expediente Académico
-                </h1>
-                <p class="text-sm text-gray-400 mt-1">
-                    Completa tus datos profesionales, clasifica tu área o carrera actual y activa tu acceso optimizado.
-                </p>
-            </div>
+            <!-- Formulario Maestro (#full-register-form requerido por app.orchestrator.js) -->
+            <form id="full-register-form" class="space-y-6">
 
-            <!-- ALERTA DE ERRORES -->
-            <div id="reg-error-box" class="hidden mt-5 p-4 rounded-xl bg-danger/15 border border-danger text-danger text-xs font-mono"></div>
-
-            <!-- FORMULARIO PRINCIPAL -->
-            <form id="full-register-form" class="mt-6 space-y-8">
-
-                <!-- 1. IDENTIFICACIÓN PROFESIONAL Y CLASIFICACIÓN DE CARRERA / PREUNIVERSITARIO -->
-                <section class="space-y-4">
-                    <h2 class="text-xs font-mono font-extrabold text-primary uppercase tracking-widest flex items-center gap-2">
-                        <span class="material-symbols-outlined text-base">badge</span>
-                        <span>1. IDENTIFICACIÓN PROFESIONAL Y CLASIFICACIÓN DE CARRERA</span>
-                    </h2>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <!-- ======================================================= -->
+                <!-- PASO 1: DATOS DE CUENTA Y EMBUDO UNIVERSITARIO          -->
+                <!-- ======================================================= -->
+                <section class="bg-surface-container border border-surface-high rounded-2xl p-6 space-y-5 shadow-xl">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-surface-high pb-4">
                         <div>
-                            <label for="reg-title" class="block text-xs font-medium text-gray-400 mb-1.5">Título Académico</label>
-                            <select id="reg-title" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-primary">
-                                <option value="Dr.">Dr. (Médico / Odontólogo)</option>
-                                <option value="Dra.">Dra. (Médica / Odontóloga)</option>
-                                <option value="Lic.">Lic. (Enfermería / Obstetricia / Salud)</option>
-                                <option value="Interno/a">Interno/a Rotativo</option>
-                                <option value="Est.">Estudiante de Ciencias de la Salud</option>
-                                <option value="Asp.">Aspirante Preuniversitario de Salud</option>
-                            </select>
+                            <span class="text-[10px] font-mono text-secondary uppercase font-bold">PASO 1 DE 3 • IDENTIDAD Y TÚNEL ACADÉMICO</span>
+                            <h2 class="text-lg font-extrabold text-white">Tus Datos y Carrera de Salud</h2>
+                        </div>
+
+                        <!-- Botón de Autocompletado Rápido con Google -->
+                        <button type="button" id="btn-register-google"
+                            class="px-4 py-2.5 rounded-xl bg-white text-gray-900 hover:bg-gray-100 font-extrabold text-xs flex items-center gap-2 self-start sm:self-center shadow">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24">
+                                <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
+                                <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
+                                <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 .1 11.2.1 13.5s.5 4.5 1.5 6.5l3.7-2.9z"/>
+                                <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 21.4 7.4 24 12 24z"/>
+                            </svg>
+                            <span>Vincular con Google en 1 Clic</span>
+                        </button>
+                    </div>
+
+                    <!-- Banner si el usuario ya inició sesión y solo está subiendo de plan -->
+                    <div id="logged-in-user-banner" class="hidden p-3.5 rounded-xl bg-primary/10 border border-primary/40 text-xs font-mono text-primary flex items-center justify-between">
+                        <span id="logged-in-user-text">Sesión activa detectada.</span>
+                        <span class="px-2 py-0.5 rounded bg-primary text-surface font-extrabold text-[10px]">CUENTA VERIFICADA</span>
+                    </div>
+
+                    <!-- Campos de Identidad -->
+                    <div id="credentials-fields-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-mono text-gray-300 uppercase mb-1 font-bold">Nombres y Apellidos *</label>
+                            <input type="text" id="reg-fullname" required placeholder="Ej: Mateo Andrade"
+                                class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white focus:border-primary focus:outline-none">
                         </div>
                         <div>
-                            <label for="reg-firstname" class="block text-xs font-medium text-gray-400 mb-1.5">Primer Nombre</label>
-                            <input type="text" id="reg-firstname" required placeholder="Ej: Anthonny" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary" />
+                            <label class="block text-[11px] font-mono text-gray-300 uppercase mb-1 font-bold">WhatsApp Personal *</label>
+                            <input type="tel" id="reg-whatsapp" required placeholder="Ej: 0991234567"
+                                class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white font-mono focus:border-primary focus:outline-none">
                         </div>
                         <div>
-                            <label for="reg-lastname" class="block text-xs font-medium text-gray-400 mb-1.5">Apellido Paterno / Materno</label>
-                            <input type="text" id="reg-lastname" required placeholder="Ej: Velástegui" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary" />
+                            <label class="block text-[11px] font-mono text-gray-300 uppercase mb-1 font-bold">Correo Electrónico *</label>
+                            <input type="email" id="reg-email" required autocomplete="email" placeholder="nombre@correo.com"
+                                class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white focus:border-primary focus:outline-none">
+                        </div>
+                        <div id="reg-password-wrapper">
+                            <label class="block text-[11px] font-mono text-gray-300 uppercase mb-1 font-bold">Crear Contraseña (Mín. 6 caracteres) *</label>
+                            <input type="password" id="reg-password" required minlength="6" autocomplete="new-password" placeholder="••••••••••••"
+                                class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white focus:border-primary focus:outline-none">
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <!-- Riel de Acero: Embudo de Carrera y Semestre -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-surface-high">
                         <div>
-                            <label for="reg-cedula" class="block text-xs font-medium text-primary mb-1.5">Cédula / DNI / Matrícula</label>
-                            <input type="text" id="reg-cedula" required placeholder="Ej: 0601234567" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary font-mono" />
-                        </div>
-                        <div>
-                            <label for="reg-nickname" class="block text-xs font-medium text-gray-400 mb-1.5">Alias / Nickname Clínico</label>
-                            <input type="text" id="reg-nickname" required placeholder="Ej: DrVelasteguiEC" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary" />
-                        </div>
-                        <div>
-                            <label for="reg-country" class="block text-xs font-medium text-gray-400 mb-1.5">País de Residencia</label>
-                            <select id="reg-country" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-primary">
-                                <option value="Ecuador">EC Ecuador</option>
-                                <option value="Colombia">CO Colombia</option>
-                                <option value="Perú">PE Perú</option>
-                                <option value="México">MX México</option>
-                                <option value="Chile">CL Chile</option>
-                                <option value="Argentina">AR Argentina</option>
-                                <option value="Otro">Otro País</option>
+                            <label class="block text-[11px] font-mono text-primary uppercase mb-1 font-bold">Tu Carrera (Túnel Exclusivo) *</label>
+                            <select id="reg-career" required
+                                class="w-full bg-surface border-2 border-primary/50 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white font-bold focus:border-primary focus:outline-none">
+                                <option value="medicina">Medicina Humana (CACES)</option>
+                                <option value="enfermeria">Enfermería (CACES)</option>
+                                <option value="odontologia">Odontología (CACES)</option>
+                                <option value="obstetricia">Obstetricia (CACES)</option>
+                                <option value="fisioterapia">Fisioterapia</option>
+                                <option value="laboratorio">Laboratorio Clínico</option>
+                                <option value="psicologia">Psicología Clínica</option>
+                                <option value="nutricion">Nutrición y Dietética</option>
+                                <option value="bioquimica">Bioquímica y Farmacia</option>
+                                <option value="imagenologia">Imagenología y Radiología</option>
+                                <option value="prehospitalaria">Atención Prehospitalaria</option>
+                                <option value="preuniversitario">Preuniversitario de Salud (Ingreso)</option>
                             </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-mono text-secondary uppercase mb-1 font-bold">Etapa / Semestre Actual *</label>
+                            <select id="reg-semester" required
+                                class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white focus:border-secondary focus:outline-none">
+                                <option value="1">1° Semestre (Ciencias Básicas)</option>
+                                <option value="2">2° Semestre</option>
+                                <option value="3">3° Semestre</option>
+                                <option value="4">4° Semestre</option>
+                                <option value="5">5° Semestre (Ciencias Clínicas)</option>
+                                <option value="6">6° Semestre</option>
+                                <option value="7">7° Semestre</option>
+                                <option value="8">8° Semestre</option>
+                                <option value="9" selected>Internado Rotativo (9° - 10° Sem)</option>
+                                <option value="10">Egresado / Preparación CACES</option>
+                                <option value="11">Médico / Profesional en Salud Rural</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-mono text-gray-300 uppercase mb-1 font-bold">Universidad (Ecuador / Ext.)</label>
+                            <input type="text" id="reg-university" placeholder="Ej: UNACH / UCE / ESPOCH / UG"
+                                class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white focus:border-primary focus:outline-none">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ======================================================= -->
+                <!-- PASO 2: SELECCIÓN DE PLAN EN CASCADA (SINCRONIZADO)     -->
+                <!-- ======================================================= -->
+                <section class="bg-surface-container border border-surface-high rounded-2xl p-6 space-y-4 shadow-xl">
+                    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-surface-high pb-4">
+                        <div>
+                            <span class="text-[10px] font-mono text-primary uppercase font-bold">PASO 2 DE 3 • SELECCIÓN DE PLAN</span>
+                            <h2 class="text-lg font-extrabold text-white">Confirma tu Plan y Ciclo</h2>
+                        </div>
+
+                        <!-- Selector Rápido de Ciclo -->
+                        <div class="inline-flex bg-surface p-1 rounded-xl border border-surface-high">
+                            <button type="button" data-reg-billing="monthly"
+                                class="reg-billing-btn px-3 py-1.5 rounded-lg text-xs font-mono font-bold text-gray-400">
+                                Mensual
+                            </button>
+                            <button type="button" data-reg-billing="annual"
+                                class="reg-billing-btn px-3 py-1.5 rounded-lg text-xs font-mono font-extrabold bg-primary text-surface">
+                                Anual / Semestral
+                            </button>
                         </div>
                     </div>
 
-                    <!-- =========================================================
-                         SELECTOR OBLIGATORIO DE CLASIFICACIÓN Y AVISO DE CONTROL
-                         ========================================================= -->
-                    <div class="p-4 sm:p-5 rounded-2xl bg-surface border-2 border-primary/40 space-y-3 shadow-[0_0_20px_rgba(0,229,255,0.08)]">
+                    <!-- Tarjetas Compactas en Cascada -->
+                    <div id="register-plans-cascade" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
+
+                    <!-- Resumen de Foto Histórica del Precio Congelado -->
+                    <div id="frozen-price-banner" class="bg-surface border border-primary/40 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
-                            <label for="reg-career" class="block text-xs font-mono font-extrabold uppercase text-primary mb-2 flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-base">clinical_notes</span>
-                                <span>¿Qué área o carrera cursas actualmente? (Obligatorio) *</span>
-                            </label>
-                            <select
-                                id="reg-career"
-                                required
-                                class="w-full bg-surface-container border border-primary/50 focus:border-primary rounded-xl px-3.5 py-3 text-xs sm:text-sm font-bold text-white focus:outline-none transition-colors cursor-pointer"
-                            >
-                                <!-- OPCIÓN A — PREUNIVERSITARIO GENERAL DE SALUD -->
-                                <optgroup label="OPCIÓN A — PREUNIVERSITARIO GENERAL DE SALUD (ASPIRANTES)">
-                                    <option value="preuniversitario_salud">
-                                        🎓 Preuniversitario General de Salud (Biología Celular, Química General/Orgánica, Anatomía Elemental y Razonamiento Clínico)
-                                    </option>
-                                </optgroup>
-
-                                <!-- OPCIÓN B — LAS 11 CARRERAS UNIVERSITARIAS -->
-                                <optgroup label="OPCIÓN B — LAS 11 CARRERAS UNIVERSITARIAS DE CIENCIAS DE LA SALUD">
-                                    <option value="medicina" selected>Medicina Humana (FCS-EC)</option>
-                                    <option value="enfermeria">Enfermería (FCS-EC)</option>
-                                    <option value="odontologia">Odontología (FCS-EC)</option>
-                                    <option value="obstetricia">Obstetricia (FCS-EC)</option>
-                                    <option value="fisioterapia">Fisioterapia y Rehabilitación</option>
-                                    <option value="laboratorio_clinico">Laboratorio Clínico</option>
-                                    <option value="psicologia_clinica">Psicología Clínica</option>
-                                    <option value="nutricion">Nutrición y Dietética</option>
-                                    <option value="bioquimica_farmacia">Bioquímica y Farmacia</option>
-                                    <option value="imagenologia">Imagenología y Radiología</option>
-                                    <option value="atencion_prehospitalaria">Atención Prehospitalaria y Emergencias (APH)</option>
-                                </optgroup>
-                            </select>
-                        </div>
-
-                        <!-- RESUMEN DINÁMICO DE LO QUE SE HABILITARÁ -->
-                        <div id="reg-career-preview" class="p-3 rounded-xl bg-surface-container border border-secondary/40 text-xs space-y-1">
-                            <span id="reg-career-preview-title" class="block font-mono font-extrabold text-secondary text-[11px] uppercase">
-                                OPCIÓN B • MEDICINA HUMANA SELECCIONADA
+                            <span class="text-[10px] font-mono text-primary uppercase font-bold block">
+                                🛡️ TARIFA CONGELADA PARA TU AUDITORÍA
                             </span>
-                            <p id="reg-career-preview-desc" class="text-gray-300 text-xs leading-relaxed">
-                                Se desplegará directamente Medicina Humana en tu panel: Preuniversitario, Nivelación, 1.° a 10.° Semestre, Internado Rotativo, Titulación y CACES Medicina sin saturar tu pantalla con otras carreras.
+                            <p id="frozen-plan-summary" class="text-sm font-extrabold text-white">
+                                Plan seleccionado: Cargando...
                             </p>
                         </div>
-
-                        <!-- AVISO TRANSPARENTE ANTI-ABUSO -->
-                        <div class="p-3.5 rounded-xl bg-warning/10 border border-warning/40 text-xs text-gray-200 leading-relaxed">
-                            🔒 Tu plataforma se optimizará exclusivamente para la carrera seleccionada sin cobros adicionales. Si en el futuro cambias de carrera o deseas habilitar asignaturas de otra área (ej. Enfermería + Medicina), podrás solicitarlo desde tu Perfil directamente al Administrador Maestro.
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label for="reg-phone-number" class="block text-xs font-medium text-gray-400 mb-1.5">Teléfono Celular / WhatsApp</label>
-                            <div class="flex gap-2">
-                                <select id="reg-phone-ext" class="w-28 bg-surface border border-surface-high rounded-xl px-2.5 py-3 text-sm text-white focus:outline-none focus:border-primary font-mono">
-                                    <option value="+593">EC +593</option>
-                                    <option value="+57">CO +57</option>
-                                    <option value="+51">PE +51</option>
-                                    <option value="+52">MX +52</option>
-                                    <option value="+56">CL +56</option>
-                                    <option value="+54">AR +54</option>
-                                </select>
-                                <input type="tel" id="reg-phone-number" required placeholder="0991234567" class="flex-1 bg-surface border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary font-mono" />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1.5">Fecha de Nacimiento (Día / Mes / Año)</label>
-                            <div class="grid grid-cols-3 gap-2">
-                                <input type="number" id="reg-bday" min="1" max="31" required placeholder="Día (DD)" class="w-full bg-surface border border-surface-high rounded-xl px-3 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary text-center" />
-                                <input type="number" id="reg-bmonth" min="1" max="12" required placeholder="Mes (MM)" class="w-full bg-surface border border-surface-high rounded-xl px-3 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary text-center" />
-                                <input type="number" id="reg-byear" min="1950" max="2012" required placeholder="Año (AAAA)" class="w-full bg-surface border border-surface-high rounded-xl px-3 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary text-center" />
-                            </div>
+                        <div class="text-left sm:text-right">
+                            <span id="frozen-plan-amount" class="text-2xl font-extrabold font-mono text-primary">$0.00</span>
+                            <span id="frozen-plan-cycle" class="text-xs font-mono text-gray-400 block">USD</span>
                         </div>
                     </div>
                 </section>
 
-                <hr class="border-surface-high" />
-
-                <!-- 2. CREDENCIALES DE ACCESO Y SEGURIDAD -->
-                <section class="space-y-4">
-                    <h2 class="text-xs font-mono font-extrabold text-primary uppercase tracking-widest flex items-center gap-2">
-                        <span class="material-symbols-outlined text-base">lock</span>
-                        <span>2. CREDENCIALES DE ACCESO Y SEGURIDAD (VALIDACIÓN DE CORREO OBLIGATORIA)</span>
-                    </h2>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label for="reg-email" class="block text-xs font-medium text-gray-400 mb-1.5">Correo Electrónico Principal (Recibirás un enlace de activación)</label>
-                            <input type="email" id="reg-email" required placeholder="medico@universidad.edu.ec" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary" />
-                        </div>
-                        <div>
-                            <label for="reg-backup-email" class="block text-xs font-medium text-gray-400 mb-1.5">Correo Electrónico de Respaldo (Obligatorio y distinto)</label>
-                            <input type="email" id="reg-backup-email" required placeholder="respaldo.personal@gmail.com" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary" />
-                        </div>
+                <!-- ======================================================= -->
+                <!-- PASO 3: RIELES DE PAGO Y COMPRESIÓN DE COMPROBANTE      -->
+                <!-- (Se oculta automáticamente si el plan elegido es $0)    -->
+                <!-- ======================================================= -->
+                <section id="payment-rails-section" class="bg-surface-container border-2 border-primary/60 rounded-2xl p-6 space-y-6 shadow-2xl">
+                    <div class="border-b border-surface-high pb-4">
+                        <span class="text-[10px] font-mono text-warning uppercase font-bold">
+                            PASO 3 DE 3 • PASARELA BLINDADA SIN ERRORES
+                        </span>
+                        <h2 class="text-lg font-extrabold text-white">
+                            Elige tu Medio de Pago y Sube tu Comprobante
+                        </h2>
+                        <p class="text-xs text-gray-400 mt-0.5">
+                            Selecciona cómo realizaste el pago para ver únicamente las instrucciones de ese canal.
+                        </p>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label for="reg-password" class="block text-xs font-medium text-gray-400 mb-1.5">Contraseña (Mínimo 6 caracteres)</label>
-                            <input type="password" id="reg-password" minlength="6" required placeholder="••••••••" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary" />
-                            <div id="reg-password-strength" class="h-1 w-full bg-surface-high mt-2 rounded-full overflow-hidden hidden">
-                                <div class="h-full bg-danger w-1/3 transition-all"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <label for="reg-confirm-password" class="block text-xs font-medium text-gray-400 mb-1.5">Confirmar Contraseña</label>
-                            <input type="password" id="reg-confirm-password" minlength="6" required placeholder="••••••••" class="w-full bg-surface border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary" />
-                        </div>
-                    </div>
-                </section>
-
-                <hr class="border-surface-high" />
-
-                <!-- 3. SELECCIONA TU PLAN ACADÉMICO MAKAI ACADEMY -->
-                <section class="space-y-5">
-                    <h2 class="text-xs font-mono font-extrabold text-primary uppercase tracking-widest flex items-center gap-2">
-                        <span class="material-symbols-outlined text-base">workspace_premium</span>
-                        <span>3. SELECCIONA TU PLAN ACADÉMICO MAKAI ACADEMY</span>
-                    </h2>
-
-                    <input type="hidden" id="reg-plan-select" value="pro_mensual" />
-
-                    <!-- 4 TARJETAS DE PLANES (CON PRECIOS ACTUALIZADOS: $18.60 MENSUAL Y $144.75 ANUAL) -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-
-                        <!-- Plan Básico -->
-                        <div data-plan-card="basico" class="plan-card cursor-pointer rounded-xl p-4 border border-surface-high bg-surface hover:border-gray-600 transition-all relative flex flex-col justify-between">
-                            <div>
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="text-[10px] font-mono text-gray-400 uppercase font-bold">FREEMIUM</span>
-                                    <span class="material-symbols-outlined text-gray-600 text-base check-icon">radio_button_unchecked</span>
-                                </div>
-                                <h3 class="text-base font-extrabold text-white">Plan Básico</h3>
-                                <div class="mt-2">
-                                    <span class="text-2xl font-extrabold text-primary font-mono">$0.00</span>
-                                    <span class="text-xs text-gray-400 font-mono"> / mes</span>
-                                </div>
-                                <p class="text-xs text-gray-400 mt-3 leading-relaxed">
-                                    15 casos clínicos CACES al mes y diagnóstico inicial.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Makai PRO Mensual ($18.60) -->
-                        <div data-plan-card="pro_mensual" class="plan-card cursor-pointer rounded-xl p-4 border-2 border-primary bg-surface-high/95 shadow-[0_0_20px_rgba(0,229,255,0.2)] transition-all relative flex flex-col justify-between">
-                            <div>
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="text-[10px] font-mono text-primary uppercase font-extrabold">ACCESO TOTAL</span>
-                                    <span class="material-symbols-outlined text-primary text-base check-icon">check_circle</span>
-                                </div>
-                                <h3 class="text-base font-extrabold text-white leading-snug">Makai PRO<br />Mensual</h3>
-                                <div class="mt-2">
-                                    <span class="text-2xl font-extrabold text-primary font-mono">$18.60</span>
-                                    <span class="text-xs text-gray-400 font-mono"> / mes</span>
-                                </div>
-                                <p class="text-xs text-gray-400 mt-3 leading-relaxed">
-                                    Simulacros de 100 reactivos ilimitados + Sináptico v4.4.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Makai PRO Anual ($144.75 con 35% de descuento) -->
-                        <div data-plan-card="pro_anual" class="plan-card cursor-pointer rounded-xl p-4 border border-surface-high bg-surface hover:border-gray-600 transition-all relative flex flex-col justify-between">
-                            <div>
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="px-2 py-0.5 rounded bg-secondary/15 text-secondary text-[10px] font-mono uppercase font-extrabold">AHORRA 35%</span>
-                                    <span class="material-symbols-outlined text-gray-600 text-base check-icon">radio_button_unchecked</span>
-                                </div>
-                                <h3 class="text-base font-extrabold text-white">Makai PRO Anual</h3>
-                                <div class="mt-2">
-                                    <span class="text-2xl font-extrabold text-secondary font-mono">$144.75</span>
-                                    <span class="text-xs text-gray-400 font-mono"> / año</span>
-                                </div>
-                                <p class="text-xs text-gray-400 mt-3 leading-relaxed">
-                                    12 meses de acceso PRO ilimitado + Mentorías grupales.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Mentoría Élite VIP -->
-                        <div data-plan-card="vip" class="plan-card cursor-pointer rounded-xl p-4 border border-surface-high bg-surface hover:border-gray-600 transition-all relative flex flex-col justify-between">
-                            <div>
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="text-[10px] font-mono text-warning uppercase font-extrabold">ESPECIALISTAS 1 A 1</span>
-                                    <span class="material-symbols-outlined text-gray-600 text-base check-icon">radio_button_unchecked</span>
-                                </div>
-                                <h3 class="text-base font-extrabold text-white">Mentoría Élite VIP</h3>
-                                <div class="mt-2">
-                                    <span class="text-2xl font-extrabold text-warning font-mono">$49.99</span>
-                                    <span class="text-xs text-gray-400 font-mono"> / módulo</span>
-                                </div>
-                                <p class="text-xs text-gray-400 mt-3 leading-relaxed">
-                                    5 horas de tutoría personalizada 1 a 1 + Acceso PRO.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- SELECTOR DE MÉTODO DE ACTIVACIÓN / PAGO PREFERIDO -->
+                    <!-- 3.1 Botones de Rieles de Medios de Pago Locales -->
                     <div>
-                        <label for="reg-payment-select" class="block text-xs font-medium text-gray-400 mb-1.5">
-                            Método de Activación / Pago Preferido
+                        <label class="block text-[11px] font-mono text-gray-300 uppercase mb-2 font-bold">
+                            1. Selecciona el Canal Utilizado *
                         </label>
-                        <select id="reg-payment-select" class="w-full bg-surface border border-surface-high rounded-xl px-4 py-3.5 text-sm font-bold text-white focus:outline-none focus:border-primary">
-                            <option value="qr">Código QR Deuna! (Pichincha) o QR Banco del Pacífico</option>
-                            <option value="transferencia">Transferencia Bancaria Directa (Pichincha / Pacífico / Diners Club)</option>
-                            <option value="tarjeta">Tarjeta de Crédito / Débito (Visa / Mastercard → Destino Banco Pichincha)</option>
-                            <option value="ninguno">Sin pago por ahora (Iniciar con Plan Básico $0)</option>
-                        </select>
-                    </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="payment-method-buttons">
+                            <button type="button" data-pay-method="Deuna!"
+                                class="pay-method-btn p-3.5 rounded-xl bg-primary/15 border-2 border-primary text-left transition-all">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-extrabold text-xs sm:text-sm text-white">Deuna! / QR Pichincha</span>
+                                    <span class="material-symbols-outlined text-primary text-base">qr_code_2</span>
+                                </div>
+                                <span class="text-[10px] font-mono text-primary block mt-1">Sin comisión • Inmediato</span>
+                            </button>
 
-                    <!-- =========================================================
-                         ADVERTENCIA OBLIGATORIA DE PLAZO DE 72 HORAS LABORABLES
-                         ========================================================= -->
-                    <div id="payment-sla-warning" class="rounded-xl border-2 border-warning/60 bg-warning/10 p-4 flex items-start gap-3 shadow-lg">
-                        <span class="material-symbols-outlined text-warning text-2xl shrink-0 mt-0.5">schedule</span>
-                        <div class="text-xs sm:text-sm text-gray-200 leading-relaxed">
-                            <strong class="text-warning font-mono uppercase tracking-wide block mb-0.5">
-                                ⚠️ AVISO IMPORTANTE SOBRE LA HABILITACIÓN DE SERVICIOS:
-                            </strong>
-                            Una vez seleccionado el método de pago y registrado tu comprobante, nuestro departamento financiero verificará la transacción y <strong>se habilitarán los servicios del plan elegido en un plazo máximo de 72 horas laborables</strong>. Mientras se valida tu pago, podrás verificar tu correo e ingresar con acceso inicial.
+                            <button type="button" data-pay-method="Transferencia Bancaria"
+                                class="pay-method-btn p-3.5 rounded-xl bg-surface border border-surface-high text-left hover:border-gray-600 transition-all">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-extrabold text-xs sm:text-sm text-white">Transferencia / Depósito</span>
+                                    <span class="material-symbols-outlined text-secondary text-base">account_balance</span>
+                                </div>
+                                <span class="text-[10px] font-mono text-gray-400 block mt-1">Pichincha / Guayaquil / Pacífico</span>
+                            </button>
+
+                            <button type="button" data-pay-method="PayPhone / Tarjeta"
+                                class="pay-method-btn p-3.5 rounded-xl bg-surface border border-surface-high text-left hover:border-gray-600 transition-all">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-extrabold text-xs sm:text-sm text-white">PayPhone / Tarjeta</span>
+                                    <span class="material-symbols-outlined text-warning text-base">credit_card</span>
+                                </div>
+                                <span class="text-[10px] font-mono text-gray-400 block mt-1">Visa / Mastercard</span>
+                            </button>
                         </div>
                     </div>
 
-                    <!-- =========================================================
-                         OPCIÓN 1: CÓDIGOS QR OFICIALES (PICHINCHA Y PACÍFICO)
-                         Ruta oficial: assets/2-pagos-bancarios/codigos-qr/
-                         ========================================================= -->
-                    <div id="qr-payment-section" class="hidden rounded-2xl border border-primary/40 bg-surface p-5 space-y-4">
-                        <div class="flex items-center gap-2 text-xs font-mono font-extrabold text-primary uppercase tracking-wider">
-                            <span class="material-symbols-outlined text-base">qr_code_scanner</span>
-                            <span>ESCANEA CUALQUIERA DE NUESTROS 2 CÓDIGOS QR OFICIALES</span>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- QR 1: Banco Pichincha (Deuna!) -->
-                            <div class="rounded-xl border border-surface-high bg-surface-container p-5 text-center flex flex-col items-center justify-between">
-                                <div>
-                                    <h4 class="text-sm font-extrabold text-white">QR Deuna! (Banco Pichincha)</h4>
-                                    <p class="text-xs font-mono text-gray-400 mt-0.5">Titular: Anthonny Velástegui</p>
-                                    <p class="text-xs font-mono text-primary font-bold mt-1">Cuenta de Ahorros: 2205616642</p>
-                                </div>
-
-                                <div class="my-4 w-52 h-52 bg-white rounded-2xl p-3 flex flex-col items-center justify-center shadow-lg">
-                                    <img
-                                        src="assets/2-pagos-bancarios/codigos-qr/qr-deuna.png"
-                                        alt="QR Deuna! Oficial"
-                                        class="w-full h-full object-contain hidden"
-                                        onload="this.classList.remove('hidden'); this.nextElementSibling.classList.add('hidden');"
-                                        onerror="if(!this.dataset.try1){this.dataset.try1='1';this.src='assets/2-pagos-bancarios/codigos-qr/qr-deuna.jpg';}else if(!this.dataset.try2){this.dataset.try2='1';this.src='assets/1-branding/pagos/qr-deuna.png';}else{this.classList.add('hidden');}"
-                                    />
-                                    <div class="flex flex-col items-center justify-center text-surface">
-                                        <span class="material-symbols-outlined text-4xl text-surface">qr_code_2</span>
-                                        <span class="text-xs font-mono font-bold mt-2 text-surface">QR Deuna! Oficial</span>
-                                        <span class="text-[10px] font-mono text-gray-600 mt-1">Cta: 2205616642</span>
-                                    </div>
-                                </div>
-
-                                <button type="button" onclick="navigator.clipboard.writeText('2205616642'); this.textContent='✓ Cuenta 2205616642 Copiada';" class="px-3 py-1.5 rounded-lg bg-surface border border-primary/40 text-primary text-[11px] font-mono font-bold hover:bg-primary hover:text-surface transition-all">
-                                    📋 Copiar N° Cuenta Pichincha (2205616642)
-                                </button>
-                            </div>
-
-                            <!-- QR 2: Banco del Pacífico -->
-                            <div class="rounded-xl border border-surface-high bg-surface-container p-5 text-center flex flex-col items-center justify-between">
-                                <div>
-                                    <h4 class="text-sm font-extrabold text-white">QR Be / Banco del Pacífico</h4>
-                                    <p class="text-xs font-mono text-gray-400 mt-0.5">Titular: Anthonny Velástegui</p>
-                                    <p class="text-xs font-mono text-primary font-bold mt-1">Cuenta de Ahorros: 1068767358</p>
-                                </div>
-
-                                <div class="my-4 w-52 h-52 bg-white rounded-2xl p-3 flex flex-col items-center justify-center shadow-lg">
-                                    <img
-                                        src="assets/2-pagos-bancarios/codigos-qr/qr-pacifico.png"
-                                        alt="QR Pacífico Oficial"
-                                        class="w-full h-full object-contain hidden"
-                                        onload="this.classList.remove('hidden'); this.nextElementSibling.classList.add('hidden');"
-                                        onerror="if(!this.dataset.try1){this.dataset.try1='1';this.src='assets/2-pagos-bancarios/codigos-qr/qr-pacifico.jpg';}else if(!this.dataset.try2){this.dataset.try2='1';this.src='assets/1-branding/pagos/qr-pacifico.png';}else{this.classList.add('hidden');}"
-                                    />
-                                    <div class="flex flex-col items-center justify-center text-surface">
-                                        <span class="material-symbols-outlined text-4xl text-surface">qr_code_2</span>
-                                        <span class="text-xs font-mono font-bold mt-2 text-surface">QR Pacífico Oficial</span>
-                                        <span class="text-[10px] font-mono text-gray-600 mt-1">Cta: 1068767358</span>
-                                    </div>
-                                </div>
-
-                                <button type="button" onclick="navigator.clipboard.writeText('1068767358'); this.textContent='✓ Cuenta 1068767358 Copiada';" class="px-3 py-1.5 rounded-lg bg-surface border border-primary/40 text-primary text-[11px] font-mono font-bold hover:bg-primary hover:text-surface transition-all">
-                                    📋 Copiar N° Cuenta Pacífico (1068767358)
-                                </button>
-                            </div>
-                        </div>
+                    <!-- 3.2 Instrucciones Exclusivas del Método Seleccionado -->
+                    <div id="payment-method-instructions" class="bg-surface border border-surface-high rounded-xl p-4 text-xs space-y-2">
+                        <!-- Inyectado dinámicamente por auth.register.js -->
                     </div>
 
-                    <!-- =========================================================
-                         OPCIÓN 2: TUS 3 CUENTAS BANCARIAS PARA TRANSFERENCIA DIRECTA
-                         ========================================================= -->
-                    <div id="bank-transfer-section" class="hidden rounded-2xl border border-primary/40 bg-surface p-5 space-y-4">
-                        <div class="flex items-center gap-2 text-xs font-mono font-extrabold text-primary uppercase tracking-wider">
-                            <span class="material-symbols-outlined text-base">account_balance</span>
-                            <span>CUENTAS OFICIALES PARA TRANSFERENCIA O DEPÓSITO BANCARIO</span>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
-                            <!-- 1) Banco Pichincha -->
-                            <div class="p-4 rounded-xl bg-surface-container border border-primary/40 flex flex-col justify-between space-y-2">
-                                <div class="space-y-1">
-                                    <span class="px-2 py-0.5 rounded bg-warning/20 text-warning font-extrabold text-[10px]">BANCO PICHINCHA</span>
-                                    <div class="text-white font-extrabold text-sm pt-1">Cuenta de Ahorros</div>
-                                    <div class="text-primary font-extrabold text-base tracking-wider">2205616642</div>
-                                    <div class="text-gray-300 text-[11px]">Titular: <strong>Anthonny Velástegui</strong></div>
-                                    <div class="text-gray-400 text-[10px] break-all">Correo: anthonnyvelastegui@gmail.com</div>
-                                </div>
-                                <button type="button" onclick="navigator.clipboard.writeText('2205616642'); this.textContent='✓ Copiado: 2205616642';" class="w-full py-1.5 rounded-lg bg-surface border border-surface-high hover:border-primary text-primary font-bold text-[11px] transition-all">
-                                    Copiar Cuenta Pichincha
-                                </button>
-                            </div>
-
-                            <!-- 2) Banco del Pacífico -->
-                            <div class="p-4 rounded-xl bg-surface-container border border-primary/40 flex flex-col justify-between space-y-2">
-                                <div class="space-y-1">
-                                    <span class="px-2 py-0.5 rounded bg-primary/20 text-primary font-extrabold text-[10px]">BANCO DEL PACÍFICO</span>
-                                    <div class="text-white font-extrabold text-sm pt-1">Cuenta de Ahorros</div>
-                                    <div class="text-primary font-extrabold text-base tracking-wider">1068767358</div>
-                                    <div class="text-gray-300 text-[11px]">Titular: <strong>Anthonny Velástegui</strong></div>
-                                    <div class="text-gray-400 text-[10px] break-all">Correo: aavemakaihc@gmail.com</div>
-                                </div>
-                                <button type="button" onclick="navigator.clipboard.writeText('1068767358'); this.textContent='✓ Copiado: 1068767358';" class="w-full py-1.5 rounded-lg bg-surface border border-surface-high hover:border-primary text-primary font-bold text-[11px] transition-all">
-                                    Copiar Cuenta Pacífico
-                                </button>
-                            </div>
-
-                            <!-- 3) Banco Diners Club -->
-                            <div class="p-4 rounded-xl bg-surface-container border border-primary/40 flex flex-col justify-between space-y-2">
-                                <div class="space-y-1">
-                                    <span class="px-2 py-0.5 rounded bg-secondary/20 text-secondary font-extrabold text-[10px]">BANCO DINERS CLUB</span>
-                                    <div class="text-white font-extrabold text-sm pt-1">Cuenta de Ahorros</div>
-                                    <div class="text-secondary font-extrabold text-base tracking-wider">1000856707</div>
-                                    <div class="text-gray-300 text-[11px]">Titular: <strong>Anthonny Velástegui</strong></div>
-                                    <div class="text-gray-400 text-[10px] break-all">Correo: anthonnyvelastegui@gmail.com</div>
-                                </div>
-                                <button type="button" onclick="navigator.clipboard.writeText('1000856707'); this.textContent='✓ Copiado: 1000856707';" class="w-full py-1.5 rounded-lg bg-surface border border-surface-high hover:border-secondary text-secondary font-bold text-[11px] transition-all">
-                                    Copiar Cuenta Diners Club
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- =========================================================
-                         OPCIÓN 3: PAGO CON TARJETA (DESTINO BANCO PICHINCHA 2205616642)
-                         ========================================================= -->
-                    <div id="card-payment-section" class="hidden rounded-xl border border-warning/50 bg-warning/5 p-5 space-y-3">
-                        <div class="flex items-center justify-between flex-wrap gap-2">
-                            <div class="flex items-center gap-2 text-xs font-mono font-extrabold text-warning uppercase tracking-wider">
-                                <span class="material-symbols-outlined text-base">credit_card</span>
-                                <span>PAGO CON TARJETA VISA / MASTERCARD / PAYPHONE</span>
-                            </div>
-                            <span class="px-2.5 py-0.5 rounded bg-warning/20 text-warning font-mono text-[10px] font-bold">
-                                Recaudación directa: Banco Pichincha Ahorros N° 2205616642
-                            </span>
-                        </div>
-                        <p class="text-xs sm:text-sm text-gray-300 leading-relaxed">
-                            Todos los cobros con tarjeta de crédito o débito (Visa / Mastercard vía PayPhone) se acreditan directamente a la cuenta recaudadora oficial de <strong>Makai Academy en Banco Pichincha (Cuenta de Ahorros N° 2205616642 - Titular: Anthonny Velástegui)</strong>.
-                        </p>
-                        <p class="text-xs text-primary font-mono">
-                            👉 Si ya realizaste el pago por enlace con tarjeta o PayPhone, ingresa abajo el número de referencia del váucher y adjunta tu captura para priorizar tu activación (plazo máximo 72 horas laborables).
-                        </p>
-                    </div>
-
-                    <!-- =========================================================
-                         REGISTRO DE COMPROBANTE BANCARIO PARA ACTIVACIÓN PRO / VIP
-                         ========================================================= -->
-                    <div id="payment-evidence-section" class="hidden rounded-2xl border border-primary/40 bg-surface p-6 space-y-5">
-                        <div class="pb-3 border-b border-surface-high">
-                            <h3 class="text-base font-extrabold text-white flex items-center gap-2">
-                                <span class="material-symbols-outlined text-primary">receipt_long</span>
-                                <span>Registro de Comprobante Bancario / Váucher para Activación PRO / VIP</span>
-                            </h3>
-                            <p class="text-xs text-gray-400 mt-1">
-                                Ingresa los datos exactos de tu transferencia, pago QR o váucher de tarjeta y sube la captura (JPG, PNG o PDF máx. 750 KB).
+                    <!-- 3.3 Campo de Referencia Inteligente (Máscara Numérica Estricta) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="bg-surface border border-surface-high rounded-xl p-4 space-y-2">
+                            <label class="block text-[11px] font-mono text-primary uppercase font-bold">
+                                2. Últimos 4 a 8 Dígitos del Comprobante *
+                            </label>
+                            <input type="text" id="reg-voucher-ref" inputmode="numeric" maxlength="8"
+                                placeholder="Ej: 492015"
+                                class="w-full bg-surface-container border-2 border-primary/50 rounded-xl px-4 py-3 text-base font-mono font-extrabold text-white tracking-widest focus:border-primary focus:outline-none">
+                            <p class="text-[11px] text-gray-400 leading-relaxed">
+                                🔒 <strong>Riel Anti-Duplicados:</strong> Solo números permitidos. El sistema generará tu código contable <code id="live-accounting-id-preview" class="text-secondary font-mono">PAG-2026-PRO-0000</code>.
                             </p>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div>
-                                <label for="pay-receipt-number" class="block text-xs font-medium text-gray-400 mb-1.5">N° de Comprobante / Referencia</label>
-                                <input type="text" id="pay-receipt-number" placeholder="Ej: 04829104" class="w-full bg-surface-container border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white placeholder-gray-500 font-mono focus:outline-none focus:border-primary" />
-                            </div>
-                            <div>
-                                <label for="pay-holder-name" class="block text-xs font-medium text-gray-400 mb-1.5">Nombre del Titular de la Cuenta / Tarjeta</label>
-                                <input type="text" id="pay-holder-name" placeholder="Quien realiza el pago" class="w-full bg-surface-container border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary" />
-                            </div>
-                            <div>
-                                <label for="pay-holder-id" class="block text-xs font-medium text-gray-400 mb-1.5">Cédula / RUC del Titular</label>
-                                <input type="text" id="pay-holder-id" placeholder="Ej: 0601234567" class="w-full bg-surface-container border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white placeholder-gray-500 font-mono focus:outline-none focus:border-primary" />
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div>
-                                <label for="pay-origin-bank" class="block text-xs font-medium text-gray-400 mb-1.5">Banco Destino / App Utilizada</label>
-                                <select id="pay-origin-bank" class="w-full bg-surface-container border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-primary">
-                                    <option value="Banco Pichincha (Cta. 2205616642 / Deuna!)">Banco Pichincha (Cta. 2205616642 / Deuna!)</option>
-                                    <option value="Banco del Pacífico (Cta. 1068767358 / QR Be)">Banco del Pacífico (Cta. 1068767358 / QR Be)</option>
-                                    <option value="Banco Diners Club (Cta. 1000856707)">Banco Diners Club (Cta. 1000856707)</option>
-                                    <option value="Tarjeta Visa/Mastercard -> Banco Pichincha (2205616642)">Tarjeta Visa/Mastercard → Pichincha (2205616642)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="pay-amount" class="block text-xs font-medium text-gray-400 mb-1.5">Monto Transferido (USD)</label>
-                                <input type="text" id="pay-amount" value="18.60" class="w-full bg-surface-container border border-surface-high rounded-xl px-3.5 py-3 text-sm text-secondary font-extrabold font-mono focus:outline-none focus:border-primary" />
-                            </div>
-                            <div>
-                                <label for="pay-receipt-date" class="block text-xs font-medium text-gray-400 mb-1.5">Fecha del Comprobante</label>
-                                <input type="date" id="pay-receipt-date" class="w-full bg-surface-container border border-surface-high rounded-xl px-3.5 py-3 text-sm text-white font-mono focus:outline-none focus:border-primary" />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label for="pay-receipt-file" class="block text-xs font-medium text-gray-400 mb-1.5">
-                                Adjuntar Captura o PDF del Comprobante (JPG, PNG o PDF)
+                        <!-- 3.4 Subida Restringida + Compresión Base64 Automática -->
+                        <div class="bg-surface border border-surface-high rounded-xl p-4 space-y-2">
+                            <label class="block text-[11px] font-mono text-secondary uppercase font-bold">
+                                3. Captura o Foto del Comprobante *
                             </label>
-                            <div class="w-full bg-surface-container border border-surface-high rounded-xl p-2.5 flex items-center gap-3">
-                                <input
-                                    type="file"
-                                    id="pay-receipt-file"
-                                    accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-                                    class="block w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-extrabold file:bg-primary file:text-surface hover:file:bg-opacity-90 cursor-pointer"
-                                />
+                            <label for="reg-voucher-file"
+                                class="cursor-pointer w-full py-3 px-4 rounded-xl bg-surface-container border-2 border-dashed border-secondary/60 hover:border-secondary flex items-center justify-center gap-2 text-xs font-mono text-secondary transition-all">
+                                <span class="material-symbols-outlined text-base">add_photo_alternate</span>
+                                <span id="voucher-upload-label">Seleccionar Imagen (JPG / PNG / WEBP)</span>
+                            </label>
+                            <input type="file" id="reg-voucher-file" accept="image/jpeg,image/png,image/webp" class="hidden">
+
+                            <!-- Previsualización del Comprobante Comprimido -->
+                            <div id="voucher-preview-box" class="hidden pt-2 flex items-center gap-3">
+                                <img id="voucher-preview-img" src="" alt="Vista previa comprobante"
+                                    class="w-14 h-14 rounded-lg object-cover border border-secondary">
+                                <div class="text-[11px] font-mono">
+                                    <span class="text-secondary font-bold block">✅ Comprobante optimizado</span>
+                                    <span id="voucher-size-info" class="text-gray-400">Listo para Bóveda Admin</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- BOTÓN DE REGISTRO FINAL -->
-                <button
-                    type="submit"
-                    id="btn-submit-register"
-                    class="w-full bg-primary text-surface font-extrabold py-4 rounded-xl hover:bg-opacity-90 transition-all shadow-[0_0_25px_rgba(0,229,255,0.3)] flex items-center justify-center gap-2 text-sm sm:text-base"
-                >
-                    <span class="material-symbols-outlined text-xl">how_to_reg</span>
-                    <span>Registrar Expediente y Enviar Correo de Verificación</span>
-                </button>
+                <!-- Botón Final de Acción del Embudo -->
+                <div class="flex justify-end">
+                    <button type="submit" id="btn-submit-registration"
+                        class="w-full sm:w-auto px-8 py-4 rounded-xl bg-primary text-surface font-extrabold text-xs sm:text-sm uppercase tracking-wider hover:bg-opacity-90 transition-all shadow-[0_0_25px_rgba(0,229,255,0.3)]">
+                        Completar Registro y Enviar a Bóveda →
+                    </button>
+                </div>
             </form>
         </div>
 
-        <!-- =========================================================
-             TARJETA 2: PANTALLA DE VALIDACIÓN DE CORREO Y AVISO 72 HORAS
-             ========================================================= -->
-        <div id="verification-card" class="hidden bg-surface-container border-2 border-primary rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 text-center">
-            <div class="w-16 h-16 rounded-2xl bg-primary/15 border border-primary text-primary flex items-center justify-center mx-auto">
-                <span class="material-symbols-outlined text-4xl">mark_email_unread</span>
+        <!-- =============================================================== -->
+        <!-- TARJETA 2: SALA DE ESPERA ACTIVA (#payment-waiting-room)        -->
+        <!-- Impide que el estudiante suba dos veces el mismo comprobante    -->
+        <!-- =============================================================== -->
+        <div id="payment-waiting-room" class="hidden bg-surface-container border-2 border-secondary rounded-2xl p-8 max-w-2xl mx-auto text-center space-y-5 shadow-2xl">
+            <div class="w-16 h-16 rounded-2xl bg-secondary/15 border border-secondary text-secondary flex items-center justify-center mx-auto">
+                <span class="material-symbols-outlined text-3xl">verified_user</span>
             </div>
 
-            <div class="space-y-2">
-                <span class="px-3 py-1 rounded-full bg-primary/15 text-primary text-xs font-mono font-extrabold uppercase">
-                    PASO FINAL OBLIGATORIO • VALIDACIÓN DE SEGURIDAD
-                </span>
-                <h2 class="text-2xl font-extrabold text-white">Verifica tu Correo Electrónico</h2>
-                <p class="text-sm text-gray-300 max-w-xl mx-auto">
-                    Hemos enviado un enlace oficial de confirmación a:
-                    <strong id="verify-email-display" class="text-primary font-mono block mt-1 text-base">tu correo electrónico</strong>
-                </p>
-                <p class="text-xs text-gray-400 max-w-lg mx-auto">
-                    Abre tu bandeja de entrada (o la carpeta de <strong>Spam / No deseados</strong>), haz clic en el enlace de verificación y luego presiona el botón de abajo para ingresar al portal.
-                </p>
-            </div>
+            <span class="text-[10px] font-mono font-extrabold px-3 py-1 rounded-full bg-secondary/20 text-secondary border border-secondary/40 uppercase">
+                SALA DE ESPERA ACTIVA • COMPROBANTE BLINDADO
+            </span>
 
-            <!-- AVISO DE 72 HORAS LABORABLES EN LA PANTALLA DE VERIFICACIÓN -->
-            <div id="payment-instructions-box" class="rounded-xl border-2 border-warning/60 bg-warning/10 p-4 text-left max-w-2xl mx-auto">
-                <div class="flex items-start gap-3">
-                    <span class="material-symbols-outlined text-warning text-2xl shrink-0">verified</span>
-                    <div class="text-xs sm:text-sm text-gray-200 leading-relaxed">
-                        <strong class="text-warning font-mono uppercase block mb-1">
-                            ⏳ TIEMPO DE HABILITACIÓN DEL PLAN ELEGIDO (MÁXIMO 72 HORAS LABORABLES):
-                        </strong>
-                        Una vez seleccionado tu método de pago y enviado tu comprobante a nuestras cuentas oficiales (<strong>Banco Pichincha 2205616642</strong>, <strong>Banco del Pacífico 1068767358</strong> o <strong>Diners Club 1000856707</strong>), los servicios completos del plan elegido se habilitarán en un <strong>plazo máximo de 72 horas laborables</strong> tras la auditoría financiera.
-                    </div>
+            <h2 class="text-2xl font-extrabold text-white">
+                ¡Tu Comprobante está en la Bóveda de Auditoría!
+            </h2>
+
+            <p class="text-xs sm:text-sm text-gray-300 leading-relaxed">
+                Para evitar duplicados hemos bloqueado el formulario de subida. Nuestro equipo de Secretaría validará tu referencia en breve y activará los días completos de tu plan automáticamente.
+            </p>
+
+            <div class="bg-surface border border-surface-high rounded-xl p-4 font-mono text-xs text-left space-y-1.5">
+                <div class="flex justify-between">
+                    <span class="text-gray-400">ID Contable Oficial:</span>
+                    <span id="waiting-room-payment-id" class="text-primary font-extrabold">PAG-00000000-PRO-0000</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Plan Solicitado:</span>
+                    <span id="waiting-room-plan" class="text-white font-bold">Makai PRO CACES</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Monto Congelado:</span>
+                    <span id="waiting-room-amount" class="text-secondary font-bold">$144.75 USD</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Estado Actual:</span>
+                    <span class="text-warning font-bold">⏳ Pendiente de Verificación</span>
                 </div>
             </div>
 
-            <div id="verify-status-msg" class="hidden p-3 rounded-xl border text-xs font-mono max-w-xl mx-auto"></div>
+            <div class="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <a href="dashboard.html"
+                    class="w-full sm:w-auto px-6 py-3 rounded-xl bg-primary text-surface font-extrabold text-xs uppercase tracking-wider">
+                    Entrar a mi Estación (Modo Básico Temporal) →
+                </a>
+            </div>
+        </div>
 
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-                <button
-                    type="button"
-                    id="btn-check-verified"
-                    class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-primary text-surface font-extrabold text-sm hover:bg-opacity-90 transition-all shadow-[0_0_20px_rgba(0,229,255,0.3)] flex items-center justify-center gap-2"
-                >
-                    <span class="material-symbols-outlined text-lg">verified_user</span>
-                    <span>Ya verifiqué mi correo (Ingresar al Portal)</span>
+        <!-- =============================================================== -->
+        <!-- TARJETA 3: VERIFICACIÓN DE CORREO (#verification-card)          -->
+        <!-- =============================================================== -->
+        <div id="verification-card" class="hidden bg-surface-container border-2 border-primary rounded-2xl p-8 max-w-xl mx-auto text-center space-y-5 shadow-2xl">
+            <div class="w-14 h-14 rounded-2xl bg-primary/15 border border-primary/40 text-primary flex items-center justify-center mx-auto">
+                <span class="material-symbols-outlined text-3xl">mark_email_unread</span>
+            </div>
+            <h2 class="text-xl font-extrabold text-white">Verifica tu Correo Institucional o Personal</h2>
+            <p class="text-xs text-gray-300 leading-relaxed">
+                Hemos enviado un enlace de seguridad a <strong id="verify-email-target" class="text-primary font-mono">tu correo</strong>. Haz clic en ese enlace y luego presiona el botón verde inferior.
+            </p>
+            <div id="verifier-feedback-box" class="hidden p-3 rounded-xl text-xs font-mono"></div>
+            <div class="flex flex-col sm:flex-row justify-center gap-3 pt-2">
+                <button type="button" id="btn-check-verified-now"
+                    class="px-5 py-3 rounded-xl bg-secondary text-surface font-extrabold text-xs uppercase tracking-wider">
+                    ✅ Ya verifiqué mi correo • Continuar
                 </button>
-
-                <button
-                    type="button"
-                    id="btn-resend-email"
-                    class="w-full sm:w-auto px-5 py-3.5 rounded-xl bg-surface border border-surface-high hover:border-primary text-gray-200 hover:text-primary font-bold text-xs font-mono transition-all"
-                >
-                    Reenviar correo de verificación
+                <button type="button" id="btn-resend-verification"
+                    class="px-4 py-3 rounded-xl bg-surface border border-surface-high text-xs font-mono text-gray-300 hover:border-primary">
+                    Reenviar Correo
                 </button>
             </div>
         </div>
-    </div>
 
-    <!-- CONTROLADOR INTEGRADO DE PLANES, CLASIFICACIÓN DE CARRERA, BANCOS, REGISTRO Y VALIDACIÓN DE CORREO -->
-    <script type="module">
-        import {
-            auth,
-            db,
-            createUserWithEmailAndPassword,
-            sendEmailVerification,
-            onAuthStateChanged,
-            doc,
-            setDoc,
-            collection,
-            addDoc
-        } from "./js/2-core/firebase.service.js";
-        import { isMasterAdmin } from "./js/2-core/state.store.js";
+    </main>
 
-        const ALL_CAREER_KEYS = [
-            "preuniversitario_salud",
-            "medicina",
-            "enfermeria",
-            "odontologia",
-            "obstetricia",
-            "fisioterapia",
-            "laboratorio_clinico",
-            "psicologia_clinica",
-            "nutricion",
-            "bioquimica_farmacia",
-            "imagenologia",
-            "atencion_prehospitalaria"
-        ];
-
-        const CAREER_PREVIEW_DESCRIPTIONS = {
-            preuniversitario_salud: {
-                title: "OPCIÓN A • PREUNIVERSITARIO GENERAL DE SALUD SELECCIONADO",
-                desc: "Habilita el tronco común de admisión (Biología Celular, Química General/Orgánica, Anatomía Elemental y Razonamiento Clínico) con acceso a las bases vocacionales de las carreras de salud, sin abrumarte con semestres clínicos ni internado."
-            },
-            medicina: {
-                title: "OPCIÓN B • MEDICINA HUMANA SELECCIONADA",
-                desc: "Se desplegará directamente Medicina Humana en tu panel: Preuniversitario, Nivelación, 1.° a 10.° Semestre, Internado Rotativo, Titulación y CACES Medicina sin saturar tu pantalla con otras carreras."
-            },
-            enfermeria: {
-                title: "OPCIÓN B • ENFERMERÍA SELECCIONADA",
-                desc: "Se desplegará directamente Enfermería en tu panel: PAE (NANDA-NIC-NOC), Semestres 1.° a 7.°, Internado Rotativo, Titulación y CACES Enfermería."
-            },
-            odontologia: {
-                title: "OPCIÓN B • ODONTOLOGÍA SELECCIONADA",
-                desc: "Se desplegará directamente Odontología en tu panel: Preuniversitario, Nivelación, 1.° a 10.° Semestre, Clínicas Integrales, Titulación y CACES Odontología."
-            },
-            obstetricia: {
-                title: "OPCIÓN B • OBSTETRICIA SELECCIONADA",
-                desc: "Se desplegará directamente Obstetricia en tu panel: Semestres 1.° a 7.°, Claves Obstétricas MSP, Internado Rotativo, Titulación y CACES Obstetricia."
-            },
-            fisioterapia: {
-                title: "OPCIÓN B • FISIOTERAPIA Y REHABILITACIÓN SELECCIONADA",
-                desc: "Se desplegará directamente Fisioterapia en tu panel: Semestres 1.° a 8.°, Biomecánica, Kinesiología, Neurorrehabilitación y Titulación."
-            },
-            laboratorio_clinico: {
-                title: "OPCIÓN B • LABORATORIO CLÍNICO SELECCIONADO",
-                desc: "Se desplegará directamente Laboratorio Clínico en tu panel: Semestres 1.° a 8.°, Hematología, Bioquímica Clínica, Microbiología y Titulación."
-            },
-            psicologia_clinica: {
-                title: "OPCIÓN B • PSICOLOGÍA CLÍNICA SELECCIONADA",
-                desc: "Se desplegará directamente Psicología Clínica en tu panel: Semestres 1.° a 8.°, Psicopatología DSM-5-TR/CIE-11, Psicodiagnóstico y Titulación."
-            },
-            nutricion: {
-                title: "OPCIÓN B • NUTRICIÓN Y DIETÉTICA SELECCIONADA",
-                desc: "Se desplegará directamente Nutrición y Dietética en tu panel: Semestres 1.° a 8.°, Evaluación ABCD, Dietoterapia, Internado y Titulación."
-            },
-            bioquimica_farmacia: {
-                title: "OPCIÓN B • BIOQUÍMICA Y FARMACIA SELECCIONADA",
-                desc: "Se desplegará directamente Bioquímica y Farmacia en tu panel: Semestres 1.° a 9.°, Farmacología, Farmacia Hospitalaria, Toxicología y Titulación."
-            },
-            imagenologia: {
-                title: "OPCIÓN B • IMAGENOLOGÍA Y RADIOLOGÍA SELECCIONADA",
-                desc: "Se desplegará directamente Imagenología y Radiología en tu panel: Semestres 1.° a 8.°, Radiología, TC, RMN, Ecografía y Titulación."
-            },
-            atencion_prehospitalaria: {
-                title: "OPCIÓN B • ATENCIÓN PREHOSPITALARIA Y EMERGENCIAS SELECCIONADA",
-                desc: "Se desplegará directamente Atención Prehospitalaria en tu panel: Semestres 1.° a 8.°, Soporte Vital BLS/ACLS, Trauma PHTLS, Triaje y Titulación."
-            }
-        };
-
-        const params = new URLSearchParams(window.location.search);
-        const urlPlan = params.get("plan");
-        const urlPago = params.get("pago");
-        const urlCareer = params.get("carrera") || sessionStorage.getItem("makai_selected_career") || localStorage.getItem("makai_selected_career");
-        const isVerifyPending = params.get("verify") === "pending";
-
-        const registrationCard = document.getElementById("registration-card");
-        const verificationCard = document.getElementById("verification-card");
-        const verifyEmailDisplay = document.getElementById("verify-email-display");
-        const verifyStatusMsg = document.getElementById("verify-status-msg");
-
-        const careerSelectEl = document.getElementById("reg-career");
-        const careerPreviewTitle = document.getElementById("reg-career-preview-title");
-        const careerPreviewDesc = document.getElementById("reg-career-preview-desc");
-        const titleSelectEl = document.getElementById("reg-title");
-
-        function updateCareerPreviewUI(careerKey) {
-            const info = CAREER_PREVIEW_DESCRIPTIONS[careerKey] || CAREER_PREVIEW_DESCRIPTIONS.medicina;
-            if (careerPreviewTitle) careerPreviewTitle.textContent = info.title;
-            if (careerPreviewDesc) careerPreviewDesc.textContent = info.desc;
-            if (careerKey === "preuniversitario_salud" && titleSelectEl) {
-                titleSelectEl.value = "Asp.";
-            }
-        }
-
-        if (careerSelectEl) {
-            if (urlCareer && ALL_CAREER_KEYS.includes(urlCareer)) {
-                careerSelectEl.value = urlCareer;
-            }
-            updateCareerPreviewUI(careerSelectEl.value);
-            careerSelectEl.addEventListener("change", () => {
-                updateCareerPreviewUI(careerSelectEl.value);
-                sessionStorage.setItem("makai_selected_career", careerSelectEl.value);
-                localStorage.setItem("makai_selected_career", careerSelectEl.value);
-            });
-        }
-
-        const planHiddenInput = document.getElementById("reg-plan-select");
-        const planCards = document.querySelectorAll(".plan-card");
-        const paySelect = document.getElementById("reg-payment-select");
-
-        const qrSection = document.getElementById("qr-payment-section");
-        const bankSection = document.getElementById("bank-transfer-section");
-        const cardSection = document.getElementById("card-payment-section");
-        const evidenceSection = document.getElementById("payment-evidence-section");
-        const slaWarning = document.getElementById("payment-sla-warning");
-        const payAmountInput = document.getElementById("pay-amount");
-        const dateInput = document.getElementById("pay-receipt-date");
-
-        if (dateInput && !dateInput.value) {
-            dateInput.value = new Date().toISOString().split("T")[0];
-        }
-
-        // Precios actualizados ($18.60 mensual y $144.75 anual con 35% de descuento)
-        const planPrices = {
-            basico: "0.00",
-            pro_mensual: "18.60",
-            pro_anual: "144.75",
-            vip: "49.99"
-        };
-
-        function highlightPlanCards(selectedKey) {
-            planCards.forEach((card) => {
-                const isSelected = card.dataset.planCard === selectedKey;
-                const icon = card.querySelector(".check-icon");
-                if (isSelected) {
-                    card.className = "plan-card cursor-pointer rounded-xl p-4 border-2 border-primary bg-surface-high/95 shadow-[0_0_20px_rgba(0,229,255,0.2)] transition-all relative flex flex-col justify-between";
-                    if (icon) {
-                        icon.textContent = "check_circle";
-                        icon.className = "material-symbols-outlined text-primary text-base check-icon";
-                    }
-                } else {
-                    card.className = "plan-card cursor-pointer rounded-xl p-4 border border-surface-high bg-surface hover:border-gray-600 transition-all relative flex flex-col justify-between";
-                    if (icon) {
-                        icon.textContent = "radio_button_unchecked";
-                        icon.className = "material-symbols-outlined text-gray-600 text-base check-icon";
-                    }
-                }
-            });
-        }
-
-        function refreshPaymentUI() {
-            const currentPlan = planHiddenInput?.value || "basico";
-            const method = paySelect?.value || "ninguno";
-
-            qrSection?.classList.add("hidden");
-            bankSection?.classList.add("hidden");
-            cardSection?.classList.add("hidden");
-            evidenceSection?.classList.add("hidden");
-
-            const requiredEvidenceIds = [
-                "pay-receipt-number",
-                "pay-holder-name",
-                "pay-holder-id",
-                "pay-amount",
-                "pay-receipt-date",
-                "pay-receipt-file"
-            ];
-
-            if (method === "ninguno") {
-                slaWarning?.classList.add("hidden");
-                requiredEvidenceIds.forEach((id) => {
-                    const el = document.getElementById(id);
-                    if (el) el.required = false;
-                });
-                return;
-            }
-
-            // Mostrar siempre la advertencia de 72 horas laborables cuando se elige un método de pago
-            slaWarning?.classList.remove("hidden");
-
-            if (method === "qr") {
-                qrSection?.classList.remove("hidden");
-            } else if (method === "transferencia") {
-                bankSection?.classList.remove("hidden");
-            } else if (method === "tarjeta") {
-                cardSection?.classList.remove("hidden");
-                const originBankSelect = document.getElementById("pay-origin-bank");
-                if (originBankSelect) {
-                    originBankSelect.value = "Tarjeta Visa/Mastercard -> Banco Pichincha (2205616642)";
-                }
-            }
-
-            // Habilitar formulario de comprobante tanto para QR, Transferencia como Tarjeta
-            evidenceSection?.classList.remove("hidden");
-            const amountForPlan = currentPlan === "basico" ? "18.60" : (planPrices[currentPlan] || "18.60");
-            if (payAmountInput) payAmountInput.value = amountForPlan;
-
-            requiredEvidenceIds.forEach((id) => {
-                const el = document.getElementById(id);
-                if (el) el.required = currentPlan !== "basico";
-            });
-        }
-
-        function applyPlanSelection(planKey, preferredPago = "") {
-            const valid = ["basico", "pro_mensual", "pro_anual", "vip"];
-            const chosen = valid.includes(planKey) ? planKey : "pro_mensual";
-            if (planHiddenInput) planHiddenInput.value = chosen;
-
-            highlightPlanCards(chosen);
-
-            if (paySelect) {
-                paySelect.innerHTML = "";
-                const allOptions = [
-                    { value: "qr", text: "Código QR Deuna! (Pichincha 2205616642) o QR Pacífico (1068767358)" },
-                    { value: "transferencia", text: "Transferencia Bancaria Directa (Pichincha / Pacífico / Diners Club)" },
-                    { value: "tarjeta", text: "Tarjeta de Crédito / Débito (Visa / Mastercard → Banco Pichincha 2205616642)" },
-                    { value: "ninguno", text: "Sin pago por ahora (Iniciar con Plan Básico $0)" }
-                ];
-
-                allOptions.forEach((o) => {
-                    if (chosen !== "basico" && o.value === "ninguno") return;
-                    const opt = document.createElement("option");
-                    opt.value = o.value;
-                    opt.textContent = o.text;
-                    paySelect.appendChild(opt);
-                });
-
-                if (chosen === "basico" && (!preferredPago || preferredPago === "ninguno")) {
-                    paySelect.value = "ninguno";
-                } else if (preferredPago === "tarjeta" || preferredPago === "payphone") {
-                    paySelect.value = "tarjeta";
-                } else if (preferredPago === "transferencia") {
-                    paySelect.value = "transferencia";
-                } else {
-                    paySelect.value = "qr";
-                }
-            }
-
-            refreshPaymentUI();
-        }
-
-        planCards.forEach((card) => {
-            card.addEventListener("click", () => {
-                const currentMethod = paySelect?.value === "ninguno" ? "qr" : (paySelect?.value || "qr");
-                applyPlanSelection(card.dataset.planCard, card.dataset.planCard === "basico" ? "ninguno" : currentMethod);
-            });
-        });
-
-        paySelect?.addEventListener("change", () => {
-            if (planHiddenInput?.value === "basico" && paySelect.value !== "ninguno") {
-                planHiddenInput.value = "pro_mensual";
-                highlightPlanCards("pro_mensual");
-            }
-            refreshPaymentUI();
-        });
-
-        // Autocompletar Cédula del titular si está vacía
-        const regCedula = document.getElementById("reg-cedula");
-        const payHolderId = document.getElementById("pay-holder-id");
-        regCedula?.addEventListener("blur", () => {
-            if (payHolderId && !payHolderId.value.trim()) {
-                payHolderId.value = regCedula.value.trim();
-            }
-        });
-
-        applyPlanSelection(urlPlan || "pro_mensual", urlPago || "qr");
-
-        // Compresor de comprobante (JPG, PNG o PDF a Base64 para Firestore)
-        function fileToDataUrl(file) {
-            return new Promise((resolve, reject) => {
-                if (file.size > 900 * 1024 && file.type.startsWith("image/")) {
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            const canvas = document.createElement("canvas");
-                            const maxDim = 1100;
-                            let w = img.width;
-                            let h = img.height;
-                            if (w > maxDim || h > maxDim) {
-                                if (w > h) {
-                                    h = Math.round((h * maxDim) / w);
-                                    w = maxDim;
-                                } else {
-                                    w = Math.round((w * maxDim) / h);
-                                    h = maxDim;
-                                }
-                            }
-                            canvas.width = w;
-                            canvas.height = h;
-                            const ctx = canvas.getContext("2d");
-                            ctx.drawImage(img, 0, 0, w, h);
-                            resolve(canvas.toDataURL("image/jpeg", 0.78));
-                        };
-                        img.onerror = reject;
-                        img.src = ev.target.result;
-                    };
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                } else {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                }
-            });
-        }
-
-        // Mostrar pantalla de Verificación de Correo Pendiente
-        function openVerificationScreen(user) {
-            registrationCard?.classList.add("hidden");
-            verificationCard?.classList.remove("hidden");
-            if (verifyEmailDisplay && user?.email) {
-                verifyEmailDisplay.textContent = user.email;
-            }
-        }
-
-        if (isVerifyPending) {
-            onAuthStateChanged(auth, (u) => {
-                if (u) openVerificationScreen(u);
-            });
-        }
-
-        // Botón: "Ya verifiqué mi correo"
-        document.getElementById("btn-check-verified")?.addEventListener("click", async () => {
-            const user = auth.currentUser;
-            if (!user) {
-                window.location.href = "index.html";
-                return;
-            }
-            await user.reload();
-            if (user.emailVerified || isMasterAdmin(user.email)) {
-                try {
-                    await setDoc(doc(db, "usuarios", user.uid), { correoConfirmadoMakai: true }, { merge: true });
-                } catch (e) {
-                    console.warn("Aviso actualizando confirmación:", e);
-                }
-                window.location.href = "dashboard.html";
-            } else {
-                verifyStatusMsg.textContent = "⚠️ Aún no detectamos la confirmación. Abre el enlace enviado a tu correo (revisa Spam) y vuelve a pulsar este botón.";
-                verifyStatusMsg.className = "p-3 rounded-xl border border-warning bg-warning/15 text-warning text-xs font-mono max-w-xl mx-auto";
-                verifyStatusMsg.classList.remove("hidden");
-            }
-        });
-
-        // Botón: "Reenviar correo de verificación"
-        document.getElementById("btn-resend-email")?.addEventListener("click", async () => {
-            const user = auth.currentUser;
-            if (!user) return;
-            try {
-                await sendEmailVerification(user);
-                verifyStatusMsg.textContent = `✅ Enlace reenviado exitosamente a ${user.email}. Revisa tu bandeja principal y Spam.`;
-                verifyStatusMsg.className = "p-3 rounded-xl border border-secondary bg-secondary/15 text-secondary text-xs font-mono max-w-xl mx-auto";
-                verifyStatusMsg.classList.remove("hidden");
-            } catch (err) {
-                verifyStatusMsg.textContent = "⚠️ Espera 60 segundos antes de solicitar otro correo: " + err.message;
-                verifyStatusMsg.className = "p-3 rounded-xl border border-danger bg-danger/15 text-danger text-xs font-mono max-w-xl mx-auto";
-                verifyStatusMsg.classList.remove("hidden");
-            }
-        });
-
-        // Envío del Formulario de Registro
-        const form = document.getElementById("full-register-form");
-        const errorBox = document.getElementById("reg-error-box");
-        const submitBtn = document.getElementById("btn-submit-register");
-
-        form?.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            errorBox?.classList.add("hidden");
-
-            const title = document.getElementById("reg-title")?.value || "Dr.";
-            const firstName = document.getElementById("reg-firstname")?.value.trim() || "";
-            const lastName = document.getElementById("reg-lastname")?.value.trim() || "";
-            const cedula = document.getElementById("reg-cedula")?.value.trim() || "";
-            const nickname = document.getElementById("reg-nickname")?.value.trim() || "";
-            const career = document.getElementById("reg-career")?.value || "medicina";
-            const country = document.getElementById("reg-country")?.value || "Ecuador";
-            const phoneExt = document.getElementById("reg-phone-ext")?.value || "+593";
-            const phoneNumber = document.getElementById("reg-phone-number")?.value.trim() || "";
-            const bday = String(document.getElementById("reg-bday")?.value || "01").padStart(2, "0");
-            const bmonth = String(document.getElementById("reg-bmonth")?.value || "01").padStart(2, "0");
-            const byear = document.getElementById("reg-byear")?.value || "2000";
-            const email = document.getElementById("reg-email")?.value.trim() || "";
-            const backupEmail = document.getElementById("reg-backup-email")?.value.trim() || "";
-            const pass = document.getElementById("reg-password")?.value || "";
-            const confirmPass = document.getElementById("reg-confirm-password")?.value || "";
-            const chosenPlan = planHiddenInput?.value || "basico";
-            const chosenPayment = paySelect?.value || "ninguno";
-
-            if (pass !== confirmPass) {
-                errorBox.textContent = "⚠️ Las contraseñas no coinciden. Verifícalas e intenta de nuevo.";
-                errorBox.classList.remove("hidden");
-                return;
-            }
-
-            if (email.toLowerCase() === backupEmail.toLowerCase()) {
-                errorBox.textContent = "⚠️ El correo de respaldo debe ser diferente a tu correo electrónico principal.";
-                errorBox.classList.remove("hidden");
-                return;
-            }
-
-            const requiresReceipt = chosenPlan !== "basico" && chosenPayment !== "ninguno";
-            const receiptFile = document.getElementById("pay-receipt-file")?.files?.[0];
-
-            if (requiresReceipt && !receiptFile) {
-                errorBox.textContent = "⚠️ Para activar un plan PRO o VIP debes adjuntar la captura o PDF de tu comprobante de pago.";
-                errorBox.classList.remove("hidden");
-                return;
-            }
-
-            try {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = "<span>Creando expediente y enviando correo de verificación...</span>";
-
-                let receiptDataUrl = null;
-                if (requiresReceipt && receiptFile) {
-                    receiptDataUrl = await fileToDataUrl(receiptFile);
-                }
-
-                const cred = await createUserWithEmailAndPassword(auth, email, pass);
-                const nowIso = new Date().toISOString();
-                const nowReadable = new Date().toLocaleString("es-EC", { timeZone: "America/Guayaquil" });
-
-                const paymentVerificationDetails = requiresReceipt ? {
-                    numeroComprobante: document.getElementById("pay-receipt-number")?.value.trim() || "",
-                    titularCuenta: document.getElementById("pay-holder-name")?.value.trim() || `${firstName} ${lastName}`,
-                    cedulaTitular: document.getElementById("pay-holder-id")?.value.trim() || cedula,
-                    bancoOrigen: document.getElementById("pay-origin-bank")?.value || "Banco Pichincha (2205616642)",
-                    montoDeclarado: document.getElementById("pay-amount")?.value.trim() || "18.60",
-                    fechaComprobante: document.getElementById("pay-receipt-date")?.value || "",
-                    archivoNombre: receiptFile ? receiptFile.name : "",
-                    archivoTipo: receiptFile ? receiptFile.type : "",
-                    comprobanteBase64: receiptDataUrl,
-                    plazoMaximoActivacion: "72 horas laborables",
-                    fechaHoraEnvioExacta: nowReadable
-                } : null;
-
-                const isUserAdmin = isMasterAdmin(email);
-                const isPreuni = career === "preuniversitario_salud";
-
-                const profileData = {
-                    uid: cred.user.uid,
-                    titulo: title,
-                    primerNombre: firstName,
-                    apellido: lastName,
-                    nombre: `${title} ${firstName} ${lastName}`,
-                    cedula: cedula,
-                    nickname: nickname,
-                    carrera: career,
-                    nivelIngreso: isPreuni ? "preuniversitario" : "universitario",
-                    esPreuniversitarioExclusivo: isPreuni,
-                    carrerasHabilitadas: isUserAdmin ? ALL_CAREER_KEYS : [career],
-                    avisoControlAceptado: true,
-                    pais: country,
-                    telefonoExtension: phoneExt,
-                    telefonoNumero: phoneNumber,
-                    telefonoCompleto: `${phoneExt} ${phoneNumber}`,
-                    email: email,
-                    emailRespaldo: backupEmail,
-                    cumpleanos: `${bday}/${bmonth}/${byear}`,
-                    rol: isUserAdmin ? "admin" : "estudiante",
-                    subscriptionLevel: isUserAdmin ? "PRO" : "Básico",
-                    planSolicitado: chosenPlan,
-                    metodoPagoPreferido: chosenPayment,
-                    estadoPago: chosenPlan === "basico" ? "activo_gratis" : "pendiente_verificacion_72h",
-                    datosComprobante: paymentVerificationDetails,
-                    correoConfirmadoMakai: isUserAdmin,
-                    casesUsedThisMonth: 0,
-                    totalExamsCompleted: 0,
-                    globalAverage: 0,
-                    createdAt: nowIso
-                };
-
-                try {
-                    await setDoc(doc(db, "usuarios", cred.user.uid), profileData);
-
-                    if (requiresReceipt && paymentVerificationDetails) {
-                        await addDoc(collection(db, "solicitudes_pago"), {
-                            uid: cred.user.uid,
-                            estudianteNombre: `${title} ${firstName} ${lastName}`,
-                            estudianteCedula: cedula,
-                            estudianteEmail: email,
-                            estudianteTelefono: `${phoneExt} ${phoneNumber}`,
-                            estudianteCarrera: career,
-                            planSolicitado: chosenPlan,
-                            metodoPago: chosenPayment,
-                            cuentaReceptoraPichincha: "2205616642",
-                            estado: "pendiente",
-                            ...paymentVerificationDetails,
-                            createdAt: nowIso
-                        });
-                    }
-                } catch (fireErr) {
-                    console.warn("Aviso guardando en Firestore:", fireErr);
-                }
-
-                // Guardar clasificación local para que dashboard.html optimice la vista desde el primer segundo
-                localStorage.setItem("makai_classified_profile", JSON.stringify({
-                    uid: cred.user.uid,
-                    email: email,
-                    carrera: career,
-                    nivelIngreso: profileData.nivelIngreso,
-                    esPreuniversitarioExclusivo: isPreuni,
-                    carrerasHabilitadas: profileData.carrerasHabilitadas
-                }));
-
-                if (isUserAdmin) {
-                    window.location.href = "dashboard.html";
-                    return;
-                }
-
-                await sendEmailVerification(cred.user);
-                openVerificationScreen(cred.user);
-            } catch (err) {
-                errorBox.textContent = "⚠️ Error al registrar: " + err.message;
-                errorBox.classList.remove("hidden");
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<span class="material-symbols-outlined text-xl">how_to_reg</span><span>Registrar Expediente y Enviar Correo de Verificación</span>';
-            }
-        });
-    </script>
+    <!-- =================================================================== -->
+    <!-- ARRANQUE DEL DIRECTOR DE ORQUESTA                                   -->
+    <!-- =================================================================== -->
+    <script type="module" src="js/2-core/app.orchestrator.js"></script>
 </body>
 </html>
