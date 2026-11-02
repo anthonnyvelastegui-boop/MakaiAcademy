@@ -1,337 +1,291 @@
 // ============================================================================
 // ARCHIVO: js/1-admin/admin.tutors.js
-// DESCRIPCIÓN: Subcomponente de Administración para gestionar postulaciones
-//              de docentes y aprobar comisiones de Tesis 1 a 1 ($10 USD).
-// PROYECTO: MakaiAcademy (Proyecto ALICIZATION)
+// PROYECTO: MakaiAcademy (Arquitectura "Rieles de Acero")
+// RESPONSABILIDAD: Bandeja Maestra de Reclutamiento de Especialistas VIP,
+//                  Verificación SENESCYT y Publicación de Fichas Inmodificables.
 // ============================================================================
 
 import {
-    db,
     auth,
+    db,
+    COLLECTIONS,
     collection,
     getDocs,
-    updateDoc,
+    doc,
     setDoc,
-    doc
+    updateDoc,
+    deleteDoc
 } from "../2-core/firebase.service.js";
 
 import {
-    isMasterAdmin,
-    appState
+    appState,
+    isMasterAdmin
 } from "../2-core/state.store.js";
 
+let allTutorsCache = [];
+let currentTutorFilter = "pendiente_revision"; // "pendiente_revision" | "aprobado"
+
 /**
- * Inicializa el panel de Tutores y Tesis dentro de la Bóveda Admin
+ * Descarga todos los expedientes de `perfiles_docentes` desde Firestore.
  */
-export function initAdminTutors() {
-    const activeEmail =
-        auth.currentUser?.email ||
-        appState.currentUser?.email ||
-        appState.currentUserData?.email ||
-        "";
+async function loadTutorsFromFirestore() {
+    try {
+        const snap = await getDocs(collection(db, COLLECTIONS.TUTORS));
+        allTutorsCache = [];
+        snap.forEach(d => allTutorsCache.push({ id: d.id, ...d.data() }));
+        allTutorsCache.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+    } catch (err) {
+        console.warn("[AdminTutors] Error cargando perfiles docentes:", err.message);
+    }
+}
 
-    if (!isMasterAdmin(activeEmail)) return;
+/**
+ * Inicializador principal invocado por `admin.controller.js`.
+ */
+export async function initAdminTutors() {
+    const mount = document.getElementById("admin-tab-panel-tutors");
+    if (!mount) return;
 
-    const adminView = document.getElementById("view-admin");
-    if (!adminView || document.getElementById("admin-tutors-section")) return;
+    const email = auth.currentUser?.email || appState.currentUser?.email || "";
+    if (!isMasterAdmin(email)) {
+        mount.innerHTML = "";
+        return;
+    }
 
-    // Inyectar la interfaz de Tutores al final de la Bóveda Admin (visible en Vista Completa)
-    const tutorsSection = document.createElement("div");
-    tutorsSection.id = "admin-tutors-section";
-    tutorsSection.className = "mb-10 space-y-6";
-
-    tutorsSection.innerHTML = `
-        <!-- BANDEJA DE POSTULACIONES DOCENTES -->
-        <div class="bg-surface-container border-2 border-secondary/50 rounded-2xl p-6 shadow-2xl">
-            <div class="flex flex-wrap items-center justify-between gap-4 mb-4 pb-3 border-b border-surface-high">
-                <div>
-                    <h3 class="text-xl font-extrabold text-secondary flex items-center gap-2">
-                        <span class="material-symbols-outlined">school</span>
-                        Reclutamiento y Postulaciones de Docentes
-                    </h3>
-                    <p class="text-xs text-gray-400 mt-1">Activa a los candidatos como "Tutores Verificados de Tesis" o "Docentes de Aulas Virtuales".</p>
-                </div>
-                <button type="button" id="btn-refresh-tutors" class="px-4 py-2 bg-surface border border-secondary text-secondary hover:bg-secondary hover:text-surface text-xs font-extrabold rounded-xl transition-all">
-                    ↻ Actualizar Solicitudes
-                </button>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-xs text-left text-gray-300 font-mono">
-                    <thead class="text-[11px] text-gray-400 uppercase bg-surface border-b border-surface-high">
-                        <tr>
-                            <th class="px-4 py-3">Fecha / Candidato</th>
-                            <th class="px-4 py-3">Especialidad / Título</th>
-                            <th class="px-4 py-3">Contacto</th>
-                            <th class="px-4 py-3">Estado Actual</th>
-                            <th class="px-4 py-3">Acciones de Activación</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-tutors-tbody">
-                        <tr><td colspan="5" class="px-4 py-6 text-center text-gray-500">Cargando postulaciones...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+    mount.innerHTML = `
+        <div class="bg-surface-container border border-surface-high rounded-2xl p-6 text-xs font-mono text-warning">
+            Sincronizando expedientes de Especialistas VIP y registros SENESCYT...
         </div>
+    `;
 
-        <!-- BANDEJA DE VINCULACIONES DE TESIS ($10 USD) -->
-        <div class="bg-surface-container border border-primary/40 rounded-2xl p-6 shadow-lg mt-6">
-            <h3 class="text-lg font-extrabold text-white flex items-center gap-2 mb-2">
-                <span class="material-symbols-outlined text-primary">handshake</span>
-                Comisiones Makai: Vinculaciones Tesis 1 a 1 ($10 USD)
-            </h3>
-            <p class="text-xs text-gray-400 mb-4">Aprueba los comprobantes de $10 USD para habilitar el contacto directo por WhatsApp entre el alumno y el tutor.</p>
-            <div class="overflow-x-auto">
-                <table class="w-full text-xs text-left text-gray-300 font-mono">
-                    <thead class="text-[11px] text-gray-400 uppercase bg-surface border-b border-surface-high">
-                        <tr>
-                            <th class="px-4 py-3">Alumno / Tema</th>
-                            <th class="px-4 py-3">Tutor Solicitado</th>
-                            <th class="px-4 py-3">Método / N° Comprobante</th>
-                            <th class="px-4 py-3">Evidencia</th>
-                            <th class="px-4 py-3">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-thesis-tbody">
-                        <tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">Cargando vinculaciones...</td></tr>
-                    </tbody>
-                </table>
+    await loadTutorsFromFirestore();
+    renderAdminTutorsPanel(mount);
+}
+
+function renderAdminTutorsPanel(mount) {
+    const pendingList = allTutorsCache.filter(t => (t.estado || "pendiente_revision") === "pendiente_revision");
+    const approvedList = allTutorsCache.filter(t => t.estado === "aprobado");
+    const visibleList = currentTutorFilter === "aprobado" ? approvedList : pendingList;
+
+    mount.innerHTML = `
+        <div class="space-y-6">
+            <!-- CABECERA Y CONMUTADOR DE BANDEJA -->
+            <div class="bg-surface-container border border-warning/50 rounded-2xl p-6 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <span class="text-[10px] font-mono text-warning uppercase font-bold">
+                        ● MODELO MATCHMAKER • AUDITORÍA DE CREDENCIALES SENESCYT
+                    </span>
+                    <h3 class="text-xl font-extrabold text-white mt-0.5">
+                        Gestión del Directorio de Especialistas & Tutores de Tesis
+                    </h3>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Los especialistas fijan sus honorarios referenciales; Makai Academy cobra únicamente la Tasa de Vinculación al estudiante.
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button type="button" data-tutor-filter="pendiente_revision"
+                        class="px-4 py-2 rounded-xl font-mono text-xs font-extrabold transition-all ${
+                            currentTutorFilter === "pendiente_revision"
+                                ? "bg-warning text-surface"
+                                : "bg-surface border border-surface-high text-gray-300"
+                        }">
+                        ⏳ Postulaciones en Cuarentena (${pendingList.length})
+                    </button>
+                    <button type="button" data-tutor-filter="aprobado"
+                        class="px-4 py-2 rounded-xl font-mono text-xs font-extrabold transition-all ${
+                            currentTutorFilter === "aprobado"
+                                ? "bg-secondary text-surface"
+                                : "bg-surface border border-surface-high text-gray-300"
+                        }">
+                        ✅ Publicados en Marketplace (${approvedList.length})
+                    </button>
+                </div>
+            </div>
+
+            <!-- FORMULARIO RÁPIDO PARA CREAR UN ESPECIALISTA DIRECTAMENTE DESDE BÓVEDA -->
+            <details class="bg-surface-container border border-surface-high rounded-2xl p-5">
+                <summary class="cursor-pointer text-xs font-mono font-extrabold text-primary uppercase">
+                    ➕ Registrar Especialista / Tutor VIP Manualmente (Sin esperar postulación)
+                </summary>
+                <form id="admin-create-tutor-form" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-4 mt-3 border-t border-surface-high text-xs">
+                    <div>
+                        <label class="block text-[10px] font-mono text-gray-400 uppercase mb-1">Nombre y Título *</label>
+                        <input type="text" id="adm-tutor-name" required placeholder="Dra. Valeria Gómez, MSc."
+                            class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2 text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-mono text-warning uppercase mb-1">N° Registro SENESCYT *</label>
+                        <input type="text" id="adm-tutor-senescyt" required placeholder="1031-2019-998877"
+                            class="w-full bg-surface border border-warning/40 rounded-xl px-3 py-2 text-white font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-mono text-gray-400 uppercase mb-1">Especialidad Clínica / Tesis *</label>
+                        <input type="text" id="adm-tutor-spec" required placeholder="Epidemiología & Bioestadística SPSS"
+                            class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2 text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-mono text-secondary uppercase mb-1">Tarifa Referencial del Doctor *</label>
+                        <input type="text" id="adm-tutor-rate" required placeholder="$30/hora o $200/Tesis"
+                            class="w-full bg-surface border border-secondary/40 rounded-xl px-3 py-2 text-white font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-mono text-gray-400 uppercase mb-1">WhatsApp Directo *</label>
+                        <input type="text" id="adm-tutor-wa" required placeholder="0991234567"
+                            class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2 text-white font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-mono text-primary uppercase mb-1">Tasa Vinculación Makai (USD) *</label>
+                        <input type="number" step="0.5" id="adm-tutor-fee" value="10" required
+                            class="w-full bg-surface border border-primary/40 rounded-xl px-3 py-2 text-white font-mono font-bold">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-[10px] font-mono text-gray-400 uppercase mb-1">Biografía y Materias que Domina *</label>
+                        <input type="text" id="adm-tutor-bio" required placeholder="Especialista en diseño PICO, PRISMA, R-Studio y preparación CACES..."
+                            class="w-full bg-surface border border-surface-high rounded-xl px-3 py-2 text-white">
+                    </div>
+                    <div class="sm:col-span-2 lg:col-span-4 flex justify-end pt-2">
+                        <button type="submit"
+                            class="px-5 py-2.5 rounded-xl bg-primary text-surface font-mono font-extrabold text-xs uppercase">
+                            ✅ Crear y Publicar Ficha VIP Directamente
+                        </button>
+                    </div>
+                </form>
+            </details>
+
+            <!-- LISTADO DE FICHAS EN LA BANDEJA ACTUAL -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                ${visibleList.length === 0 ? `
+                    <div class="col-span-full bg-surface-container border border-surface-high rounded-2xl p-8 text-center text-xs font-mono text-gray-400">
+                        No hay expedientes docentes en esta bandeja actualmente.
+                    </div>
+                ` : visibleList.map(tutor => `
+                    <article class="bg-surface-container border ${tutor.estado === "aprobado" ? "border-secondary/50" : "border-warning/50"} rounded-2xl p-5 flex flex-col justify-between space-y-4">
+                        <div class="space-y-2">
+                            <div class="flex items-start justify-between gap-2">
+                                <div>
+                                    <span class="px-2.5 py-0.5 rounded-full bg-warning/15 text-warning border border-warning/40 text-[10px] font-mono font-extrabold uppercase">
+                                        SENESCYT: ${tutor.registroSenescyt || "Pendiente"}
+                                    </span>
+                                    <h4 class="text-base font-extrabold text-white mt-1">${tutor.nombre || "Especialista"}</h4>
+                                    <p class="text-xs text-primary font-mono">${tutor.especialidad || "Medicina & Investigación"}</p>
+                                </div>
+                                <span class="text-xs font-mono font-extrabold text-secondary bg-surface px-3 py-1 rounded-lg border border-secondary/30">
+                                    Honorarios: ${tutor.tarifaReferencial || "A convenir"}
+                                </span>
+                            </div>
+
+                            <p class="text-xs text-gray-300 leading-relaxed bg-surface rounded-xl p-3 border border-surface-high">
+                                ${tutor.biografia || "Sin resumen biográfico."}
+                            </p>
+
+                            <div class="grid grid-cols-2 gap-2 text-[11px] font-mono text-gray-400">
+                                <div>📱 WhatsApp: <strong class="text-white">${tutor.whatsapp || "N/A"}</strong></div>
+                                <div>✉️ Correo: <strong class="text-white">${tutor.email || "N/A"}</strong></div>
+                                <div>🎯 Modalidad: <strong class="text-warning">${tutor.modalidad || "mentorias_y_tesis"}</strong></div>
+                                <div>💰 Comisión Makai: <strong class="text-primary">$${Number(tutor.tasaVinculacionMakaiUSD || 10).toFixed(2)} USD</strong></div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center justify-end gap-2 pt-3 border-t border-surface-high">
+                            ${tutor.cvUrl ? `
+                                <a href="${tutor.cvUrl}" target="_blank" rel="noopener"
+                                    class="px-3 py-1.5 rounded-lg bg-surface border border-surface-high text-xs font-mono text-primary hover:border-primary">
+                                    🔗 Ver CV / ORCID
+                                </a>
+                            ` : ""}
+
+                            ${tutor.estado !== "aprobado" ? `
+                                <button type="button" data-approve-tutor="${tutor.id}"
+                                    class="px-4 py-2 rounded-xl bg-secondary text-surface font-mono font-extrabold text-xs uppercase">
+                                    ✅ Verificar SENESCYT y Publicar Ficha
+                                </button>
+                            ` : `
+                                <button type="button" data-pause-tutor="${tutor.id}"
+                                    class="px-3 py-1.5 rounded-lg bg-warning/20 border border-warning text-warning font-mono font-bold text-xs">
+                                    ⏸️ Ocultar del Marketplace
+                                </button>
+                            `}
+
+                            <button type="button" data-delete-tutor="${tutor.id}"
+                                class="px-3 py-1.5 rounded-lg bg-danger/20 border border-danger text-danger font-mono font-bold text-xs">
+                                🗑️ Eliminar
+                            </button>
+                        </div>
+                    </article>
+                `).join("")}
             </div>
         </div>
     `;
 
-    adminView.appendChild(tutorsSection);
-
-    // Enlazar eventos de recarga
-    document.getElementById("btn-refresh-tutors")?.addEventListener("click", () => {
-        loadTutorApplications();
-        loadThesisVouchers();
+    // Conmutar filtro de bandeja
+    mount.querySelectorAll("[data-tutor-filter]").forEach(btn => {
+        btn.addEventListener("click", () => {
+            currentTutorFilter = btn.dataset.tutorFilter;
+            renderAdminTutorsPanel(mount);
+        });
     });
 
-    // Carga inicial
-    loadTutorApplications();
-    loadThesisVouchers();
-}
+    // Crear Especialista Manualmente
+    document.getElementById("admin-create-tutor-form")?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const id = `TUT-${Date.now().toString(36).toUpperCase()}`;
+        const nuevoTutor = {
+            id,
+            nombre: document.getElementById("adm-tutor-name")?.value.trim() || "",
+            registroSenescyt: document.getElementById("adm-tutor-senescyt")?.value.trim() || "",
+            especialidad: document.getElementById("adm-tutor-spec")?.value.trim() || "",
+            tarifaReferencial: document.getElementById("adm-tutor-rate")?.value.trim() || "",
+            whatsapp: document.getElementById("adm-tutor-wa")?.value.trim() || "",
+            tasaVinculacionMakaiUSD: Number(document.getElementById("adm-tutor-fee")?.value || 10),
+            biografia: document.getElementById("adm-tutor-bio")?.value.trim() || "",
+            modalidad: "mentorias_y_tesis",
+            avatarUrl: "assets/9-multimedia-titulacion/avatares-tutores/default-specialist.png",
+            verificadoSenescyt: true,
+            estado: "aprobado",
+            createdAt: new Date().toISOString()
+        };
 
-/**
- * Carga los usuarios que postularon para ser docentes en "postulaciones_docentes"
- */
-async function loadTutorApplications() {
-    const tbody = document.getElementById("admin-tutors-tbody");
-    if (!tbody) return;
+        await setDoc(doc(db, COLLECTIONS.TUTORS, id), nuevoTutor);
+        window.MakaiSecurityGuard?.showSecurityToast?.("✅ Ficha de Especialista VIP publicada en el Marketplace.", "success");
+        currentTutorFilter = "aprobado";
+        await loadTutorsFromFirestore();
+        renderAdminTutorsPanel(mount);
+    });
 
-    try {
-        const snap = await getDocs(collection(db, "postulaciones_docentes"));
-        if (snap.empty) {
-            tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-6 text-center text-gray-500">No hay postulaciones pendientes.</td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = "";
-        snap.forEach(docSnap => {
-            const data = docSnap.data();
-            const tr = document.createElement("tr");
-            tr.className = "border-b border-surface-high hover:bg-surface/60 align-top";
-
-            const rawStatus = data.estado || data.estadoEvaluacion || "pendiente";
-            const isPending = rawStatus.toLowerCase().includes("pendiente");
-
-            const careerKey = data.carreraPrincipal || data.carrera || "medicina";
-            const careerLabel = data.carreraNombre || careerKey.toUpperCase();
-            const academicProfile = data.detalleGraduado?.tituloEspecialidad
-                || (data.detalleEstudiante ? `Estudiante (${data.detalleEstudiante.semestreActual || ""} • ${data.detalleEstudiante.meritoAyudantia || ""})` : "")
-                || data.tituloEspecialidad
-                || data.especialidad
-                || "Docente en Salud";
-
-            const subjectsList = Array.isArray(data.materiasQueDomina) && data.materiasQueDomina.length > 0
-                ? data.materiasQueDomina.slice(0, 4).join(", ") + (data.materiasQueDomina.length > 4 ? ` (+${data.materiasQueDomina.length - 4} más)` : "")
-                : "";
-
-            const contactPhone = data.telefonoWhatsapp || data.telefono || data.whatsappDirecto || "";
-
-            tr.innerHTML = `
-                <td class="px-4 py-3">
-                    <div class="text-white font-bold">${data.nombreCompleto || data.nombre || "---"}</div>
-                    <div class="text-[10px] text-primary font-bold">CI: ${data.cedula || "---"} • ${data.institucionOrigen || ""}</div>
-                    <div class="text-[10px] text-gray-400">${data.fechaPostulacionLegible || data.createdAt || "---"}</div>
-                </td>
-                <td class="px-4 py-3">
-                    <span class="px-2 py-0.5 rounded bg-primary/15 text-primary text-[10px] font-bold uppercase">${careerLabel}</span>
-                    <div class="text-secondary font-bold mt-1">${academicProfile}</div>
-                    ${subjectsList ? `<div class="text-[10px] text-gray-400 mt-0.5">Materias: ${subjectsList}</div>` : ""}
-                </td>
-                <td class="px-4 py-3">
-                    <div class="text-white">${data.email || "---"}</div>
-                    <div class="text-secondary font-bold">${contactPhone}</div>
-                </td>
-                <td class="px-4 py-3 uppercase text-[10px] font-bold ${isPending ? "text-warning" : "text-secondary"}">
-                    ${rawStatus}
-                </td>
-                <td class="px-4 py-3 flex flex-wrap gap-2">
-                    <button type="button" class="btn-activate-tutor px-2.5 py-1.5 rounded-lg bg-secondary/20 border border-secondary/50 text-secondary hover:bg-secondary hover:text-surface font-bold transition-all" data-id="${docSnap.id}" data-uid="${data.uid || docSnap.id}" data-rol="tutor_tesis">
-                        ✓ Activar Tesis
-                    </button>
-                    <button type="button" class="btn-activate-tutor px-2.5 py-1.5 rounded-lg bg-primary/20 border border-primary/50 text-primary hover:bg-primary hover:text-surface font-bold transition-all" data-id="${docSnap.id}" data-uid="${data.uid || docSnap.id}" data-rol="docente_aula">
-                        ✓ Activar Aulas
-                    </button>
-                </td>
-            `;
-
-            tr.querySelectorAll(".btn-activate-tutor").forEach(btn => {
-                btn.addEventListener("click", async (e) => {
-                    const targetBtn = e.currentTarget;
-                    const postulacionId = targetBtn.getAttribute("data-id");
-                    const userUid = targetBtn.getAttribute("data-uid");
-                    const nuevoRol = targetBtn.getAttribute("data-rol");
-                    const rolTexto = nuevoRol === "tutor_tesis" ? "Tutor Verificado de Tesis" : "Docente de Aulas Virtuales";
-
-                    if (!confirm(`¿Deseas activar a ${data.nombreCompleto || "este candidato"} como ${rolTexto} en la carrera de ${careerLabel}?`)) {
-                        return;
-                    }
-
-                    try {
-                        // 1. Actualizar rol y asegurar que tenga habilitada su carrera en "usuarios"
-                        await setDoc(doc(db, "usuarios", userUid), {
-                            rol: nuevoRol,
-                            carrera: careerKey,
-                            carrerasHabilitadas: [careerKey],
-                            materiasDocenteAutorizadas: data.materiasQueDomina || [],
-                            updatedAt: new Date().toISOString()
-                        }, { merge: true });
-
-                        // 2. Marcar postulación como aprobada en "postulaciones_docentes"
-                        await updateDoc(doc(db, "postulaciones_docentes", postulacionId), {
-                            estado: "aprobado",
-                            estadoEvaluacion: "aprobado",
-                            rolAsignado: nuevoRol,
-                            aprobadoEn: new Date().toISOString()
-                        });
-
-                        // 3. Si es Tutor de Tesis, registrarlo también en "tutores_verificados"
-                        if (nuevoRol === "tutor_tesis") {
-                            await setDoc(doc(db, "tutores_verificados", userUid), {
-                                id: userUid,
-                                nombre: data.nombreCompleto || data.nombre || "Especialista Verificado",
-                                carrera: careerKey,
-                                carrerasCompatibles: data.carrerasCompatibles || [careerKey],
-                                especialidad: academicProfile,
-                                universidadesExperiencia: [data.institucionOrigen || "Universidades del Ecuador"],
-                                tesisAprobadas: Number(data.tesisAprobadas) || 10,
-                                calificacion: 4.95,
-                                tarifaReferencialTutor: data.tarifaReferencialTutor || "$150 - $280 USD (Negociable directo con el tutor)",
-                                comisionMakaiUSD: 10,
-                                whatsappDirecto: contactPhone.replace(/\D/g, ""),
-                                insignia: "TUTOR VERIFICADO MAKAI"
-                            }, { merge: true });
-                        }
-
-                        alert(`✅ Candidato activado como ${rolTexto} exitosamente.`);
-                        loadTutorApplications();
-                    } catch (error) {
-                        alert("Error al activar: " + error.message);
-                    }
-                });
+    // Aprobar postulación y asignar rol "docente" si el usuario existe
+    mount.querySelectorAll("[data-approve-tutor]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            const tutorId = btn.dataset.approveTutor;
+            await updateDoc(doc(db, COLLECTIONS.TUTORS, tutorId), {
+                verificadoSenescyt: true,
+                estado: "aprobado",
+                aprobadoPor: auth.currentUser?.email || "master",
+                fechaAprobacion: new Date().toISOString()
             });
-
-            tbody.appendChild(tr);
+            window.MakaiSecurityGuard?.showSecurityToast?.("✅ Especialista verificado y visible para todos los estudiantes.", "success");
+            await loadTutorsFromFirestore();
+            renderAdminTutorsPanel(mount);
         });
-        });
-    } catch (error) {
-        tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-danger">Error de permisos o colección vacía: ${error.message}</td></tr>`;
-    }
-}
+    });
 
-/**
- * Carga las vinculaciones de tesis pendientes de validación del comprobante de $10 USD
- */
-async function loadThesisVouchers() {
-    const tbody = document.getElementById("admin-thesis-tbody");
-    if (!tbody) return;
-
-    try {
-        const snap = await getDocs(collection(db, "solicitudes_tesis"));
-        if (snap.empty) {
-            tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">No hay vinculaciones pendientes.</td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = "";
-        let pendingCount = 0;
-
-        snap.forEach(docSnap => {
-            const data = docSnap.data();
-            const currentStatus = String(data.estado || "").toUpperCase();
-            if (currentStatus === "APROBADO" || currentStatus === "VERIFICADO") return;
-
-            pendingCount++;
-            const studentName = data.nombreEstudiante || data.alumnoNombre || "Estudiante Makai";
-            const studentEmail = data.emailEstudiante || "";
-            const topic = data.temaTentativo || "Sin tema especificado";
-
-            const tr = document.createElement("tr");
-            tr.className = "border-b border-surface-high hover:bg-surface/60";
-            tr.innerHTML = `
-                <td class="px-4 py-3">
-                    <div class="text-white font-bold">${studentName}</div>
-                    <div class="text-[10px] text-primary">${studentEmail}</div>
-                    <div class="text-[10px] text-gray-400 truncate max-w-xs" title="${topic}">Tema: ${topic}</div>
-                </td>
-                <td class="px-4 py-3 text-secondary font-bold">${data.tutorNombre || "---"}</td>
-                <td class="px-4 py-3">
-                    <div class="font-mono text-warning font-bold">Ref: ${data.numeroComprobante || "---"}</div>
-                    <div class="text-[10px] text-gray-400">${data.metodoPago || "QR / Transferencia"} • $${data.montoUSD || 10} USD</div>
-                </td>
-                <td class="px-4 py-3">
-                    ${
-                        data.comprobanteBase64
-                            ? `<button type="button" class="btn-view-thesis-voucher px-2.5 py-1 rounded bg-surface border border-primary text-primary hover:bg-primary hover:text-surface font-bold">👁️ Ver Captura</button>`
-                            : `<span class="text-gray-500">Sin captura</span>`
-                    }
-                </td>
-                <td class="px-4 py-3">
-                    <button type="button" class="btn-approve-voucher px-3 py-1.5 rounded-lg bg-primary text-surface font-extrabold hover:bg-opacity-90" data-id="${docSnap.id}">
-                        ✅ Aprobar Vinculación
-                    </button>
-                </td>
-            `;
-
-            // Ver captura del comprobante de $10 USD si el estudiante la subió
-            tr.querySelector(".btn-view-thesis-voucher")?.addEventListener("click", () => {
-                const win = window.open("", "_blank");
-                win.document.write(`
-                    <body style="margin:0;background:#06090e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:white;font-family:monospace;">
-                        <div style="padding:12px;text-align:center;">
-                            <strong>Alumno:</strong> ${studentName} | <strong>Tutor:</strong> ${data.tutorNombre} | <strong>Ref:</strong> ${data.numeroComprobante}
-                        </div>
-                        <img src="${data.comprobanteBase64}" style="max-width:95%;max-height:85vh;border:2px solid #00e5ff;border-radius:12px;"/>
-                    </body>
-                `);
+    // Pausar / Ocultar tutor
+    mount.querySelectorAll("[data-pause-tutor]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            await updateDoc(doc(db, COLLECTIONS.TUTORS, btn.dataset.pauseTutor), {
+                estado: "pendiente_revision"
             });
-
-            // Aprobar el pago de $10 USD (escribe "APROBADO" como espera graduation.controller.js)
-            tr.querySelector(".btn-approve-voucher")?.addEventListener("click", async (e) => {
-                const voucherId = e.currentTarget.getAttribute("data-id");
-                if (confirm(`¿Verificaste el ingreso de los $10 USD de ${studentName} para vincularse con ${data.tutorNombre}?`)) {
-                    try {
-                        await updateDoc(doc(db, "solicitudes_tesis", voucherId), {
-                            estado: "APROBADO",
-                            aprobadoEn: new Date().toISOString()
-                        });
-                        alert("✅ Vinculación aprobada. El alumno ya tiene habilitado el botón de WhatsApp directo con el tutor.");
-                        loadThesisVouchers();
-                    } catch (error) {
-                        alert("Error al aprobar vinculación: " + error.message);
-                    }
-                }
-            });
-
-            tbody.appendChild(tr);
+            await loadTutorsFromFirestore();
+            renderAdminTutorsPanel(mount);
         });
+    });
 
-        if (pendingCount === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">Todas las vinculaciones están al día.</td></tr>';
-        }
-    } catch (error) {
-        tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-4 text-center text-danger">Error de lectura: ${error.message}</td></tr>`;
-    }
+    // Eliminar tutor
+    mount.querySelectorAll("[data-delete-tutor]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            await deleteDoc(doc(db, COLLECTIONS.TUTORS, btn.dataset.deleteTutor));
+            await loadTutorsFromFirestore();
+            renderAdminTutorsPanel(mount);
+        });
+    });
 }
