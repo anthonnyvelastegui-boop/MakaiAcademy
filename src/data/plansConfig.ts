@@ -110,7 +110,7 @@ export const DEFAULT_PAYMENT_METHODS_CONFIG: PaymentMethodsAdminConfig = {
       titular: "Anthonny Velasteguí • Makai Academy",
       cedulaRuc: "Por configurar en Panel Maestro",
       numeroCuenta: "Por configurar en Panel Maestro",
-      qrImageUrl: "/assets/2-pagos-bancarios/codigos-qr/qr-deuna.png",
+      qrImageUrl: "assets/2-pagos-bancarios/codigos-qr/qr-deuna.png",
       notaEspecifica:
         "Escanea este código desde la app de Banco Pichincha o Deuna! y verifica el nombre del titular antes de confirmar.",
       habilitado: true
@@ -122,7 +122,7 @@ export const DEFAULT_PAYMENT_METHODS_CONFIG: PaymentMethodsAdminConfig = {
       titular: "Anthonny Velasteguí • Makai Academy",
       cedulaRuc: "Por configurar en Panel Maestro",
       numeroCuenta: "Por configurar en Panel Maestro",
-      qrImageUrl: "/assets/2-pagos-bancarios/codigos-qr/qr-pacifico.png",
+      qrImageUrl: "assets/2-pagos-bancarios/codigos-qr/qr-pacifico.png",
       notaEspecifica:
         "Escanea este código desde el aplicativo móvil de Banco del Pacífico y verifica el nombre del beneficiario.",
       habilitado: true
