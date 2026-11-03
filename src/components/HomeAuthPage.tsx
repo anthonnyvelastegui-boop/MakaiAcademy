@@ -26,7 +26,7 @@ import { SelectPlanStep2 } from "./SelectPlanStep2";
 import { PaymentMethodsStep3 } from "./PaymentMethodsStep3";
 import { MasterPlansEditorModal } from "./MasterPlansEditorModal";
 
-const OFFICIAL_LOGO_URL = "assets/aistudio/logo_959094cf.png";
+const OFFICIAL_LOGO_URL = "/assets/aistudio/logo_959094cf.png";
 
 type OnboardingViewMode = "auto" | "portal" | "step1" | "step2" | "step3" | "app_inside";
 
