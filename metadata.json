@@ -1,0 +1,9 @@
+{
+  "name": "Makai Academy",
+  "description": "Ecosistema de Entrenamiento Clínico, Simulador CACES, Sináptico v4.4 y Motores 1D/2D/3D para Carreras de Salud",
+  "version": "4.4.0",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ],
+  "permissions": []
+}
